@@ -31,7 +31,7 @@ class LeadController extends Controller
 
     public function add_lead(Request $request)
     {
-
+        
         $rules = [
             'email' => [
                 'required',
@@ -67,18 +67,17 @@ class LeadController extends Controller
     ];
 
     // Step 2: Validate the request (only email field)
-    $validator = Validator::make($request->all(), $rules, $messages);
+    // $validator = Validator::make($request->all(), $rules, $messages);
 
-    // Step 3: Return errors if validation fails (email-related only)
-    if ($validator->fails()) {
-        return back()->withErrors($validator)->withInput();
-    }
-
+    // // Step 3: Return errors if validation fails (email-related only)
+    // if ($validator->fails()) {
+    //     return back()->withErrors($validator)->withInput();
+    // }
 
 
         // Step 4: Create a new Lead instance
         $lead = new Lead();
-        $lead->agent_id               = session()->get('user_id') ;
+        $lead->agent_id               = session()->get('user_id');
         $lead->first_name             = $request->first_name;
         $lead->last_name              = $request->last_name;
         $lead->email                  = $request->email;
@@ -93,6 +92,7 @@ class LeadController extends Controller
         $lead->college                = $request->college;
         $lead->branch                 = $request->branch;
         $lead->session_duration       = $request->session_duration;
+        $lead->status                 = $request->status;
 
         // Step 5: Dump the Lead object before saving
         // dd($lead);
@@ -161,34 +161,52 @@ class LeadController extends Controller
     }
  }
 
-public function show_leads() {
+// public function show_leads() {
 
-    // Retrieve user_id and job_role from the session
+//     // Retrieve user_id and job_role from the session
+//     $userId = session()->get('user_id');
+//     $userRole = session()->get('emp_job_role');
+
+//     if ($userRole == 2) { // Agent role
+//         // Fetch leads where agent_id matches the logged-in user's ID
+//         $leads = Lead::where('agent_id', $userId)->get();
+
+//         // Return the view with only the leads added by this agent
+//         return view('personal.show_lead', compact('leads'));
+//     } elseif ($userRole == 1) { // Admin role
+//         // Admins can see all leads
+//         $leads = Lead::all();
+
+//          // Add the "Fresh" property to leads where agent_id = 1
+//           foreach ($leads as $lead) {
+//             $lead->is_fresh = $lead->agent_id == 1; // Mark as fresh if agent_id is 1
+//         }
+
+//         // Return the view with all leads
+//         return view('personal.show_lead', compact('leads'));
+//     } else {
+//         // If the user is neither an agent nor an admin, deny access
+//         return redirect()->back()->with('error', 'Unauthorized access.');
+//     }
+
+// }
+
+public function show_leads() {
     $userId = session()->get('user_id');
     $userRole = session()->get('emp_job_role');
 
     if ($userRole == 2) { // Agent role
-        // Fetch leads where agent_id matches the logged-in user's ID
-        $leads = Lead::where('agent_id', $userId)->get();
-
-        // Return the view with only the leads added by this agent
-        return view('personal.show_lead', compact('leads'));
+        $leads = Lead::where('agent_id', $userId)->paginate(50);
     } elseif ($userRole == 1) { // Admin role
-        // Admins can see all leads
-        $leads = Lead::all();
-
-         // Add the "Fresh" property to leads where agent_id = 1
-          foreach ($leads as $lead) {
-            $lead->is_fresh = $lead->agent_id == 1; // Mark as fresh if agent_id is 1
+        $leads = Lead::paginate(50); 
+        foreach ($leads as $lead) {
+            $lead->is_fresh = $lead->agent_id == 1;
         }
-
-        // Return the view with all leads
-        return view('personal.show_lead', compact('leads'));
     } else {
-        // If the user is neither an agent nor an admin, deny access
         return redirect()->back()->with('error', 'Unauthorized access.');
     }
 
+    return view('personal.show_lead', compact('leads'));
 }
 
 
@@ -210,6 +228,8 @@ public function update(Request $request, $id)
     $lead->email = $request->email;
     $lead->phone = $request->phone;
     $lead->lead_source = $request->lead_source;
+    $lead->university = $request->university;
+    $lead->courses = $request->courses;
 
     $lead->save();
 
@@ -510,7 +530,9 @@ public function transferView()
     $agents = Employee::where('emp_job_role', 2)->select('id', 'emp_name')->get();
 
     // Fetch fresh leads (leads with agent_id = 1)
-    $freshLeads = Lead::where('agent_id', 1)->get();
+    $freshLeads = Lead::where('agent_id', 1)->when(request()->status, function($Lead){
+        $Lead->where('status', request()->status);
+    })->get();
 
     return view('personal.leadtransfer', compact('agents', 'freshLeads'));
 }
@@ -550,5 +572,30 @@ public function index()
     return redirect()->route('payment.verify')->with('success', 'Payment has been verified successfully.');
 }
 
+
+public function updateStatus(Request $request)
+{
+
+    $request->validate([
+        'lead_id' => 'required|exists:leads,id',
+        'new_status' => 'required|string',
+        'next_follow_up' => 'required|date',
+    ]);
+
+    // Update Lead Status
+    $lead = Lead::findOrFail($request->lead_id);
+    $lead->status = $request->new_status;
+    $lead->next_lead_datetime = $request->next_follow_up;
+    $lead->save();
+
+    // Create a new Follow-up Reminder (Optional)
+    $followUp = new FollowUp();
+    $followUp->lead_id = $lead->id;
+    $followUp->agent_id = $lead->agent_id;
+    $followUp->comments = $request->comments;
+    $followUp->save();
+
+    return redirect()->back()->with('success', 'Lead status and reminder updated successfully.');
+}
 
 }

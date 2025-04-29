@@ -25,6 +25,7 @@ class Lead extends Model
         'university',
         'courses',
         'session_duration',
+        'status'
     ];
 
     // public function getButtonColorAttribute()

@@ -153,7 +153,7 @@
     <div class="content">
         <div class="card">
             <div class="card-body">
-                <form method="POST" action="{{ url('/i-admin/leads/add-lead') }}">
+                <form method="POST" action="{{ route('store-lead') }}">
                     @csrf
 
                     <div class="form-container">
@@ -172,6 +172,15 @@
                             <fieldset class="form-group">
                                 <label for="secondary_phone">Secondary Phone</label>
                                 <input class="form-control" id="secondary_phone" name="secondary_phone" type="text">
+                            </fieldset>
+
+                            <fieldset class="form-group">
+                                <label for="status">Status<span class="text-danger">*</span></label>
+                                <select name="status" id="status" class="form-control" required>
+                                    @foreach(App\Helpers\SiteHelper::getLeadStatus() as $status)
+                                        <option value="{{ $status['code'] }}">{{ $status['name'] }}</option>
+                                    @endforeach
+                                </select>
                             </fieldset>
 
                             <fieldset class="form-group">

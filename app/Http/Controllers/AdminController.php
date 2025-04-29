@@ -609,7 +609,7 @@ public function exportLeads()
         }
 
         // Fetch the leads based on the filters applied
-        $leads = $query->get();
+        $leads = $query->paginate(50);
 
         // Pass leads and the current request filters to the view
         return view('personal.show_lead', compact('leads'));

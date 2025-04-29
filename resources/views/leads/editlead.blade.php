@@ -46,6 +46,18 @@
                     </div>
 
                     <div class="form-row">
+                        <div class="form-group col-md-6">
+                            <label for="university">University</label>
+                            <input class="form-control" id="university" name="university" type="text" value="{{ $lead->university }}" required>
+                        </div>
+
+                        <div class="form-group col-md-6">
+                            <label for="courses">Courses <span class="text-danger">*</span></label>
+                            <input class="form-control" id="courses" name="courses" type="text" value="{{ $lead->courses }}" required>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
                         {{-- <div class="form-group col-md-6">
                             <label for="company">Company <span class="text-danger">*</span></label>
                             <input class="form-control" id="company" name="company" type="text" value="{{ $lead->company }}" required>

@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Storage;
 use App\Http\Controllers\personal\LeadController;
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\CronJobController;
 use App\Models\Registration;
 use App\Models\personal\Lead;
 use App\Models\personal\FollowUp;
@@ -17,16 +18,21 @@ use App\Models\Document;
 use Carbon\Carbon;
 
 
+Route::get('/send-reminder',  [CronJobController::class, 'SendLeadReminders']);
+
+
 Route::prefix('i-admin')->group(function () {
 
 // Add Leads Routes
 Route::get('/leads/add-lead', [LeadController::class, 'addlead']);
-Route::post('/leads/add-lead', [LeadController::class, 'add_lead']);
+Route::post('/leads/add-lead', [LeadController::class, 'add_lead'])->name('store-lead');
 Route::get('/show-leads',[LeadController::class,'show_leads']);
 
 Route::get('/leads/edit/{id}', [LeadController::class, 'edit']);
 Route::post('/leads/update/{id}', [LeadController::class, 'update']);
 Route::delete('/leads/delete/{id}', [LeadController::class, 'destroy']);
+
+Route::post('/leads/update-status', [LeadController::class, 'updateStatus'])->name('leads.updateStatus');
 
 
 // View Leads Routes

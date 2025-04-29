@@ -118,12 +118,14 @@
                             <option value="Last Year" {{ request()->time_frame == 'Last Year' ? 'selected' : '' }}>Last Year</option>
                         </select>
                     </form>
-                    
+
+                    @if(session()->get('emp_job_role') == 1)
                         <select onchange="location = this.value;">
                             <option selected disabled>More Actions</option>
                             <option value="{{ route('leads.export') }}">Export All Leads</option>
                             <option value="{{ route('leads.transfer.view') }}">Transfer & Share Leads</option>
                         </select>
+                    @endif
 
                         <!-- Import Leads Button -->
                         <button class="btn btn-primary ml-2" data-toggle="modal" data-target="#importModal">Import Leads</button>
@@ -207,6 +209,8 @@
                                 </td> --}}
                                 <td>
                                     {{-- <a href="{{ url('/leads/view/'.$lead->id) }}" class="btn btn-info btn-sm">View</a> --}}
+                                    <button class="btn btn-info btn-sm update-status-btn"  data-lead-id="{{ $lead->id }}"data-current-status="{{ $lead->status }}">Update status</button>
+
                                     <a href="{{ url('/i-admin/leads/edit/'.$lead->id) }}" class="btn btn-warning btn-sm">Edit</a>
                                     {{-- <form action="{{ url('/i-admin/leads/delete/'.$lead->id) }}" method="POST" style="display:inline-block;">
                                         @csrf
@@ -219,6 +223,10 @@
                         </tbody>
                     </table>
                 </div>
+                <div class="d-flex justify-content-center mt-4">
+    {{ $leads->links() }}
+</div>
+
             </div>
         </div>
     </div>
@@ -250,4 +258,64 @@
         </div>
     </div>
 </div>
+
+<!-- Update Status Modal -->
+<div class="modal fade" id="updateStatusModal" tabindex="-1" role="dialog" aria-labelledby="updateStatusModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <form id="updateStatusForm" method="POST" action="{{ url('/i-admin/leads/update-status') }}">
+        @csrf
+        <input type="hidden" name="lead_id" id="modal_lead_id">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="updateStatusModalLabel">Update Lead Status & Reminder</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+
+            <div class="form-group">
+                <label for="new_status">New Status</label>
+                <select name="new_status" id="new_status" class="form-control" required>
+                    @foreach(App\Helpers\SiteHelper::getLeadStatus() as $status)
+                                        <option value="{{ $status['code'] }}">{{ $status['name'] }}</option>
+                                    @endforeach
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="next_follow_up">Next Follow-up Date & Time</label>
+                <input type="datetime-local" name="next_follow_up" id="next_follow_up" class="form-control" required>
+            </div>
+
+            <div class="form-group">
+                <label for="comments">Comments</label>
+                <input type="text" name="comments" id="comments" class="form-control" required>
+            </div>
+
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+            <button type="submit" class="btn btn-primary">Update Status</button>
+          </div>
+        </div>
+    </form>
+  </div>
+</div>
+
+
+<script>
+$(document).ready(function() {
+    $('.update-status-btn').click(function() {
+        var leadId = $(this).data('lead-id');
+        var currentStatus = $(this).data('current-status');
+
+        $('#modal_lead_id').val(leadId);
+        $('#new_status').val(currentStatus);
+
+        $('#updateStatusModal').modal('show');
+    });
+});
+</script>
+
 @endsection <!-- End of content section -->
