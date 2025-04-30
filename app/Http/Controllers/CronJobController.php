@@ -31,7 +31,7 @@ class CronJobController extends Controller
                 
                 // Admin email
                 Mail::raw("Reminder sent to agent {$agent->emp_name} ({$agent->emp_email}) for lead {$lead->first_name} at {$lead->next_lead_datetime}.", function ($message) {
-                    $message->to('admin@example.com')
+                    $message->to('krishnaavtar955@gmail.com')
                             ->subject("📬 Admin Notification: Lead Reminder Sent");
                 });
             }

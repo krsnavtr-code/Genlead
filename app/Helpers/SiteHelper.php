@@ -23,14 +23,38 @@ class SiteHelper
     {
         return [
             [
-                'code' => 'test1',
-                'name' => 'Test 1'
+                'code' => 'new',
+                'name' => 'New'
             ],
             [
-                'code' => 'test2',
-                'name' => 'Test 2'
-            ]
-            ];
+                'code' => 'contacted',
+                'name' => 'Contacted'
+            ],
+            [
+                'code'=> 'not_connected',
+                'name'=> 'Not Connected'
+            ],
+            [
+                'code'=> 'qualified',
+                'name'=> 'Qualified'
+            ],
+            [
+                'code'=> 'not_qualified',
+                'name'=> 'Not Qualified'
+            ],
+            [
+                'code'=> 'future',
+                'name'=> 'Contact in Future'
+            ],
+            [
+                'code'=> 'lost',
+                'name'=> 'Lost'
+            ],
+            [
+                'code'=> 'closed',
+                'name'=> 'Closed'
+            ],            
+        ];
     }
 
 

@@ -50,6 +50,7 @@ class CheckRole
             ->where('can_display', 1)
             ->first();
 
+
         if ($page && in_array($page->id, $permissions)) {
             return $next($request);
         }

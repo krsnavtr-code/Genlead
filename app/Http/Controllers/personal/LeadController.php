@@ -537,6 +537,21 @@ public function transferView()
     return view('personal.leadtransfer', compact('agents', 'freshLeads'));
 }
 
+public function transferViewDetail()
+{
+    // Fetch agents with emp_job_role = 2 (agents)
+    $agents = Employee::where('emp_job_role', 2)->select('id', 'emp_name')->get();
+
+    // Fetch fresh leads (leads with agent_id = 1)
+    $freshLeads = Lead::when(request()->agent_id, function($lead){
+        $lead->where('agent_id', request()->agent_id);
+    })->when(request()->status, function($Lead){
+        $Lead->where('status', request()->status);
+    })->paginate(50);
+
+    return view('personal.leadtransferdetail', compact('agents', 'freshLeads'));
+}
+
 public function transferLeads(Request $request)
 {
     // $request->validate([
@@ -579,20 +594,22 @@ public function updateStatus(Request $request)
     $request->validate([
         'lead_id' => 'required|exists:leads,id',
         'new_status' => 'required|string',
-        'next_follow_up' => 'required|date',
     ]);
 
     // Update Lead Status
     $lead = Lead::findOrFail($request->lead_id);
     $lead->status = $request->new_status;
-    $lead->next_lead_datetime = $request->next_follow_up;
+    $lead->next_lead_datetime = $request->next_follow_up ?? null;
     $lead->save();
 
     // Create a new Follow-up Reminder (Optional)
+    FollowUp::where('lead_id', $lead->id)->where('agent_id', $lead->agent_id)->delete();
+    
     $followUp = new FollowUp();
     $followUp->lead_id = $lead->id;
     $followUp->agent_id = $lead->agent_id;
     $followUp->comments = $request->comments;
+    $followUp->follow_up_time = $request->next_follow_up ?? null;
     $followUp->save();
 
     return redirect()->back()->with('success', 'Lead status and reminder updated successfully.');

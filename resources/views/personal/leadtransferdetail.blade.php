@@ -1,22 +1,29 @@
 @extends('main')
 
-@section('title', 'Transfer & Share Leads')
+@section('title', 'Transfer & Share Leads Details')
 
 @section('content')
     <div class="content-wrapper">
         <div class="content-header sty-one">
-            <h1>Transfer & Share Leads</h1>
+            <h1>Transfer & Share Leads Details</h1>
         </div>
         <div class="content">
             <div class="card">
                 <div class="card-body">
 
-                <a href="{{  route('leads.transfer.detail') }}" class="btn btn-primary"> Transfer & Share Leads Detail</a>
-                <br>
-                    <form action="{{ route('leads.transfer') }}" method="POST">
-                        @csrf
+                    <form action="{{ route('leads.transfer.detail') }}" method="GET">
+                        <div class="row">
+                            <div class="form-group col-4">
+                                <label for="status">Status<span class="text-danger">*</span></label>
+                                <select name="status" id="status" class="form-control">
+                                    <option value="">Select Status</option>
+                                    @foreach(App\Helpers\SiteHelper::getLeadStatus() as $status)
+                                        <option value="{{ $status['code'] }}" @if(request()->status == $status['code']) selected @endif>{{ $status['name'] }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
 
-                        <div class="form-group">
+                            <div class="form-group col-4">
                             <label for="agent_id">Select Agent:</label>
                             <select name="agent_id" id="agent_id" class="form-control" required>
                                 <option value="" disabled selected>Select an agent</option>
@@ -25,6 +32,19 @@
                                 @endforeach
                             </select>
                         </div>
+
+                            <div class="form-group col-4">
+                                <button type="submit" class="btn btn-primary btn-sm">Filter</button>
+
+                            </div>
+                        </div>
+                    </form>
+
+
+                    <form action="{{ route('leads.transfer') }}" method="POST">
+                        @csrf
+
+                        
 
                         <div class="form-group">
                             <label for="lead_ids">Select Fresh Leads:</label>
@@ -75,7 +95,11 @@
                             </table>
                         </div>
 
-                        <button type="submit" class="btn btn-primary">Transfer Leads</button>
+                        <div class="d-flex justify-content-center mt-4">
+    {{ $freshLeads->links() }}
+</div>
+
+                        <!-- <button type="submit" class="btn btn-primary">Transfer Leads</button> -->
                     </form>
                 </div>
             </div>

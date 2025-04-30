@@ -34,7 +34,7 @@
                             @forelse($followUps as $followUp)
                                 <tr>
                                     <td>{{ $followUp->lead->first_name }} {{ $followUp->lead->last_name }}</td>
-                                    <td>{{ $followUp->agent->name ?? 'N/A' }}</td>
+                                    <td>{{ $followUp->agent->emp_name ?? 'N/A' }}</td>
                                     <td>{{ \Carbon\Carbon::parse($followUp->follow_up_time)->format('d M Y, h:i A') }}</td>
                                     <td>{{ $followUp->comments }}</td>
                                     <td>
