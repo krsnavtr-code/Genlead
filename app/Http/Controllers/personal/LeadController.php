@@ -603,13 +603,14 @@ public function updateStatus(Request $request)
     $lead->save();
 
     // Create a new Follow-up Reminder (Optional)
-    FollowUp::where('lead_id', $lead->id)->where('agent_id', $lead->agent_id)->delete();
+    FollowUp::where('lead_id', $lead->id)->where('agent_id', $lead->agent_id)->where('action', 'lead-status-update')->delete();
     
     $followUp = new FollowUp();
     $followUp->lead_id = $lead->id;
     $followUp->agent_id = $lead->agent_id;
     $followUp->comments = $request->comments;
     $followUp->follow_up_time = $request->next_follow_up ?? null;
+    $followUp->action = 'lead-status-update';
     $followUp->save();
 
     return redirect()->back()->with('success', 'Lead status and reminder updated successfully.');
