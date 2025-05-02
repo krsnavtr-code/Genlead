@@ -125,10 +125,10 @@
                             <option value="{{ route('leads.export') }}">Export All Leads</option>
                             <option value="{{ route('leads.transfer.view') }}">Transfer & Share Leads</option>
                         </select>
+                        <button class="btn btn-primary ml-2" data-toggle="modal" data-target="#importModal">Import Leads</button>
                     @endif
 
                         <!-- Import Leads Button -->
-                        <button class="btn btn-primary ml-2" data-toggle="modal" data-target="#importModal">Import Leads</button>
                         <button class="btn btn-info ml-2" onclick="location.href='{{ route('followups.today') }}'">Today Follow-up</button>
                     </div>
                 </div>
