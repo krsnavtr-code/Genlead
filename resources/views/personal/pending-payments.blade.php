@@ -6,8 +6,8 @@
 
 <style>
     .pending-payment-container {
+        margin: 15px auto;
         max-width: 1000px;
-        margin: -71px auto;
         padding: 20px;
         background: #ffffff;
         border: 1px solid #ddd;
@@ -115,10 +115,10 @@
 </div>
 
 <!-- Content Header (Page header) -->
-<div class="content-header sty-one d-flex justify-content-between align-items-center">
-    <div>
+<div class="content-header sty-one d-flex justify-content-between align-items-center" style="float: right;">
+    <!-- <div>
         <h1>Pending Payment</h1>
-    </div>
+    </div> -->
     <div>
         <a href="{{ url('/i-admin/leads/add-lead') }}" 
         class="btn btn-danger btn-sm" 

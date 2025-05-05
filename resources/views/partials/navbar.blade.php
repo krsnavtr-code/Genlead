@@ -27,7 +27,7 @@
     </ul>
 
     <!-- Right navbar links -->
-    <ul class="navbar-nav ml-auto">
+    <ul class="navbar-nav" style="margin-left: auto;">
       <!-- Navbar Search -->
       <li class="nav-item">
         {{-- <a class="nav-link" data-widget="navbar-search" href="#" role="button" style="padding-right: 3rem; margin-right:180px;">
@@ -53,7 +53,7 @@
        <!-- HRMS -->
        @if($emp_job_role === 4 || $emp_job_role === 1)
        <li class="nav-item">
-           <a class="nav-link badge badge-primary navbar-badge" href="{{ route('hrms.manage_employees')}}" style="font-size: 18px; right:29px; padding: 10px;">
+           <a class="nav-link badge badge-primary navbar-badge" href="{{ route('hrms.manage_employees')}}" style="font-size: 18px; right:29px; padding: 10px; position: static; color: white;">
                HRMS
            </a>
        </li>
@@ -63,7 +63,7 @@
   <!-- LEADS Dropdown Menu -->
   @if($emp_job_role === 2 || $emp_job_role === 1)
             <li class="nav-item">
-                <a class="nav-link badge badge-success navbar-badge" href="{{ url('/i-admin/leads/add-lead') }}" style="font-size: 18px; margin-right:120px; padding: 10px;">
+                <a class="nav-link badge badge-success navbar-badge" href="{{ url('/i-admin/leads/add-lead') }}" style="font-size: 18px; margin:0px 20px; padding: 10px; position: static; color: white;">
                     LEADS
                 </a>
             </li>
@@ -108,7 +108,7 @@
       <!-- New Join Panel: Visible to Super Admin -->
       @if($emp_job_role === 1)
           <li class="nav-item">
-              <a class="nav-link badge badge-info navbar-badge" href="{{ url('/admin/new-join-panel') }}" style="font-size: 17px; right:95px;padding: 11px;">
+              <a class="nav-link badge badge-info navbar-badge" href="{{ url('/admin/new-join-panel') }}" style="font-size: 17px; right:95px;padding: 11px; position: static; color: white;">
                NEW JOIN PANEL
               </a>
          </li>

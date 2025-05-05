@@ -20,6 +20,10 @@ class Payment extends Model
         'payment_mode',
         'payment_details_input',
         'payment_amount',
+        'pending_amount',
+        'bank',
+        'loan_amount',
+        'loan_details'
     ];
 
     // Relationship with Lead model

@@ -79,8 +79,8 @@
             <div class="card-body">
 
                   <!-- Filters and Search -->
-                  <div class="d-flex justify-content-between align-items-center mb-3">
-                    <form method="GET" action="{{ route('leads.index') }}">
+                
+                    <form method="GET" action="{{ route('leads.index') }}" class="d-flex align-items-center mb-3" style="gap: 30px;">
                         <!-- Search Leads -->
                         <input type="text" name="search" class="form-control" placeholder="Search Leads" style="width: 200px; display: inline-block;" value="{{ request()->search }}">
                         <button type="submit" class="btn btn-secondary" style="margin-left: -30px;"><i class="fa fa-search"></i></button>
@@ -118,19 +118,20 @@
                             <option value="Last Year" {{ request()->time_frame == 'Last Year' ? 'selected' : '' }}>Last Year</option>
                         </select>
                     </form>
+                
+                <div class="d-flex align-items-center mb-3" style="gap: 30px;">
 
                     @if(session()->get('emp_job_role') == 1)
-                        <select onchange="location = this.value;">
+                        <!-- <select onchange="location = this.value;">
                             <option selected disabled>More Actions</option>
                             <option value="{{ route('leads.export') }}">Export All Leads</option>
-                            <option value="{{ route('leads.transfer.view') }}">Transfer & Share Leads</option>
-                        </select>
+                        </select> -->
+                        <button class="btn btn-primary ml-2" onclick="location.href='{{ route('leads.transfer.view') }}'">Transfer & Share Leads</button>
                         <button class="btn btn-primary ml-2" data-toggle="modal" data-target="#importModal">Import Leads</button>
                     @endif
 
                         <!-- Import Leads Button -->
                         <button class="btn btn-info ml-2" onclick="location.href='{{ route('followups.today') }}'">Today Follow-up</button>
-                    </div>
                 </div>
 
                  <!-- Validation Messages -->
@@ -151,6 +152,7 @@
                     <table id="example2" class="table table-bordered table-hover" data-name="cool-table">
                         <thead>
                             <tr>
+                                <th>S.No</th>
                                 <th>Lead Name</th>
                                 {{-- <th>Lead Score</th>  --}}
                                 {{-- <th>Lead Stage</th> --}}
@@ -165,6 +167,7 @@
                         <tbody>
                             @foreach($leads as $lead)
                             <tr>
+                                <td>{{ $loop->iteration }}</td>
                                 <td>
                                         <a href="{{ url('/i-admin/leads/view/'.$lead->id) }}">
                                             {{ $lead->first_name }} {{ $lead->last_name }}

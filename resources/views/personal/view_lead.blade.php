@@ -138,7 +138,7 @@
         font-weight: bold;
     }
 
-    .lead-section .lead-info-box {
+    .lead-section {
         display: flex;
         justify-content: space-between;
     }
@@ -169,11 +169,11 @@
     overflow: hidden;
     }
 
-    .lead-info-box {
+    /* .lead-info-box {
         display: flex;
         justify-content: space-between;
         margin-bottom: 10px;
-    }
+    } */
 
     /* Modal Styles */
     .modal {
@@ -341,19 +341,19 @@ margin-bottom: 10px;
             <h4>Lead Details: </h4>
 
          <!-- Lead Information Section -->   
-      <div class="lead-section">
+    {{-- <div class="lead-section"> 
         <h4 onclick="toggleSection('leadInfo', 'iconLead')">Lead Information:</h4>
         <div id="iconLead" class="toggle-button" onclick="toggleSection('leadInfo', 'iconLead')">^</div>
 
         <!-- Edit Button -->
-      {{-- <button class="btn btn-warning btn-sm" style="position: absolute; right: 10px; top: 10px;" onclick="openModal()">Edit</button> --}}
+      <!-- <button class="btn btn-warning btn-sm" style="position: absolute; right: 10px; top: 10px;" onclick="openModal()">Edit</button> -->
 
         <div id="leadInfo" class="collapsible-content visible">
             <div class="lead-info-box">
-                {{-- <div><span class="eWUmU">Lead Owner:</span><span class="lagyBr">{{ $lead->owner }}</span></div> --}}
-                {{-- <div><span class="eWUmU">Company:</span><span class="lagyBr">{{ $lead->company }}</span></div> --}}
+                <!--  <div><span class="eWUmU">Lead Owner:</span><span class="lagyBr">{{ $lead->owner }}</span></div> -->
+                <!--  <div><span class="eWUmU">Company:</span><span class="lagyBr">{{ $lead->company }}</span></div> -->
                 <div><span class="eWUmU">Lead Source:</span><span class="lagyBr"> {{ $lead->lead_source }}</span> </div>
-                {{-- <div><span class="eWUmU">Lead Status:</span><span class="lagyBr">{{ ucfirst($lead->lead_status) }}</span></div> --}}
+                <!-- <div><span class="eWUmU">Lead Status:</span><span class="lagyBr">{{ ucfirst($lead->lead_status) }}</span></div> -->
             </div>
             <div class="lead-info-box">
             <div><span class="eWUmU">University:</span><span class="lagyBr">{{ ucfirst($lead->university) }}</span></div>
@@ -366,7 +366,46 @@ margin-bottom: 10px;
             <div><span class="eWUmU">Phone:</span><span class="lagyBr">{{ $lead->phone }}</span></div>
         </div>
         </div>
+    </div> --}}
+
+    <div class="container my-4">
+    <div class="card shadow-sm">
+        <div class="card-header d-flex justify-content-between align-items-center bg-primary text-white">
+            <h5 class="mb-0" style="cursor: pointer;" onclick="toggleSection('leadInfo', 'iconLead')">
+                Lead Information
+            </h5>
+            <span id="iconLead" onclick="toggleSection('leadInfo', 'iconLead')" style="cursor: pointer;">&#9650;</span>
+        </div>
+
+        {{-- <button class="btn btn-warning btn-sm position-absolute top-0 end-0 m-2" onclick="openModal()">Edit</button> --}}
+
+        <div id="leadInfo" class="card-body">
+            <div class="row mb-3">
+                <div class="col-md-6 mb-2">
+                    <strong>Lead Source:</strong> {{ $lead->lead_source }}
+                </div>
+                <div class="col-md-6 mb-2">
+                    <strong>University:</strong> {{ ucfirst($lead->university) }}
+                </div>
+                <div class="col-md-6 mb-2">
+                    <strong>Course:</strong> {{ ucfirst($lead->courses) }}
+                </div>
+                <div class="col-md-6 mb-2">
+                    <strong>College:</strong> {{ ucfirst($lead->college) }}
+                </div>
+                <div class="col-md-6 mb-2">
+                    <strong>Branch:</strong> {{ ucfirst($lead->branch) }}
+                </div>
+                <div class="col-md-6 mb-2">
+                    <strong>Email:</strong> {{ $lead->email }}
+                </div>
+                <div class="col-md-6 mb-2">
+                    <strong>Phone:</strong> {{ $lead->phone }}
+                </div>
+            </div>
+        </div>
     </div>
+</div>
 
     
     <!-- Payment Button -->
@@ -390,7 +429,7 @@ margin-bottom: 10px;
             </form>
         </div>
 
-        <div id="conversations" class="tab-content">
+        <!-- <div id="conversations" class="tab-content">
             <h4>Recent Conversations</h4>
             @foreach($lead->followUps as $followUp)
             <div class="conversation-box">
@@ -399,8 +438,35 @@ margin-bottom: 10px;
                 <div><span class="eWUmU">Comments:</span> <span  class="lagyBr">{{ $followUp->comments }}</span></div>
                 <div><span class="eWUmU">Follow-up Time:</span> <span  class="lagyBr">{{ \Carbon\Carbon::parse($followUp->follow_up_time)->format('d M Y, H:i') }}</span></div>
             </div>
-        @endforeach
+            @endforeach
+        </div> -->
+        <div id="conversations" class="tab-content mt-4">
+            <h4 class="mb-3 text-primary">Recent Conversations</h4>
+
+            @foreach($lead->followUps->sortByDesc('created_at') as $followUp)
+            <div class="card mb-3 shadow-sm">
+                <div class="card-body">
+                    {{-- <p class="mb-2"><strong>Agent:</strong> {{ $followUp->agent->name }}</p> --}}
+            
+            <p class="mb-1">
+                <span class="fw-bold text-secondary">Date:</span>
+                <span class="text-dark">{{ $followUp->created_at->format('d M Y, H:i') }}</span>
+            </p>
+            
+            <p class="mb-1">
+                <span class="fw-bold text-secondary">Comments:</span>
+                <span class="text-dark">{{ $followUp->comments }}</span>
+            </p>
+            
+            <p class="mb-0">
+                <span class="fw-bold text-secondary">Follow-up Time:</span>
+                <span class="text-dark">{{ \Carbon\Carbon::parse($followUp->follow_up_time)->format('d M Y, H:i') }}</span>
+            </p>
         </div>
+    </div>
+    @endforeach
+</div>
+
     </div>
 </div>
 
@@ -490,6 +556,19 @@ function openModal() {
             icon.innerHTML = '^'; // Show the up arrow
         } else {
             icon.innerHTML = 'v'; // Show the down arrow
+        }
+    }
+    
+    // JavaScript for toggling visibility of sections
+    function toggleSection(sectionId, iconId) {
+        const section = document.getElementById(sectionId);
+        const icon = document.getElementById(iconId);
+        if (section.style.display === 'none' || section.classList.contains('d-none')) {
+            section.style.display = 'block';
+            icon.innerHTML = '&#9650;'; // Up arrow
+        } else {
+            section.style.display = 'none';
+            icon.innerHTML = '&#9660;'; // Down arrow
         }
     }
 </script>

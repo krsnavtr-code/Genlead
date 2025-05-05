@@ -417,58 +417,161 @@ public function showPaymentPage($leadId)
 
 public function processPayment(Request $request)
 {
+    \Log::info('Starting payment processing', ['request_data' => $request->all()]);
 
-    // Retrieve the logged-in agent's ID from the session
-    $agentId = session()->get('user_id');
+    try {
+        // Retrieve the logged-in agent's ID from the session
+        $agentId = session()->get('user_id');
+        if (!$agentId) {
+            \Log::error('No agent ID found in session');
+            return back()->withInput()->with('error', 'Session expired. Please log in again.');
+        }
+        \Log::info('Session user_id', ['user_id' => $agentId]);
 
-    // Validate the lead and agent access
-    $lead = Lead::where('id', $request->lead_id)
-                ->where('agent_id', $agentId)
-                ->first();
+        // Validate the lead and agent access
+        $lead = Lead::where('id', $request->lead_id)
+                    ->where('agent_id', $agentId)
+                    ->first();
 
-    if (!$lead) {
-        abort(403, 'Access denied. You are not authorized to process payment for this lead.');
-    }
+        if (!$lead) {
+            \Log::error('Lead not found or unauthorized access', [
+                'lead_id' => $request->lead_id, 
+                'agent_id' => $agentId
+            ]);
+            return back()->with('error', 'Access denied. You are not authorized to process payment for this lead.');
+        }
 
-    $request->validate([
-        'lead_id' => 'required|exists:leads,id',
-        'session_duration' => 'required|string',
-        'session' => 'required|string',
-        'payment_screenshot' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
-        'utr_no' => 'required|digits:12|unique:payments,utr_no',
-        'payment_mode' => 'required|string',
-        'payment_details_input' => 'nullable|string',
-        'payment_amount' => 'required|numeric',
-        'loan_amount' => 'nullable|numeric',
-        'loan_details' => 'nullable|string',
-    ]);
+        \Log::info('Lead found', ['lead' => $lead->toArray()]);
 
-    // Handle file upload
-    if ($request->hasFile('payment_screenshot')) {
+        try {
+            $validated = $request->validate([
+                'lead_id' => 'required|exists:leads,id',
+                'session_duration' => 'required|string',
+                'session' => 'required|string',
+                'payment_screenshot' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
+                'utr_no' => 'required|digits:12|unique:payments,utr_no',
+                'payment_mode' => 'required|string',
+                'payment_details_input' => 'required|string',
+                'payment_amount' => 'required|numeric',
+                'pending_amount' => 'required|numeric',
+                'loan_amount' => 'nullable|numeric',
+                'loan_details' => 'nullable|string',
+            ]);
+            \Log::info('Validation passed', $validated);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            \Log::error('Validation failed', [
+                'errors' => $e->errors(),
+            ]);
+            return back()->withErrors($e->errors())->withInput()->with('error', 'Please check the form for errors.');
+        }
+
+        // Create uploads directory if it doesn't exist
         $uploadPath = 'images/payment-screenshots';
-        // Store the file in the public directory
-        $fileName = $request->file('payment_screenshot')->getClientOriginalName();
-        $filePath = $request->file('payment_screenshot')->move(public_path($uploadPath), $fileName);
-        $filePath = "$uploadPath/$fileName";
+        try {
+            if (!file_exists(public_path($uploadPath))) {
+                if (!mkdir(public_path($uploadPath), 0777, true)) {
+                    throw new \Exception('Failed to create upload directory');
+                }
+            }
+        } catch (\Exception $e) {
+            \Log::error('Error creating upload directory', [
+                'path' => $uploadPath,
+                'error' => $e->getMessage()
+            ]);
+            return back()->withInput()->with('error', 'Server error: Unable to create upload directory. Please contact support.');
+        }
+
+        // Handle file upload
+        $filePath = null;
+        try {
+            if ($request->hasFile('payment_screenshot')) {
+                $file = $request->file('payment_screenshot');
+                $fileName = time() . '_' . $file->getClientOriginalName();
+                $file->move(public_path($uploadPath), $fileName);
+                $filePath = $uploadPath . '/' . $fileName;
+                \Log::info('File uploaded successfully', ['file_path' => $filePath]);
+            } else {
+                \Log::warning('No payment screenshot file found in request');
+                return back()->withInput()->with('error', 'Payment screenshot is required.');
+            }
+        } catch (\Exception $e) {
+            \Log::error('File upload failed', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            return back()->withInput()->with('error', 'Failed to upload payment screenshot. Please try again.');
+        }
+
+        // Prepare payment data
+        $paymentData = [
+            'lead_id' => $request->lead_id,
+            'agent_id' => $agentId,
+            'session_duration' => $request->session_duration,
+            'session' => $request->session,
+            'payment_screenshot' => $filePath,
+            'utr_no' => $request->utr_no,
+            'payment_mode' => $request->payment_mode,
+            'payment_details_input' => $request->payment_details_input,
+            'payment_amount' => $request->payment_amount,
+            'pending_amount' => $request->pending_amount,
+            'bank' => $request->payment_mode === 'netbanking' ? $request->bank : null,
+            'loan_amount' => $request->loan_amount,
+            'loan_details' => $request->loan_details,
+        ];
+
+        \Log::info('Attempting to create payment record', $paymentData);
+
+        // Create the payment record in the database
+        try {
+            $payment = Payment::create($paymentData);
+            \Log::info('Payment record created successfully', [
+                'payment_id' => $payment->id,
+                'data' => $payment->toArray()
+            ]);
+            
+            // Get lead name for the success message
+            $leadName = $lead->name ?? 'Lead #' . $lead->id;
+            $formattedAmount = number_format($request->payment_amount, 2);
+            
+            // Create a detailed success message
+            $successMessage = "Payment of ₹{$formattedAmount} for {$leadName} has been recorded successfully. ";
+            $successMessage .= "Payment mode: {$request->payment_mode}. ";
+            $successMessage .= "UTR Number: {$request->utr_no}. ";
+            $successMessage .= "Thank you for your payment!";
+            
+            return redirect('/i-admin/show-leads')
+                ->with('success', $successMessage);
+                
+        } catch (\Exception $e) {
+            \Log::error('Failed to create payment record', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+                'payment_data' => $paymentData
+            ]);
+            throw $e; // Re-throw to be caught by the outer try-catch
+        }
+
+    } catch (\Exception $e) {
+        \Log::error('Error processing payment', [
+            'message' => $e->getMessage(),
+            'trace' => $e->getTraceAsString()
+        ]);
+        
+        // Determine a more specific error message based on the exception
+        $errorMessage = 'An error occurred while processing your payment. Please try again.';
+        
+        if (strpos($e->getMessage(), 'Duplicate entry') !== false) {
+            $errorMessage = 'This UTR number has already been used. Please check and enter the correct UTR number.';
+        } elseif (strpos($e->getMessage(), 'Column') !== false && strpos($e->getMessage(), 'cannot be null') !== false) {
+            $errorMessage = 'Some required payment information is missing. Please fill in all required fields.';
+        } elseif (strpos($e->getMessage(), 'Connection refused') !== false) {
+            $errorMessage = 'Database connection error. Please try again later or contact support.';
+        }
+        
+        return back()
+            ->withInput()
+            ->with('error', $errorMessage);
     }
-
-    // Create the payment record in the database
-    Payment::create([
-        'lead_id' => $request->lead_id,
-        'agent_id' => session()->get('user_id'), // Save the logged-in agent
-        'session_duration' => $request->session_duration,
-        'session' => $request->session,
-        'payment_screenshot' => $filePath ?? null,
-        'utr_no' => $request->utr_no,
-        'payment_mode' => $request->payment_mode,
-        'payment_details_input' => $request->payment_details_input,
-        'payment_amount' => $request->payment_amount,
-        'bank' => $request->payment_mode === 'netbanking' ? $request->bank : null,
-        'loan_amount' => $request->loan_amount,
-        'loan_details' => $request->loan_details,
-    ]);
-
-    return redirect('/i-admin/show-leads')->with('success', 'Payment details submitted successfully.');
 }
 
 public function showPendingPayments()

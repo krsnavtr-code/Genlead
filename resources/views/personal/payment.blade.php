@@ -206,6 +206,11 @@
             </div>
 
             <div class="form-group">
+                <label for="pending_amount">Pending Amount:</label>
+                <input type="number" name="pending_amount" class="form-control" required>
+            </div>
+
+            <div class="form-group">
                 <label for="payment_details">Payment Details (you can write here about payment brief details):</label>
                 <input type="text" name="payment_details" class="form-control" placeholder="This is payment details session 2016-17 of 2ndsemester">
             </div>
