@@ -142,13 +142,18 @@
     </div>
 
     <!-- Payment Form Section -->
-    <form action="{{ url('/i-admin/process-payment') }}" method="POST" enctype="multipart/form-data">
+    <form action="{{ url('/i-admin/process-payment') }}" method="POST" enctype="multipart/form-data" id="paymentForm">
         @csrf
+        <input type="hidden" name="lead_id" value="{{ $lead->id }}">
+        
         <div class="payment-section">
             <h1 class="section-title">Payment Process:</h1>
 
-            <!-- Include lead_id as a hidden field -->
-            <input type="hidden" name="lead_id" value="{{ $lead->id }}">
+            <div class="form-group">
+                <label for="total_amount">Total Amount (₹):</label>
+                <input type="number" name="total_amount" id="total_amount" class="form-control" required 
+                       value="{{ old('total_amount', $lead->total_fees ?? '') }}">
+            </div>
 
             <div class="form-group">
                 <label for="session_duration">Session Duration:</label>
@@ -179,35 +184,38 @@
             </div>
 
             <div class="form-group">
-                <label for="utr_no">Transaction ID/UTR No:</label>
-                <input type="text" name="utr_no" class="form-control" required pattern="\d{12}" title="UTR number should be 12 digits" maxlength="12" required>
-            </div>
-
-            <div class="form-group">
                 <label for="payment_mode">Payment Mode:</label>
                 <select name="payment_mode" id="payment_mode" class="form-control" required>
-                    <option value="upi">UPI</option>
-                    <option value="netbanking">Netbanking</option>
-                    <option value="credit_card">Credit Card</option>
-                    <option value="debit_card">Debit Card</option>
-                    <option value="others">Others</option>
+                    <option value="">Select Payment Mode</option>
+                    <option value="bank_transfer" {{ old('payment_mode') == 'bank_transfer' ? 'selected' : '' }}>Bank Transfer</option>
+                    <option value="upi" {{ old('payment_mode') == 'upi' ? 'selected' : '' }}>UPI</option>
+                    <option value="credit_card" {{ old('payment_mode') == 'credit_card' ? 'selected' : '' }}>Credit Card</option>
+                    <option value="debit_card" {{ old('payment_mode') == 'debit_card' ? 'selected' : '' }}>Debit Card</option>
+                    <option value="net_banking" {{ old('payment_mode') == 'net_banking' ? 'selected' : '' }}>Net Banking</option>
+                    <option value="cash" {{ old('payment_mode') == 'cash' ? 'selected' : '' }}>Cash</option>
                 </select>
             </div>
 
-            <!-- Simple input box for all payment details -->
             <div class="form-group" id="payment_details">
-                <label for="payment_details_input">Payment Bank Details:</label>
-                <input type="text" name="payment_details_input" class="form-control" placeholder="Enter payment details here">
+                <label for="payment_details_input">Payment Details:</label>
+                <input type="text" name="payment_details_input" id="payment_details_input" class="form-control"
+                       value="{{ old('payment_details_input') }}">
             </div>
 
             <div class="form-group">
-                <label for="payment_amount">Payment Amount:</label>
-                <input type="number" name="payment_amount" class="form-control" required>
+                <label for="payment_amount">Payment Amount (₹):</label>
+                <input type="number" name="payment_amount" id="payment_amount" class="form-control" required
+                       value="{{ old('payment_amount') }}" oninput="calculatePendingAmount()">
             </div>
 
             <div class="form-group">
-                <label for="pending_amount">Pending Amount:</label>
-                <input type="number" name="pending_amount" class="form-control" required>
+                <label for="pending_amount">Pending Amount (₹):</label>
+                <input type="number" name="pending_amount" id="pending_amount" class="form-control" readonly>
+            </div>
+
+            <div class="form-group">
+                <label for="utr_no">UTR/Transaction Number:</label>
+                <input type="text" name="utr_no" id="utr_no" class="form-control" value="{{ old('utr_no') }}">
             </div>
 
             <div class="form-group">
@@ -240,8 +248,47 @@
 <script>
     // Show the payment details input box for all payment modes
     document.getElementById('payment_mode').addEventListener('change', function () {
-        const paymentDetails = document.getElementById('payment_details');
-        paymentDetails.style.display = 'block';
+        var paymentDetails = document.getElementById('payment_details');
+        if (this.value === 'bank_transfer' || this.value === 'upi' || this.value === 'credit_card' || this.value === 'debit_card' || this.value === 'net_banking') {
+            paymentDetails.style.display = 'block';
+        } else {
+            paymentDetails.style.display = 'none';
+        }
+    });
+
+    // Calculate pending amount
+    function calculatePendingAmount() {
+        const totalAmount = parseFloat(document.getElementById('total_amount').value) || 0;
+        const paymentAmount = parseFloat(document.getElementById('payment_amount').value) || 0;
+        const pendingAmount = Math.max(0, totalAmount - paymentAmount);
+        document.getElementById('pending_amount').value = pendingAmount.toFixed(2);
+    }
+
+    // Calculate pending amount when total amount changes
+    document.getElementById('total_amount').addEventListener('input', calculatePendingAmount);
+
+    // Form validation
+    document.getElementById('paymentForm').addEventListener('submit', function(e) {
+        const totalAmount = parseFloat(document.getElementById('total_amount').value) || 0;
+        const paymentAmount = parseFloat(document.getElementById('payment_amount').value) || 0;
+        
+        if (paymentAmount <= 0) {
+            e.preventDefault();
+            alert('Payment amount must be greater than 0');
+            return false;
+        }
+        
+        if (paymentAmount > totalAmount) {
+            e.preventDefault();
+            alert('Payment amount cannot be greater than total amount');
+            return false;
+        }
+    });
+
+    // Trigger the change event on page load
+    document.addEventListener('DOMContentLoaded', function() {
+        document.getElementById('payment_mode').dispatchEvent(new Event('change'));
+        calculatePendingAmount();
     });
 
     // Toggle Loan Fields

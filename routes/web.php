@@ -60,6 +60,9 @@ Route::post('/process-payment', [LeadController::class, 'processPayment'])->name
 
 Route::get('/pending', [LeadController::class, 'showPendingPayments'])->name('pending.payments');
 
+// Payment Details API
+Route::get('/api/payment/{id}', [LeadController::class, 'getPaymentDetails'])->name('api.payment.details');
+
 
 // Filter Routes
 

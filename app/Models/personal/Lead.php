@@ -25,7 +25,14 @@ class Lead extends Model
         'university',
         'courses',
         'session_duration',
-        'status'
+        'status',
+        'total_fees',
+        'pending_amount'
+    ];
+
+    protected $casts = [
+        'total_fees' => 'decimal:2',
+        'pending_amount' => 'decimal:2',
     ];
 
     // public function getButtonColorAttribute()

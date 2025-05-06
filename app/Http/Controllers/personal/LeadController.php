@@ -690,14 +690,47 @@ public function index()
     return redirect()->route('payment.verify')->with('success', 'Payment has been verified successfully.');
 }
 
+    /**
+     * Get payment details via API
+     *
+     * @param int $id Payment ID
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function getPaymentDetails($id)
+    {
+        try {
+            $payment = Payment::findOrFail($id);
+            
+            // Ensure the logged-in user has access to this payment
+            $agentId = session()->get('user_id');
+            if ($payment->agent_id != $agentId) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Unauthorized access to this payment.'
+                ], 403);
+            }
+            
+            return response()->json([
+                'success' => true,
+                'data' => $payment
+            ]);
+            
+        } catch (\Exception $e) {
+            \Log::error('Error fetching payment details: ' . $e->getMessage());
+            
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to fetch payment details.'
+            ], 500);
+        }
+    }
 
-public function updateStatus(Request $request)
-{
-
-    $request->validate([
-        'lead_id' => 'required|exists:leads,id',
-        'new_status' => 'required|string',
-    ]);
+    public function updateStatus(Request $request)
+    {
+        $request->validate([
+            'lead_id' => 'required|exists:leads,id',
+            'new_status' => 'required|string',
+        ]);
 
     // Update Lead Status
     $lead = Lead::findOrFail($request->lead_id);
