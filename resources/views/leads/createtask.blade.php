@@ -12,39 +12,18 @@
         font-weight: 100 !important;
         
     }
-      /* Horizontal Navbar Styles */
-      .horizontal-navbar {
-        display: flex;
-        justify-content: space-around;
-        background-color: #f8f9fa;
-        padding: 17px 0;
-        border-bottom: 1px solid #ddd;
-    }
-
-    .horizontal-navbar a {
-        color: #007bff;
-        font-size: 14px;
-        font-weight: 500;
-        text-decoration: none;
-        padding: 8px 16px;
-        border-radius: 4px;
-    }
-
-    .horizontal-navbar a:hover {
-        background-color: #007bff;
-        color: white;
-    }
 </style>
 <div class="content-wrapper">
-    
-    <div class="horizontal-navbar">
-        <a href="{{ url('/i-admin/show-leads') }}">Manage Leads</a>
-        <a href="{{ url('/admin/activities/create') }}">Add Activities</a>
-        <a href="{{ url('/admin/activities') }}">Manage Activities</a>
-        <a href="{{ url('/admin/tasks/create') }}">Create/Add Tasks</a>
-        <a href="{{ url('/admin/tasks') }}">Manage Tasks</a>
-        <a href="{{ url('/i-admin/pending') }}">Pending Payment</a>
+    <!-- Horizontal Navbar -->
+    <div class="horizontal-navbar d-flex flex-wrap justify-content-around py-2 border-bottom mb-3">
+        <a href="{{ url('/i-admin/show-leads') }}" class="btn m-1">Manage Leads</a>
+        <a href="{{ url('/admin/activities/create') }}" class="btn m-1">Add Activities</a>
+        <a href="{{ url('/admin/activities') }}" class="btn m-1">Manage Activities</a>
+        <a href="{{ url('/admin/tasks/create') }}" class="btn m-1">Create/Add Tasks</a>
+        <a href="{{ url('/admin/tasks') }}" class="btn m-1">Manage Tasks</a>
+        <a href="{{ url('/i-admin/pending') }}" class="btn m-1">Pending Payment</a>
     </div>
+    
     <!-- Content Header (Page header) -->
     <div class="content-header sty-one d-flex justify-content-between align-items-center">
         <div>

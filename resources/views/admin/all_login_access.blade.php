@@ -8,8 +8,8 @@
         margin-top: -25px;
     }
 </style>
-<div class="container mt-4" style="margin-right:0px;">
-    <h3 class="mb-4" style= "margin-left: -100px;">All Login Access</h3>
+<div class="container-fluid mt-4">
+    <h3 class="mb-4">All Login Access</h3>
 
     @if (session('errors'))
     <div class="alert alert-danger">
@@ -25,7 +25,7 @@
         <div class="alert alert-success">{{ session('success') }}</div>
     @endif
   
-    <table class="table table-bordered" style="margin-left: -114px;">
+    <table class="table table-bordered table-responsive">
         <thead>
             <tr>
                  <th>S.No</th>

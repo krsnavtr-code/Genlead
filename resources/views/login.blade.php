@@ -5,117 +5,43 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Login Page</title>
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <meta name="description" content="GenLead | Admin Login">
+    <meta name="keywords" content="GenLead, Admin Login">
+    <meta name="author" content="GenLead">
+    <link rel="icon" href="{{ asset('images/gen-logo.jpeg') }}">
+    <title>GenLead | Admin Login</title>
+
     <!-- Bootstrap CSS CDN -->
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+
     <style>
         body {
-            font-family: Arial, sans-serif;
-            /* background-color: #f4f4f4; */
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-
-            background: url('{{ asset('images/background-image.png') }}');
+            background: url('{{ asset('images/background-image.png') }}') no-repeat center center;
             background-size: cover;
-            font-family: "Poppins", sans-serif;
+            height: 100vh;
+            font-family: 'Poppins', sans-serif;
         }
-
-        .card-login {
-            width: 100%;
-            max-width: 450px;
-            padding: 2rem;
-            border-radius: 10px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-            background-color: #fff;
+        .login-card form button {
+            max-width: 70%;
+            margin: 0 auto;
+            transition: all 0.3s ease-in-out;
         }
-
-        .form-outline {
-            margin-bottom: 1.5rem;
-        }
-
-        .btn-primary {
-            background-color: #d32f2f;
-            border: none;
-            width: 100%;
-            font-size: 1.1rem;
-        }
-
-        .btn-primary:hover {
-            background-color: #b71c1c;
-        }
-
-        .text-center {
-            text-align: center;
-        }
-
-        .login-logo {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-bottom: 1rem;
-        }
-
-        .login-logo img {
-            height: 100px;
-        }
-
-        .divider {
-            display: flex;
-            align-items: center;
-            text-align: center;
-            margin: 20px 0;
-        }
-
-        .divider::before,
-        .divider::after {
-            content: "";
-            flex: 1;
-            border-bottom: 1px solid #ddd;
-        }
-
-        .divider:not(:empty)::before {
-            margin-right: .25em;
-        }
-
-        .divider:not(:empty)::after {
-            margin-left: .25em;
-        }
-
-        .social-login-buttons {
-            display: flex;
-            justify-content: space-around;
-        }
-
-        .social-login-buttons button {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 0.2rem;
-            width: 48%;
-            border: 1px solid #ddd;
-            background-color: #fff;
-            font-size: 1rem;
-            cursor: pointer;
-        }
-
-        .social-login-buttons img {
-            height: 20px;
-            margin-right: 8px;
+        .login-card form button:hover{
+            max-width: 80%;
+            transform: translateX(-5%);
+            transform: translateY(-5%);
+            transition: all 0.3s ease-in-out;
         }
     </style>
 </head>
 
-<body>
-    <div class="card card-login">
-        <div class="login-logo">
-            {{-- <img src="{{ asset('images/7015971.jpg') }}" alt="Logo"> --}}
-            <img src="{{ asset('images/logo.jpeg') }}" alt="Logo">
-            {{-- <h4 class="mb-4">GEN-LEAD CRM</h4> --}}
-        </div>
-        {{-- <h5 class="text-center mb-4">Get started with your 15-day free trial.</h5> --}}
+<body class="d-flex justify-content-center align-items-center">
 
+    <div class="login-card card shadow-lg p-4" style="width: 100%; max-width: 420px; border-radius: 1rem; background-color: #fff;">
+        <div class="text-center mb-4">
+            <img src="{{ asset('images/gen-logo.jpeg') }}" alt="GenLead Logo" style="height: 80px;">
+        </div>
 
         <!-- Display Error Message -->
         @if (session('error'))
@@ -126,42 +52,30 @@
 
         <form action="{{ url('/admin/login') }}" method="POST">
             @csrf
-            <div class="form-outline">
-                <label class="form-label" for="form3Example97">Work Username</label>
-                <input type="text" id="form3Example97" name="emp_username" class="form-control form-control-lg" required />
+
+            <div class="form-group">
+                <label for="form3Example97">Username</label>
+                <input type="text" id="form3Example97" name="emp_username" class="form-control" placeholder="Enter username" required />
             </div>
 
-            <div class="form-outline">
-                <label class="form-label" for="form3ExamplePassword"> Password</label>
-                <input type="password" id="form3ExamplePassword" name="emp_password" class="form-control form-control-lg" required />
+            <div class="form-group">
+                <label for="form3ExamplePassword">Password</label>
+                <input type="password" id="form3ExamplePassword" name="emp_password" class="form-control" placeholder="Enter password" required />
             </div>
 
-            <button type="submit" class="btn btn-primary btn-lg">GET STARTED</button>
+            <button type="submit" class="btn text-white btn-block" style="background-color: #FB6005;">Get Started</button>
         </form>
 
         <div class="text-center mt-3">
             <a href="{{ route('password.request') }}" class="text-primary">Forgot Password?</a>
         </div>
-
-        {{-- <div class="divider">Or, Create a new account now</div>
-
-        <div class="social-login-buttons">
-            <button type="button">
-                <img src="https://img.icons8.com/color/48/000000/google-logo.png" alt="Google Icon">
-                Sign in with Google
-            </button>
-            <button type="button">
-                <img src="https://img.icons8.com/color/48/000000/linkedin.png" alt="LinkedIn Icon">
-                Sign in with LinkedIn
-            </button>
-        </div> --}}
     </div>
 
     <!-- Bootstrap JS CDN -->
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/js/toastr.min.js"></script>
 </body>
 
 </html>
-

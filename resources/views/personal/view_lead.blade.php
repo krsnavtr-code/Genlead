@@ -8,16 +8,13 @@
     /* Adjust the layout for the left and right sections */
     .lead-details-container {
         display: flex;
+        flex-direction: column;
         margin-top: 0px;
-        margin-left: 254px;
-        margin-right: 315px;
-        max-width: 70%;  /* Ensure the container takes full width */
-        width: 70%;
     }
 
     /* Left side (Lead Properties) */
     .lead-left {
-        width: 35%;
+        width: 100%;
         background-color: #ffffff;
         padding: 20px;
         border-right: 1px solid #ddd;
@@ -89,8 +86,9 @@
 
     /* Right side (Tabs and Content) */
     .lead-right {
-        width: 65%;
-        padding: 20px;
+        width: 100%;
+        margin-bottom: 100px;
+        padding: 5px;
         box-sizing: border-box;
     }
 
@@ -102,23 +100,30 @@
     /* Tab Styles */
     .tabs {
         display: flex;
+        flex-wrap: wrap;
         margin-bottom: 20px;
         border-bottom: 2px solid #ddd;
     }
 
     .tabs span {
-        padding: 10px 20px;
-        margin-right: 20px;
+        padding: 4px 8px;
+        margin: 5px 10px;
         cursor: pointer;
+        font-size: 14px;
+        font-weight: 600;
+        background-color:var(--logo-color);
+        color: white;
+        border-radius: 5px;
     }
 
     .active-tab {
-        border-bottom: 3px solid #007bff;
+        border-bottom: 3px solid var(--primary-color);
         font-weight: bold;
     }
 
     .tab-content {
         display: none;
+        
     }
 
     .active-content {
@@ -129,6 +134,14 @@
         font-size: 18px;
         margin-bottom: 15px;
     }
+    /* input[type="datetime-local"] {
+        width: 100%;
+        max-width: 200px;
+        padding: 8px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        box-sizing: border-box;
+    } */
 
     .lead-section {
         margin-bottom: 20px;
@@ -178,22 +191,23 @@
     /* Modal Styles */
     .modal {
         display: none;
-        position: fixed;
-        top: 0;
-        right: -100%;
-        width: 30%;
+        /* position: fixed; */
+        /* top: 0; */
+        /* right: -100%; */
+        /* margin-top: 400px; */
+        /* width: 30%; */
         height: 100%;
-        background-color: #fff;
+        background-color: transparent;
         border-left: 1px solid #ddd;
         box-shadow: -2px 0 5px rgba(0, 0, 0, 0.2);
-        padding: 20px;
+        /* padding: 20px; */
         overflow-y: auto;
         transition: right 0.3s ease;
     }
 
     .modal.show {
-        position: absolute;
-        left: 0;
+        /* position: absolute; */
+        /* left: 0; */
         display: block;
     }
 
@@ -298,6 +312,38 @@ margin-bottom: 10px;
 .conversation-box div{
     margin-bottom: 10px;
 }
+
+
+
+
+.payment-card {
+        border: 1px solid #dee2e6;
+        border-radius: 12px;
+        padding: 16px;
+        background-color: #ffffff;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        transition: transform 0.2s ease;
+    }
+
+    .payment-card:hover {
+        transform: translateY(-3px);
+    }
+
+    .payment-label {
+        font-weight: 600;
+        color: #6c757d;
+        margin-bottom: 4px;
+    }
+
+    .payment-value {
+        font-size: 1rem;
+        margin-bottom: 8px;
+    }
+
+    .summary-card {
+        border-radius: 12px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    }
 </style>
 
 <div class="lead-details-container">
@@ -470,104 +516,99 @@ margin-bottom: 10px;
 
         <!-- Payment History Tab -->
         <div id="payment-history" class="tab-content">
-            <div class="d-flex justify-content-between align-items-center mb-3">
-                <h4 class="mb-0">Payment History</h4>
-                <a href="{{ route('payment.page', ['leadId' => $lead->id]) }}" class="btn btn-success btn-sm">
-                    <i class="fas fa-plus"></i> Add Payment
-                </a>
-            </div>
+    <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap">
+        <h4 class="mb-2 mb-md-0">Payment History</h4>
+        <a href="{{ route('payment.page', ['leadId' => $lead->id]) }}" class="btn btn-success btn-sm">
+            <i class="fas fa-plus"></i> Add Payment
+        </a>
+    </div>
 
-            @if($lead->payments->count() > 0)
-                <div class="table-responsive">
-                    <table class="table table-bordered table-hover">
-                        <thead class="table-light">
-                            <tr>
-                                <th>Date</th>
-                                <th>Amount</th>
-                                <th>Payment Mode</th>
-                                <th>UTR No</th>
-                                <th>Status</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach($lead->payments as $payment)
-                                <tr>
-                                    <td>{{ $payment->created_at->format('d M Y') }}</td>
-                                    <td>₹{{ number_format($payment->payment_amount, 2) }}</td>
-                                    <td>{{ ucfirst($payment->payment_mode) }}</td>
-                                    <td>{{ $payment->utr_no }}</td>
-                                    <td>
-                                        @if($payment->payment_verify)
-                                            <span class="badge bg-success">Verified</span>
-                                        @else
-                                            <span class="badge bg-warning">Pending Verification</span>
-                                        @endif
-                                    </td>
-                                    <td>
-                                        <button class="btn btn-sm btn-info" onclick="viewPaymentDetails({{ $payment->id }})">
-                                            <i class="fas fa-eye"></i>
-                                        </button>
-                                    </td>
-                                </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
-                </div>
+    @if($lead->payments->count() > 0)
+        <div class="row g-3">
+            @foreach($lead->payments as $payment)
+                <div class="col-12 col-sm-6 col-lg-4">
+                    <div class="payment-card h-100">
+                        <div class="payment-label">Date</div>
+                        <div class="payment-value">{{ $payment->created_at->format('d M Y') }}</div>
 
-                <!-- Payment Summary -->
-                <div class="row mt-4">
-                    <div class="col-md-4">
-                        <div class="card bg-light">
-                            <div class="card-body">
-                                <h6 class="card-subtitle mb-2 text-muted">Total Paid</h6>
-                                <h5 class="card-text">₹{{ number_format($lead->payments->sum('payment_amount'), 2) }}</h5>
-                            </div>
+                        <div class="payment-label">Amount</div>
+                        <div class="payment-value text-success">₹{{ number_format($payment->payment_amount, 2) }}</div>
+
+                        <div class="payment-label">Payment Mode</div>
+                        <div class="payment-value">{{ ucfirst($payment->payment_mode) }}</div>
+
+                        <div class="payment-label">UTR No</div>
+                        <div class="payment-value">{{ $payment->utr_no }}</div>
+
+                        <div class="payment-label">Status</div>
+                        <div class="payment-value">
+                            @if($payment->payment_verify)
+                                <span class="badge bg-success">Verified</span>
+                            @else
+                                <span class="badge bg-warning">Pending Verification</span>
+                            @endif
                         </div>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="card bg-light">
-                            <div class="card-body">
-                                <h6 class="card-subtitle mb-2 text-muted">Last Payment</h6>
-                                <h5 class="card-text">
-                                    @if($lead->payments->count() > 0)
-                                        ₹{{ number_format($lead->payments->sortByDesc('created_at')->first()->payment_amount, 2) }}
-                                        <small class="d-block text-muted">
-                                            {{ $lead->payments->sortByDesc('created_at')->first()->created_at->format('d M Y') }}
-                                        </small>
-                                    @else
-                                        N/A
-                                    @endif
-                                </h5>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="card bg-light">
-                            <div class="card-body">
-                                <h6 class="card-subtitle mb-2 text-muted">Payment Status</h6>
-                                @php
-                                    $totalPaid = $lead->payments->sum('payment_amount');
-                                    $courseFees = 100000; // This should be dynamic based on your course fees
-                                    $pendingAmount = max($courseFees - $totalPaid, 0);
-                                @endphp
-                                <h5 class="card-text">
-                                    @if($pendingAmount <= 0)
-                                        <span class="text-success">Fully Paid</span>
-                                    @else
-                                        <span class="text-danger">Pending: ₹{{ number_format($pendingAmount, 2) }}</span>
-                                    @endif
-                                </h5>
-                            </div>
+
+                        <div class="mt-2">
+                            <button class="btn btn-sm btn-outline-primary w-100" onclick="viewPaymentDetails({{ $payment->id }})">
+                                <i class="fas fa-eye"></i> View
+                            </button>
                         </div>
                     </div>
                 </div>
-            @else
-                <div class="alert alert-info">
-                    No payment records found for this lead.
-                </div>
-            @endif
+            @endforeach
         </div>
+
+        <!-- Payment Summary -->
+        <div class="row mt-4">
+            <div class="col-12 col-md-4">
+                <div class="card summary-card bg-light">
+                    <div class="card-body">
+                        <h6 class="text-muted">Total Paid</h6>
+                        <h5 class="text-success">₹{{ number_format($lead->payments->sum('payment_amount'), 2) }}</h5>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-md-4">
+                <div class="card summary-card bg-light">
+                    <div class="card-body">
+                        <h6 class="text-muted">Last Payment</h6>
+                        <h5>
+                            ₹{{ number_format($lead->payments->sortByDesc('created_at')->first()->payment_amount, 2) }}
+                            <small class="d-block text-muted">
+                                {{ $lead->payments->sortByDesc('created_at')->first()->created_at->format('d M Y') }}
+                            </small>
+                        </h5>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-md-4">
+                <div class="card summary-card bg-light">
+                    <div class="card-body">
+                        <h6 class="text-muted">Payment Status</h6>
+                        @php
+                            $totalPaid = $lead->payments->sum('payment_amount');
+                            $courseFees = 100000; // Replace with dynamic value as needed
+                            $pendingAmount = max($courseFees - $totalPaid, 0);
+                        @endphp
+                        <h5>
+                            @if($pendingAmount <= 0)
+                                <span class="text-success">Fully Paid</span>
+                            @else
+                                <span class="text-danger">Pending: ₹{{ number_format($pendingAmount, 2) }}</span>
+                            @endif
+                        </h5>
+                    </div>
+                </div>
+            </div>
+        </div>
+    @else
+        <div class="alert alert-info mt-3">
+            No payment records found for this lead.
+        </div>
+    @endif
+</div>
+
     </div>
 </div>
 
@@ -819,6 +860,13 @@ function openModal() {
             }
         });
     }
+
+    // flatpickr("#followUpTime", {
+    //     enableTime: true,
+    //     dateFormat: "Y-m-d H:i",
+    //     minDate: "today"
+    // });
+
 </script>
 
 @endsection

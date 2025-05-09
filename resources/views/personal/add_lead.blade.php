@@ -5,280 +5,151 @@
 @section('content')
 
 <style>
-    /* General Styling */
-    body {
-        font-family: 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-        color: #333;
-    }
-
-    h1, h4 {
-        font-weight: 600;
-        color: #333;
-    }
-
-    label {
+    .lead-form-select{
+        width: 100%;
+        max-width: 500px;
+        display: inline-block;
+        padding: 8px;
+        border-radius: 5px;
+        border: 1px solid #ccc;
         font-size: 14px;
+        font-weight: 500;
         color: #495057;
-        font-family: sans-serif;
-        font-weight: 100 !important;
-    }
-
-    .form-control {
-        font-size: 14px;
-        padding: 8px 12px;
-        border: 1px solid #ced4da;
-        border-radius: 4px;
-    }
-
-    .form-control:focus {
-        border-color: #80bdff;
-        box-shadow: 0 0 5px rgba(0, 123, 255, 0.25);
-    }
-
-    .form-group {
-        margin-bottom: 20px;
-    }
-
-    /* Page Layout */
-    .content-header h1 {
-        font-size: 24px;
-        margin-bottom: 20px;
-    }
-
-    .breadcrumb {
-        padding: 0;
-        margin-bottom: 15px;
-        background-color: transparent;
-        font-size: 14px;
-    }
-
-    /* Two-column layout */
-    .form-container {
-        display: flex;
-        flex-wrap: wrap;
-    }
-
-    .form-container .form-column {
-        flex: 0 0 48%;
-        margin-right: 2%;
-    }
-
-    .form-container .form-column:nth-child(2n) {
-        margin-right: 0;
-    }
-
-    .btn-primary {
-        background-color: #007bff;
-        border-color: #007bff;
-        padding: 8px 20px;
-        font-size: 14px;
-        font-weight: 500;
-        border-radius: 4px;
-    }
-
-    .btn-primary:hover {
-        background-color: #0056b3;
-        border-color: #0056b3;
-    }
-
-    /* Horizontal Navbar Styles */
-    .horizontal-navbar {
-        display: flex;
-        justify-content: space-around;
-        background-color: #f8f9fa;
-        padding: 10px 0;
-        border-bottom: 1px solid #ddd;
-    }
-
-    .horizontal-navbar a {
-        color: #007bff;
-        font-size: 14px;
-        font-weight: 500;
-        text-decoration: none;
-        padding: 8px 16px;
-        border-radius: 4px;
-    }
-
-    .horizontal-navbar a:hover {
-        background-color: #007bff;
-        color: white;
-    }
-
-    /* Responsive Design */
-    @media (max-width: 768px) {
-        .form-container .form-column {
-            flex: 0 0 100%;
-            margin-right: 0;
-        }
+        text-transform: uppercase;
     }
 </style>
 
 <div class="content-wrapper">
-    <!-- Add Lead Options in Horizontal Navbar -->
-    <div class="horizontal-navbar">
-        <a href="{{ url('/i-admin/show-leads') }}">Manage Leads</a>
-        <a href="{{ url('/admin/activities/create') }}">Add Activities</a>
-        <a href="{{ url('/admin/activities') }}">Manage Activities</a>
-        <a href="{{ url('/admin/tasks/create') }}">Create/Add Tasks</a>
-        <a href="{{ url('/admin/tasks') }}">Manage Tasks</a>
-        <a href="{{ url('/i-admin/pending') }}">Pending Payment</a>
+    <!-- Horizontal Navbar -->
+    <div class="horizontal-navbar d-flex flex-wrap justify-content-around py-2 border-bottom mb-3">
+        <a href="{{ url('/i-admin/show-leads') }}" class="">Manage Leads</a>
+        <a href="{{ url('/admin/activities/create') }}" class="">Add Activities</a>
+        <a href="{{ url('/admin/activities') }}" class="">Manage Activities</a>
+        <a href="{{ url('/admin/tasks/create') }}" class="">Create/Add Tasks</a>
+        <a href="{{ url('/admin/tasks') }}" class="">Manage Tasks</a>
+        <a href="{{ url('/i-admin/pending') }}" class="">Pending Payment</a>
     </div>
 
-    <!-- Content Header (Page header) -->
-    <div class="content-header sty-one">
-        <h1>Add Leads</h1>
-        <ol class="breadcrumb">
-            <li><a href="">Leads</a></li>
-        </ol>
-    </div>
+    <div class="container">
+        <div class="text-center mb-4">
+            <h1 class="fw-bold">Add Leads</h1>
+        </div>
 
-     <!-- Display Success Message -->
-            @if (session('success'))
-          <div class="alert alert-success">
-                {{ session('success') }}
-         </div>
-          @endif
+        <!-- Flash Messages -->
+        @if (session('success'))
+            <div class="alert alert-success">{{ session('success') }}</div>
+        @endif
 
-          @if (session('errors'))
-          <div class="alert alert-danger">
-              <ul>
-                  @foreach (session('errors')->all() as $error)
-                      <li>{{ $error }}</li>
-                  @endforeach
-              </ul>
-          </div>
-         @endif
+        @if (session('errors'))
+            <div class="alert alert-danger">
+                <ul class="mb-0">
+                    @foreach (session('errors')->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
+        @endif
 
-    <!-- Main content -->
-    <div class="content">
-        <div class="card">
+        <!-- Lead Form -->
+        <div class="card shadow-sm">
             <div class="card-body">
                 <form method="POST" action="{{ route('store-lead') }}">
                     @csrf
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label for="first_name" class="form-label">First Name<span class="text-danger">*</span></label>
+                            <input type="text" id="first_name" name="first_name" class="form-control" required>
 
-                    <div class="form-container">
-                        <!-- Left Column -->
-                        <div class="form-column">
-                            <fieldset class="form-group">
-                                <label for="first_name">First Name<span class="text-danger">*</span></label>
-                                <input class="form-control" id="first_name" name="first_name" type="text" required>
-                            </fieldset>
+                            <label for="last_name" class="form-label mt-3">Last Name<span class="text-danger">*</span></label>
+                            <input type="text" id="last_name" name="last_name" class="form-control" required>
 
-                            <fieldset class="form-group">
-                                <label for="phone">Phone<span class="text-danger">*</span></label>
-                                <input class="form-control" id="phone" name="phone" type="text" required>
-                            </fieldset>
+                            <label for="phone" class="form-label mt-3">Phone<span class="text-danger">*</span></label>
+                            <input type="text" id="phone" name="phone" class="form-control" required>
 
-                            <fieldset class="form-group">
-                                <label for="secondary_phone">Secondary Phone</label>
-                                <input class="form-control" id="secondary_phone" name="secondary_phone" type="text">
-                            </fieldset>
+                            <label for="secondary_phone" class="form-label mt-3">Secondary Phone</label>
+                            <input type="text" id="secondary_phone" name="secondary_phone" class="form-control">
 
-                            <fieldset class="form-group">
-                                <label for="status">Status<span class="text-danger">*</span></label>
-                                <select name="status" id="status" class="form-control" required>
-                                    @foreach(App\Helpers\SiteHelper::getLeadStatus() as $status)
-                                        <option value="{{ $status['code'] }}">{{ $status['name'] }}</option>
-                                    @endforeach
-                                </select>
-                            </fieldset>
-
-                            <fieldset class="form-group">
-                                <label for="lead_source">
-                                    Lead Source <span class="text-danger">*</span>
-                                </label>
-                                @php
-                                    $lead_source = array('Advertising', 'Social Media', 'Direct Call', 'Employee Referral', 'Web Research', 'Public Relations');
-                                @endphp
-                                <select class="form-control" id="source" name="lead_source" required>
-                                    @foreach ($lead_source as $single)
-                                    <option value="{{ $single }}">{{ $single }}</option>
-                                    @endforeach
-                                </select>
-                            </fieldset>
-
-                            <fieldset class="form-group">
-                                <label for="college">College<span class="text-danger"></span></label>
-                                <input class="form-control" id="college" name="college" type="text">
-                            </fieldset>
-
-                            <fieldset class="form-group">
-                                <label for="branch">Branch<span class="text-danger"></span></label>
-                                <input class="form-control" id="branch" name="branch" type="text">
-                            </fieldset>
-                        </div>
-
-                        <!-- Right Column -->
-                        <div class="form-column">
-                            <fieldset class="form-group">
-                                <label for="last_name">Last Name<span class="text-danger">*</span></label>
-                                <input class="form-control" id="last_name" name="last_name" type="text" required>
-                            </fieldset>
-
-                            <fieldset class="form-group">
-                                <label for="email">Email<span class="text-danger">*</span></label>
-                                <div class="input-group">
-                                    <input class="form-control" id="email" name="email" type="email" required>
-                                    <select class="form-control" name="email_domain" required>
-                                        <option value="gmail.com">Gmail</option>
-                                        <option value="yahoo.com">Yahoo</option>
-                                    </select>
-                                </div>
-                            </fieldset>
-
-                            <fieldset class="form-group">
-                                <label for="secondary_email">Secondary Email</label>
-                                <div class="input-group">
-                                    <input class="form-control" id="secondary_email" name="secondary_email" type="email">
-                                    <select class="form-control" name="secondary_email_domain">
-                                        <option value="gmail.com">Gmail</option>
-                                        <option value="yahoo.com">Yahoo</option>
-                                    </select>
-                                </div>
-                            </fieldset>
-
-                            <fieldset class="form-group">
-                                <label for="university">University<span class="text-danger">*</span></label>
-                                <input class="form-control" id="university" name="university" type="text" required>
-                            </fieldset>
-
-                            <fieldset class="form-group">
-                                <label for="courses">Courses<span class="text-danger">*</span></label>
-                                <input class="form-control" id="courses" name="courses" type="text" required>
-                            </fieldset>
-                            
-                            <div class="form-group">
-                                <label for="session_duration">Session Duration<span class ="text-danger">*</span></label>
-                                <select name="session_duration" id="session_duration" class="form-control" required>
-                                    @for ($year = 2016; $year <= 2027; $year++)
-                                        <option value="{{ $year }}-{{ $year + 1 }}">{{ $year }}-{{ $year + 1 }}</option>
-                                    @endfor
+                            <label for="email" class="form-label mt-3">Email<span class="text-danger">*</span></label>
+                            <div class="input-group">
+                                <input type="email" id="email" name="email" class="form-control" required>
+                                <select class="form-select" style="border-radius: 5px; border: 1px solid #ccc;" name="email_domain" required>
+                                    <option value="gmail.com">Gmail</option>
+                                    <option value="yahoo.com">Yahoo</option>
                                 </select>
                             </div>
+
+                            <label for="secondary_email" class="form-label mt-3">Secondary Email</label>
+                            <div class="input-group">
+                                <input type="email" id="secondary_email" name="secondary_email" class="form-control">
+                                <select class="form-select" style="border-radius: 5px; border: 1px solid #ccc;" name="secondary_email_domain">
+                                    <option value="gmail.com">Gmail</option>
+                                    <option value="yahoo.com">Yahoo</option>
+                                </select>
+                            </div>
+
+                            <label for="status" class="form-label mt-3">Status<span class="text-danger">*</span></label>
+                            <select name="status" id="status" class="form-select lead-form-select" required>
+                                @foreach(App\Helpers\SiteHelper::getLeadStatus() as $status)
+                                    <option value="{{ $status['code'] }}">{{ $status['name'] }}</option>
+                                @endforeach
+                            </select>
+
+                            <label for="lead_source" class="form-label mt-3">Lead Source<span class="text-danger">*</span></label>
+                            @php
+                                $lead_source = ['Advertising', 'Social Media', 'Direct Call', 'Employee Referral', 'Web Research', 'Public Relations'];
+                            @endphp
+                            <select class="form-select lead-form-select" id="source" name="lead_source" required>
+                                @foreach ($lead_source as $single)
+                                    <option value="{{ $single }}">{{ $single }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label for="university" class="form-label">University<span class="text-danger">*</span></label>
+                            <input type="text" id="university" name="university" class="form-control" required>
+
+                            <label for="college" class="form-label mt-3">College</label>
+                            <input type="text" id="college" name="college" class="form-control">
+
+                            <label for="courses" class="form-label mt-3">Courses<span class="text-danger">*</span></label>
+                            <input type="text" id="courses" name="courses" class="form-control" required>
+
+                            <label for="branch" class="form-label mt-3">Branch</label>
+                            <input type="text" id="branch" name="branch" class="form-control">
+
+                            <label for="session_duration" class="form-label mt-3">Session Duration<span class="text-danger">*</span></label>
+                            <select name="session_duration" id="session_duration" class="form-select lead-form-select" required>
+                                @for ($year = 2016; $year <= 2027; $year++)
+                                    <option value="{{ $year }}-{{ $year + 1 }}">{{ $year }}-{{ $year + 1 }}</option>
+                                @endfor
+                            </select>
                         </div>
                     </div>
 
-                    <button type="submit" class="btn btn-primary">Submit</button>
+                    <div class="mt-4 text-center">
+                        <button type="submit" class="btn btn-success px-4">Submit</button>
+                    </div>
                 </form>
             </div>
         </div>
     </div>
-    <!-- /.content -->
 </div>
 
+<!-- Email Domain Validation -->
 <script>
     document.querySelector('form').addEventListener('submit', function(event) {
         const email = document.querySelector('#email').value;
         const emailDomain = document.querySelector('select[name="email_domain"]').value;
         if (!email.endsWith(emailDomain)) {
-            alert('Please use only Gmail or Yahoo for your email.');
+            alert('Primary email must match the selected domain.');
             event.preventDefault();
         }
 
         const secondaryEmail = document.querySelector('#secondary_email').value;
         const secondaryEmailDomain = document.querySelector('select[name="secondary_email_domain"]').value;
         if (secondaryEmail && !secondaryEmail.endsWith(secondaryEmailDomain)) {
-            alert('Please use only Gmail or Yahoo for your secondary email.');
+            alert('Secondary email must match the selected domain.');
             event.preventDefault();
         }
     });

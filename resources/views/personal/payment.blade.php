@@ -35,7 +35,7 @@
     }
 
     .lead-info-item {
-        width: 48%;
+        width: 262px;
         margin-bottom: 10px;
     }
 
@@ -90,54 +90,31 @@
         font-size: 14px;
         margin-top: 10px;
     }
-
-    /* Horizontal Navbar Styles */
-    .horizontal-navbar-payment {
-        display: flex;
-        justify-content: space-around;
-        background-color: #f8f9fa;
-        margin-left: 221px;
-        padding: 17px 0;
-        border-bottom: 1px solid #ddd;
-    }
-
-    .horizontal-navbar a {
-        color: #007bff;
-        font-size: 14px;
-        font-weight: 500;
-        text-decoration: none;
-        padding: 8px 16px;
-        border-radius: 4px;
-    }
-
-    .horizontal-navbar a:hover {
-        background-color: #007bff;
-        color: white;
-    }
 </style>
 
 
-<div class="horizontal-navbar-payment">
-    <a href="{{ url('/i-admin/show-leads') }}">Manage Leads</a>
-    <a href="{{ url('/admin/activities/create') }}">Add Activities</a>
-    <a href="{{ url('/admin/activities') }}">Manage Activities</a>
-    <a href="{{ url('/admin/tasks/create') }}">Create/Add Tasks</a>
-    <a href="{{ url('/admin/tasks') }}">Manage Tasks</a>
-    <a href="{{ url('/i-admin/pending') }}">Pending Payment</a>
-</div>
+<!-- Horizontal Navbar -->
+    <div class="horizontal-navbar d-flex flex-wrap justify-content-around py-2 border-bottom mb-3">
+        <a href="{{ url('/i-admin/show-leads') }}" class="btn m-1">Manage Leads</a>
+        <a href="{{ url('/admin/activities/create') }}" class="btn m-1">Add Activities</a>
+        <a href="{{ url('/admin/activities') }}" class="btn m-1">Manage Activities</a>
+        <a href="{{ url('/admin/tasks/create') }}" class="btn m-1">Create/Add Tasks</a>
+        <a href="{{ url('/admin/tasks') }}" class="btn m-1">Manage Tasks</a>
+        <a href="{{ url('/i-admin/pending') }}" class="btn m-1">Pending Payment</a>
+    </div>
 
 <div class="payment-container">
     <!-- Lead Info Section -->
     <div class="lead-info-section">
         <h2 class="section-title" style="text-align: center;">Lead Payment Page</h2>
         <div class="lead-info-container">
-            <div class="lead-info-item">Lead Name: {{ $lead->first_name }} {{ $lead->last_name }}</div>
-            <div class="lead-info-item">Email: {{ $lead->email }}</div>
-            <div class="lead-info-item">Phone: {{ $lead->phone }}</div>
-            <div class="lead-info-item">University: {{ $lead->university }}</div>
-            <div class="lead-info-item">Course: {{ $lead->courses }}</div>
-            <div class="lead-info-item">Branch: {{ $lead->branch }}</div>
-            <div class="lead-info-item">College: {{ $lead->college }}</div>
+            <div class="lead-info-item"><span style="font-weight: bold;">Lead Name:</span> {{ $lead->first_name }} {{ $lead->last_name }}</div>
+            <div class="lead-info-item"><span style="font-weight: bold;">Email:</span> {{ $lead->email }}</div>
+            <div class="lead-info-item"><span style="font-weight: bold;">Phone:</span> {{ $lead->phone }}</div>
+            <div class="lead-info-item"><span style="font-weight: bold;">University:</span> {{ $lead->university }}</div>
+            <div class="lead-info-item"><span style="font-weight: bold;">Course:</span> {{ $lead->courses }}</div>
+            <div class="lead-info-item"><span style="font-weight: bold;">Branch:</span> {{ $lead->branch }}</div>
+            <div class="lead-info-item"><span style="font-weight: bold;">College:</span> {{ $lead->college }}</div>
         </div>
     </div>
 

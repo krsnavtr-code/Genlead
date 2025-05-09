@@ -3,7 +3,7 @@
 @section('title', 'Manage Employees')
 
 @section('content')
-<div class="content-wrapper">
+<div class="container-fluid">
     <div class="content-header sty-one">
         <h1>HRMS - Welcome Page</h1> 
     </div>

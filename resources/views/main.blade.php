@@ -21,6 +21,63 @@
     <link rel="stylesheet" href="{{ asset('plugins/jqvmap/jqvmap.min.css') }}">
     <!-- Theme style -->
     <link rel="stylesheet" href="{{ asset('dist/css/adminlte.min.css') }}">
+    
+    <!-- Custom responsive styles for sidebar toggle -->
+    <style>
+      :root{
+          --logo-color: #FA5508;
+          --primary-color: #007bff;
+          --secondary-color: #6c757d;
+          --success-color: #28a745;
+          --danger-color: #dc3545;
+          --warning-color: #ffc107;
+          --info-color: #17a2b8;
+          --light-color: #f8f9fa;
+          --dark-color: #343a40;
+        }
+
+        .content-wrapper {
+            transition: margin-left 0.3s ease-in-out;
+        }
+        
+        .container, .card, .account-card, .form-container {
+            width: 100% !important;
+            max-width: 100% !important;
+            transition: width 0.3s ease-in-out;
+        }
+        
+        @media (max-width: 991.98px) {
+            .content-wrapper {
+                margin-left: 0 !important;
+            }
+        }
+
+        /* horizontal navbar */
+        /* Horizontal Navbar Styles */
+     .horizontal-navbar {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-around;
+        padding: 10px 0;
+        border-bottom: 1px solid #ddd;
+    }
+
+    .horizontal-navbar a {
+        margin: 3px 5px;
+        padding: 3px 5px ;
+        color:rgb(255, 255, 255);
+        background-color: var(--logo-color);
+        font-size: 14px;
+        font-weight: 500;
+        text-decoration: none;
+        border-radius: 4px;
+        text-align: center;
+    }
+    .horizontal-navbar a:hover{
+      background-color: var(--danger-color);
+      color: white;
+    }
+    </style>
     <!-- overlayScrollbars -->
     <link rel="stylesheet" href="{{ asset('plugins/overlayScrollbars/css/OverlayScrollbars.min.css') }}">
     <!-- Daterange picker -->
@@ -42,7 +99,7 @@
     <div class="wrapper">
         <!-- Preloader -->
         <div class="preloader flex-column justify-content-center align-items-center">
-            <img class="animation__shake" src="{{ asset('images/logo.jpeg') }}" alt="AdminLTELogo" height="100" width="100">
+            <img class="animation__shake" src="{{ asset('images/logo.jpeg') }}" alt="AdminLTELogo" height="100" width="100" style="color: var(--logo-color);">
         </div>
 
         <!-- Navbar -->
@@ -52,9 +109,9 @@
         @include('partials.sidebar') <!-- Extracted Sidebar into a partial -->
 
         <!-- Content Wrapper. Contains page content -->
-        <div class="content-wrapper" style="margin-left: 0px">
+        <div class="content-wrapper">
             <!-- Main content -->
-            <section class="content">
+            <section class="content" style="margin-top: 50px;">
                 @yield('content') <!-- This is where the child content will be loaded -->
             </section>
             <!-- /.content -->
@@ -758,6 +815,46 @@
 
 <!-- jQuery -->
 <script src="{{ asset('plugins/jquery/jquery.min.js') }}"></script>
+
+<!-- Custom script for sidebar toggle responsiveness -->
+<script>
+    $(document).ready(function() {
+        // Fix nested content-wrapper divs on page load
+        fixNestedContentWrappers();
+        
+        // Handle sidebar toggle button click
+        $('[data-widget="pushmenu"]').on('click', function() {
+            setTimeout(function() {
+                // Force layout recalculation
+                $('.content-wrapper').css('transition', 'none');
+                $('.content-wrapper')[0].offsetHeight; // Force reflow
+                $('.content-wrapper').css('transition', 'margin-left 0.3s ease-in-out');
+                
+                // Adjust any containers inside
+                $('.container, .card, .account-card, .form-container').css('width', '100%');
+                
+                // Fix nested content-wrapper divs again after toggle
+                fixNestedContentWrappers();
+            }, 50);
+        });
+        
+        // Function to fix nested content-wrapper divs
+        function fixNestedContentWrappers() {
+            // Find all content-wrapper divs inside the main content-wrapper
+            $('.content-wrapper .content-wrapper').each(function() {
+                // Replace the class with container-fluid to prevent nesting issues
+                $(this).removeClass('content-wrapper').addClass('container-fluid');
+            });
+            
+            // Ensure all tables are responsive
+            $('.table').addClass('table-responsive');
+            
+            // Fix any right-shifted content
+            $('.content-wrapper > div').css('max-width', '100%');
+        }
+    });
+    
+</script>
 <!-- jQuery UI 1.11.4 -->
 <script src="{{ asset('plugins/jquery-ui/jquery-ui.min.js')}}"></script>
 <!-- Resolve conflict in jQuery UI tooltip with Bootstrap tooltip -->

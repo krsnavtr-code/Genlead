@@ -1,73 +1,117 @@
 @php
     $emp_job_role = session()->get('emp_job_role');
+    $loggedInEmployee = \App\Models\Employee::find(session('user_id'));
 @endphp
 
+<style>
+    .nav-sidebar .nav-item .nav-link.active {
+        background-color:var(--logo-color) !important;
+        color: #fff !important;
+    }
+    .nav-sidebar .nav-item .nav-link.active i {
+        color: #fff !important;
+    }
+</style>
+
 <aside class="main-sidebar sidebar-dark-primary elevation-4">
-     {{-- <!-- Brand Logo -->
-    <a href="/home" class="brand-link">
-     {{-- <img src="dist/img/AdminLTELogo.png" alt="AdminLTE Logo" class="brand-image img-circle elevation-3" style="opacity: .8"> --}}
-      {{-- <span class="brand-text font-weight-light">Admin</span>
-    </a>  --}} 
-
     <!-- Brand Logo -->
-<a href="/admin/home" class="brand-link">
-  {{-- <img src="{{ asset('images/7015971.jpg') }}" alt="Lead Force" class="brand-image img-circle elevation-3"> --}}
-  {{-- <span class="brand-initials" style="font-size: 24px; font-weight: bold;">Lf</span>
-  <span class="brand-text font-weight-light">LEAD FORCE</span> --}}
+    <a href="/admin/home" class="brand-link">
+        <img src="{{ asset('images/gen-logo.jpeg') }}" alt="Logo"
+            style="border-radius: 50%; width: 50px; height: 50px;">
+        <span class="brand-text font-weight-light" style="font-size: 20px;">GEN LEAD</span>
+    </a>
 
-  <img src="{{ asset('images/logo.jpeg') }}" style=" border-radius: 50%; width: 39px; height: 35px; display: flex; align-items: center; justify-content: center;" alt="Logo">
-  <span class="brand-text font-weight-light" style="font-size: 20px; margin-top: 5px;">GEN LEAD</span>
-</a>
-     <!-- SidebarSearch Form -->
-     <div class="form-inline">
-        <div class="input-group" data-widget="sidebar-search">
-          <input class="form-control form-control-sidebar" type="search" placeholder="Search" aria-label="Search">
-          <div class="input-group-append">
-            <button class="btn btn-sidebar">
-              <i class="fas fa-search fa-fw"></i>
-            </button>
-          </div>
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <!-- SidebarSearch Form -->
+        <div class="form-inline mt-2">
+            <div class="input-group" data-widget="sidebar-search">
+                <input class="form-control form-control-sidebar" type="search" placeholder="Search Leads">
+                <div class="input-group-append">
+                    <button class="btn btn-sidebar">
+                        <i class="fas fa-search fa-fw"></i>
+                    </button>
+                </div>
+            </div>
         </div>
-      </div>
 
-      <nav class="mt-2">
-        <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
-          <!-- Add icons to the links using the .nav-icon class
-               with font-awesome or any other icon font library -->
-          <li class="nav-item menu-open">
-            <a href="#" class="nav-link active">
-              <i class="nav-icon fas fa-tachometer-alt"></i>
-              <p>
-                Dashboard
-                {{-- <i class="right fas fa-angle-left"></i> --}}
-              </p>
-            </a>
-        </li>
-                 
-         <!-- All Login Access Section -->
-         @if($emp_job_role === 1)
-         <li class="nav-item">
-          <a href="{{ url('/admin/all-login-access')}}" class="nav-link">
-            <i class="nav-icon fas fa-briefcase"></i>
-            <p>
-              All Login Access
-              <i class="fas fa-angle-right right"></i>
-            </p>
-          </a>
-        </li>
-        @endif
-          @if($emp_job_role === 5 || $emp_job_role === 1)
-             <li class="nav-item">
-              <a href="{{ url('/admin/lead/payment-verify')}}" class="nav-link">
-                <i class="far fa-circle nav-icon"></i>
-                <p>Payment Verification</p>
-              </a>
-            </li>
-          </ul> 
-        </li>
-        @endif    
-</nav>
-<!-- /.sidebar-menu -->
-</div>
-<!-- /.sidebar -->
+        <!-- Sidebar Menu -->
+        <nav class="mt-2">
+            <ul class="nav nav-pills nav-sidebar flex-column" style="gap: 5px;" data-widget="treeview" role="menu">
+                <li class="nav-item">
+                    <a href="#" class="nav-link disabled">
+                        <i class="nav-icon fas fa-smile"></i>
+                        <p>Hi, {{ $loggedInEmployee->emp_name }}</p>
+                    </a>
+                </li>
+                <li class="nav-item ">
+                    <a href="/admin/home" class="nav-link w-100 {{ request()->is('admin/home') ? 'active' : ''}}">
+                        <i class="nav-icon fas fa-home"></i>
+                        <p>Home</p>
+                    </a>
+                </li>
+
+                @if($loggedInEmployee)
+                <li class="nav-item">
+                    <a href="{{ url('/admin/my-account') }}" class="nav-link w-100 {{ request()->is('admin/my-account') ? 'active' : '' }}">
+                        <i class="nav-icon fas fa-user"></i>
+                        <p>My Account</p>
+                    </a>
+                </li>
+                @endif
+
+                @if($emp_job_role === 4 || $emp_job_role === 1)
+                <li class="nav-item">
+                    <a href="{{ route('hrms.manage_employees') }}" class="nav-link w-100 {{ request()->is('hrms/manage_employees*') ? 'active' : '' }}">
+                        <i class="nav-icon fas fa-users" style="color: #0062CC;"></i>
+                        <p>HRMS</p>
+                    </a>
+                </li>
+                @endif
+
+                @if($emp_job_role === 2 || $emp_job_role === 1)
+                <li class="nav-item">
+                    <a href="{{ url('/i-admin/leads/add-lead') }}" class="nav-link w-100 {{ request()->is('i-admin/leads/add-lead*') ? 'active' : '' }}">
+                        <i class="nav-icon fas fa-plus-circle" style="color: #1E7E34;"></i>
+                        <p>Leads</p>
+                    </a>
+                </li>
+                @endif
+
+                @if($emp_job_role === 1)
+                <li class="nav-item">
+                    <a href="{{ url('/admin/new-join-panel') }}" class="nav-link w-100 {{ request()->is('admin/new-join-panel') ? 'active' : '' }}">
+                        <i class="nav-icon fas fa-user-plus" style="color: #117A8B;"></i>
+                        <p>New Join Panel</p>
+                    </a>
+                </li>
+                @endif
+
+                @if($emp_job_role === 1)
+                <li class="nav-item">
+                    <a href="{{ url('/admin/all-login-access') }}" class="nav-link w-100 {{ request()->is('admin/all-login-access') ? 'active' : '' }}">
+                        <i class="nav-icon fas fa-briefcase"></i>
+                        <p>All Login Access</p>
+                    </a>
+                </li>
+                @endif
+
+                @if($emp_job_role === 5 || $emp_job_role === 1)
+                <li class="nav-item">
+                    <a href="{{ url('/admin/lead/payment-verify') }}" class="nav-link w-100 {{ request()->is('admin/lead/payment-verify') ? 'active' : '' }}">
+                        <i class="nav-icon fas fa-check-circle"></i>
+                        <p>Payment Verification</p>
+                    </a>
+                </li>
+                @endif
+
+                <li class="nav-item">
+                    <a href="{{ route('logout') }}" style="color: var(--logo-color);" class="nav-link text-bold w-100 {{ request()->is('logout') ? 'active' : '' }}">
+                        <i class="nav-icon fas fa-sign-out-alt"></i>
+                        <p>Logout</p>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+    </div>
 </aside>

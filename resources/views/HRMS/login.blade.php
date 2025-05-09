@@ -96,7 +96,7 @@
         color:blue;
     }
 </style>
-<div class="content-wrapper">
+<div class="container-fluid">
     <div class="content-header sty-one">
         {{-- <h1>HR Login</h1> --}}
     </div>
