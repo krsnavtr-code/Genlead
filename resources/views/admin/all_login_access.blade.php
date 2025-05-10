@@ -3,108 +3,86 @@
 @section('title', 'Employees Details')
 
 @section('content')
-<style>
-    section.content {
-        margin-top: -25px;
-    }
-</style>
+
 <div class="container-fluid mt-4">
-    <h3 class="mb-4">All Login Access</h3>
+    <h3 class="mb-4 text-center">All Login Access</h3>
 
     @if (session('errors'))
-    <div class="alert alert-danger">
-        <ul>
-            @foreach (session('errors')->all() as $error)
-                <li>{{ $error }}</li>
-            @endforeach
-        </ul>
-    </div>
-   @endif
+        <div class="alert alert-danger">
+            <ul class="mb-0">
+                @foreach (session('errors')->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
 
     @if (session('success'))
-        <div class="alert alert-success">{{ session('success') }}</div>
+        <div class="alert alert-success text-center">{{ session('success') }}</div>
     @endif
-  
-    <table class="table table-bordered table-responsive">
-        <thead>
-            <tr>
-                 <th>S.No</th>
-                <th>Employee Name</th>
-                <th>Email</th>
-                <th>Username</th>
-                <th>Password</th>
-                <th>Job Role</th>
-                {{-- <th>Joining Date</th> --}}
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach ($employees as $index => $employee)
-                <tr>
-                    <td>{{ $index + 1 }}</td>
-                    <td>{{ $employee->emp_name }}</td>
-                    <td>{{ $employee->emp_email }}</td>
-                    <td>{{ $employee->emp_username }}</td>
-                    <td>{{ $employee->emp_password }}</td>
-                    <td>
-                           @if ($employee->emp_job_role == 1)
-                           SuperAdmin
-                          @elseif ($employee->emp_job_role == 2)
-                           Agent
-                          @elseif ($employee->emp_job_role == 4)
-                           HR
-                          @elseif ($employee->emp_job_role == 5)
-                          Accountant
-                          @else
-                          Unknown Role
-                        @endif
-                  </td>
-                  {{-- <td>{{ $employee->emp_join_date }}</td> --}}
-                    <td>
-                        <!-- Button to trigger password change modal -->
-                        <button class="btn btn-primary btn-sm" data-toggle="modal" data-target="#changePasswordModal{{ $employee->id }}">
+
+    <div class="row g-4">
+        @foreach ($employees as $index => $employee)
+        <div class="col-md-6 col-lg-4 mb-4">
+            <div class="card shadow-sm h-100 border-start border-4 border-primary">
+                <div class="card-body">
+                    <h5 class="card-title mb-2 text-primary fw-bold">{{ $employee->emp_name }}</h5>
+                    <br>
+                    <p class="mb-1"><strong>Email:</strong> {{ $employee->emp_email }}</p>
+                    <p class="mb-1"><strong>Username:</strong> {{ $employee->emp_username }}</p>
+                    <p class="mb-1"><strong>Password:</strong> {{ $employee->emp_password }}</p>
+                    <p class="mb-2"><strong>Role:</strong>
+                        @php
+                            $roles = [
+                                1 => 'SuperAdmin',
+                                2 => 'Agent',
+                                4 => 'HR',
+                                5 => 'Accountant'
+                            ];
+                        @endphp
+                        {{ $roles[$employee->emp_job_role] ?? 'Unknown Role' }}
+                    </p>
+
+                    <div class="d-flex justify-content-between align-items-center">
+                        <!-- Trigger Modal -->
+                        <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#changePasswordModal{{ $employee->id }}">
                             Change Password
                         </button>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-                        <!-- Modal for changing password -->
-                        <div class="modal fade" id="changePasswordModal{{ $employee->id }}" tabindex="-1" role="dialog">
-                            <div class="modal-dialog" role="document">
-                                <div class="modal-content">
-
-                                    @if (session('error'))
-                                    <div class="alert alert-danger">{{ session('error') }}</div>
-                                    @endif
-                                    <form action="{{url('/admin/change-employee-password')}}" method="POST">
-                                        @csrf
-                                        <div class="modal-header">
-                                            <h5 class="modal-title">Change Password:</h5>
-                                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                                <span aria-hidden="true">&times;</span>
-                                            </button>
-                                        </div>
-                                        <div class="modal-body">
-                                            <input type="hidden" name="employee_id" value="{{ $employee->id }}">             
-                                            <div class="form-group">
-                                                <label for="newPassword">New Password</label>
-                                                <input type="text" class="form-control" name="new_password" required>
-                                            </div>
-                                            <div class="form-group">
-                                                <label for="confirmPassword">Confirm Password</label>
-                                                <input type="password" class="form-control" name="new_password_confirmation" required>
-                                            </div>
-                                        </div>
-                                        <div class="modal-footer">
-                                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                                            <button type="submit" class="btn btn-primary">Save changes</button>
-                                        </div>
-                                    </form>
-                                </div>
+        <!-- Modal -->
+        <div class="modal fade" id="changePasswordModal{{ $employee->id }}" tabindex="-1" aria-labelledby="changePasswordModalLabel{{ $employee->id }}" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <form action="{{ url('/admin/change-employee-password') }}" method="POST">
+                        @csrf
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="changePasswordModalLabel{{ $employee->id }}">Change Password</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <input type="hidden" name="employee_id" value="{{ $employee->id }}">
+                            <div class="mb-3">
+                                <label for="newPassword" class="form-label">New Password</label>
+                                <input type="text" name="new_password" class="form-control" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="confirmPassword" class="form-label">Confirm Password</label>
+                                <input type="password" name="new_password_confirmation" class="form-control" required>
                             </div>
                         </div>
-                    </td>
-                </tr>
-            @endforeach
-        </tbody>
-    </table>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                            <button type="submit" class="btn btn-primary">Save changes</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        @endforeach
+    </div>
 </div>
 @endsection
