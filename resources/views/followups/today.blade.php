@@ -16,42 +16,30 @@
     <div class="content">
         <div class="card">
             <div class="card-body">
-                <h4 class="text-black">Follow-Ups Scheduled for Today</h4>
+                <h4 class="text-black mb-4">Follow-Ups Scheduled for Today</h4>
 
-                <!-- Table -->
-                <div class="table-responsive">
-                    <table class="table table-bordered">
-                        <thead>
-                            <tr>
-                                <th>Lead Name</th>
-                                <th>Agent Name</th>
-                                <th>Follow-Up Time</th>
-                                <th>Comments</th>
-                                <th>Action</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @forelse($followUps as $followUp)
-                                <tr>
-                                    <td>{{ $followUp->lead->first_name }} {{ $followUp->lead->last_name }}</td>
-                                    <td>{{ $followUp->agent->emp_name ?? 'N/A' }}</td>
-                                    <td>{{ \Carbon\Carbon::parse($followUp->follow_up_time)->format('d M Y, h:i A') }}</td>
-                                    <td>{{ $followUp->comments }}</td>
-                                    <td>
-                                        <a href="{{ url('/i-admin/leads/view/'.$followUp->lead_id) }}" class="btn btn-sm btn-primary">View Lead</a>
-                                    </td>
-                                </tr>
-                            @empty
-                                <tr>
-                                    <td colspan="5" class="text-center">No follow-ups scheduled for today.</td>
-                                </tr>
-                            @endforelse
-                        </tbody>
-                    </table>
-                </div>
+                @forelse($followUps as $followUp)
+                    <div class="card mb-3 shadow-sm border rounded p-3">
+                        <div class="d-flex justify-content-between flex-wrap">
+                            <div>
+                                <h5 class="mb-2">{{ $followUp->lead->first_name }} {{ $followUp->lead->last_name }}</h5>
+                                <p class="mb-1"><strong>Agent:</strong> {{ $followUp->agent->emp_name ?? 'N/A' }}</p>
+                                <p class="mb-1"><strong>Follow-Up Time:</strong> {{ \Carbon\Carbon::parse($followUp->follow_up_time)->format('d M Y, h:i A') }}</p>
+                                <p class="mb-2"><strong>Comments:</strong> {{ $followUp->comments }}</p>
+                            </div>
+                            <div class="d-flex align-items-start justify-content-end">
+                                <a href="{{ url('/i-admin/leads/view/'.$followUp->lead_id) }}" class="btn btn-primary btn-sm mt-2">View Lead</a>
+                            </div>
+                        </div>
+                    </div>
+                @empty
+                    <div class="alert alert-info text-center">
+                        No follow-ups scheduled for today.
+                    </div>
+                @endforelse
 
                 <!-- Back Button -->
-                <a href="{{ url('/i-admin/show-leads') }}" class="btn btn-secondary mt-3">Back to Leads</a>
+                <a href="{{ url('/i-admin/show-leads') }}" class="btn btn-secondary mt-4">Back to Leads</a>
             </div>
         </div>
     </div>

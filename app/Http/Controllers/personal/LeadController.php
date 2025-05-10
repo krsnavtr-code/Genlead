@@ -24,6 +24,10 @@ use Carbon\Carbon;
 
 class LeadController extends Controller
 {
+    public function howToUse()
+    {
+        return view('how-to-use');
+    }
     public function addlead()
     {
        return view('personal.add_lead');

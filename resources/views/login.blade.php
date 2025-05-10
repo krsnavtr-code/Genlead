@@ -66,9 +66,9 @@
             <button type="submit" class="btn text-white btn-block" style="background-color: #FB6005;">Get Started</button>
         </form>
 
-        <div class="text-center mt-3">
+        <!-- <div class="text-center mt-3">
             <a href="{{ route('password.request') }}" class="text-primary">Forgot Password?</a>
-        </div>
+        </div> -->
     </div>
 
     <!-- Bootstrap JS CDN -->

@@ -22,59 +22,59 @@ Route::get('/send-reminder',  [CronJobController::class, 'SendLeadReminders']);
 
 
 Route::prefix('i-admin')->group(function () {
+    // Add Leads Routes
+    Route::get('/how-to-use', [LeadController::class, 'howToUse'])->name('how-to-use');
+    Route::get('/leads/add-lead', [LeadController::class, 'addlead']);
+    Route::post('/leads/add-lead', [LeadController::class, 'add_lead'])->name('store-lead');
+    Route::get('/show-leads',[LeadController::class,'show_leads']);
 
-// Add Leads Routes
-Route::get('/leads/add-lead', [LeadController::class, 'addlead']);
-Route::post('/leads/add-lead', [LeadController::class, 'add_lead'])->name('store-lead');
-Route::get('/show-leads',[LeadController::class,'show_leads']);
+    Route::get('/leads/edit/{id}', [LeadController::class, 'edit']);
+    Route::post('/leads/update/{id}', [LeadController::class, 'update']);
+    Route::delete('/leads/delete/{id}', [LeadController::class, 'destroy']);
 
-Route::get('/leads/edit/{id}', [LeadController::class, 'edit']);
-Route::post('/leads/update/{id}', [LeadController::class, 'update']);
-Route::delete('/leads/delete/{id}', [LeadController::class, 'destroy']);
-
-Route::post('/leads/update-status', [LeadController::class, 'updateStatus'])->name('leads.updateStatus');
-
-
-// View Leads Routes
-
-Route::get('/leads/view/{id}', [LeadController::class, 'show']);
-
-Route::post('/follow-ups',[LeadController::class,'store'])->name('follow-ups.store');
-
-// View and follow up page Edit Routes
-
-Route::get('/leads-view/edit/{id}', [LeadController::class, 'editview']);
-Route::post('/leads/{id}', [LeadController::class, 'updateview']);
-
-// Today follow up routes
-
-Route::get('/followups/today', [LeadController::class, 'todayFollowUps'])->name('followups.today');
+    Route::post('/leads/update-status', [LeadController::class, 'updateStatus'])->name('leads.updateStatus');
 
 
-// Payment process Routes
+    // View Leads Routes
 
-Route::get('/lead/{leadId}/payment', [LeadController::class, 'showPaymentPage'])->name('payment.page');
-Route::post('/process-payment', [LeadController::class, 'processPayment'])->name('process.payment');
+    Route::get('/leads/view/{id}', [LeadController::class, 'show']);
 
-// Pending Payment Routes
+    Route::post('/follow-ups',[LeadController::class,'store'])->name('follow-ups.store');
 
-Route::get('/pending', [LeadController::class, 'showPendingPayments'])->name('pending.payments');
+    // View and follow up page Edit Routes
 
-// Payment Details API
-Route::get('/api/payment/{id}', [LeadController::class, 'getPaymentDetails'])->name('api.payment.details');
+    Route::get('/leads-view/edit/{id}', [LeadController::class, 'editview']);
+    Route::post('/leads/{id}', [LeadController::class, 'updateview']);
 
+    // Today follow up routes
 
-// Filter Routes
-
-Route::get('/lead', [AdminController::class, 'index'])->name('leads.index');
+    Route::get('/followups/today', [LeadController::class, 'todayFollowUps'])->name('followups.today');
 
 
-// Agent Login Routes
+    // Payment process Routes
 
-Route::post('/agent-login', [LeadController::class, 'login']);
+    Route::get('/lead/{leadId}/payment', [LeadController::class, 'showPaymentPage'])->name('payment.page');
+    Route::post('/process-payment', [LeadController::class, 'processPayment'])->name('process.payment');
 
-// Export Leads Routes
+    // Pending Payment Routes
 
-Route::get('/leads/export', [LeadController::class, 'exportLeads']);
+    Route::get('/pending', [LeadController::class, 'showPendingPayments'])->name('pending.payments');
+
+    // Payment Details API
+    Route::get('/api/payment/{id}', [LeadController::class, 'getPaymentDetails'])->name('api.payment.details');
+
+
+    // Filter Routes
+
+    Route::get('/lead', [AdminController::class, 'index'])->name('leads.index');
+
+
+    // Agent Login Routes
+
+    Route::post('/agent-login', [LeadController::class, 'login']);
+
+    // Export Leads Routes
+
+    Route::get('/leads/export', [LeadController::class, 'exportLeads']);
 
 });

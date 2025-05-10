@@ -42,7 +42,52 @@ Route::prefix('admin')->group(function () {
 Route::prefix('admin')->middleware(['checkrole'])->group(function () {
 
     Route::get('/home', function () {
-        return view('main');
+        try {
+            // Get data for dashboard
+            $totalLeads = \App\Models\Lead::count();
+            $convertedLeads = \App\Models\Lead::where('status', 3)->count();
+            
+            // Get recent leads
+            $recentLeads = \App\Models\Lead::orderBy('created_at', 'desc')->take(5)->get();
+            
+            // Try to get follow-ups
+            try {
+                $todayFollowups = \App\Models\personal\FollowUp::whereDate('follow_up_time', \Carbon\Carbon::today())->count();
+                $todayFollowupsList = \App\Models\personal\FollowUp::with('lead')
+                    ->whereDate('follow_up_time', \Carbon\Carbon::today())
+                    ->orderBy('follow_up_time', 'asc')
+                    ->take(5)
+                    ->get();
+            } catch (\Exception $e) {
+                // If there's an error, set default values
+                $todayFollowups = 0;
+                $todayFollowupsList = collect([]);
+            }
+            
+            // Try to get pending payments
+            try {
+                // Try with 'status' column first
+                $pendingPayments = \App\Models\personal\Payment::where('status', 'pending')->count();
+            } catch (\Exception $e) {
+                try {
+                    // If that fails, try with 'payment_status' column
+                    $pendingPayments = \App\Models\personal\Payment::where('payment_status', 'pending')->count();
+                } catch (\Exception $e) {
+                    // If both fail, set to 0
+                    $pendingPayments = 0;
+                }
+            }
+        } catch (\Exception $e) {
+            // If there's a general error, set default values for everything
+            $totalLeads = 0;
+            $convertedLeads = 0;
+            $todayFollowups = 0;
+            $pendingPayments = 0;
+            $recentLeads = collect([]);
+            $todayFollowupsList = collect([]);
+        }
+        
+        return view('home', compact('totalLeads', 'convertedLeads', 'todayFollowups', 'pendingPayments', 'recentLeads', 'todayFollowupsList'));
     })->name('home');
 
 

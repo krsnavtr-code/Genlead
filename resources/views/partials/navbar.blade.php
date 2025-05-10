@@ -17,14 +17,22 @@
         </li>
     </ul>
 
+    
+
     <!-- Right navbar icons (optional) -->
     <ul class="navbar-nav ml-auto">
-        <!-- Fullscreen Button -->
         <li class="nav-item">
+            <a href="#" class="nav-link disabled" style="color: black;">
+                <i class="nav-icon fas fa-smile"></i>
+                <span>Hi, {{ $loggedInEmployee->emp_name }}</span>
+            </a>
+        </li>
+        <!-- Fullscreen Button -->
+        <!-- <li class="nav-item">
             <a class="nav-link" data-widget="fullscreen" href="#" role="button">
                 <i class="fas fa-expand-arrows-alt"></i>
             </a>
-        </li>
+        </li> -->
         <!-- Notifications Dropdown -->
         <!-- <li class="nav-item dropdown">
             <a class="nav-link" data-toggle="dropdown" href="#">

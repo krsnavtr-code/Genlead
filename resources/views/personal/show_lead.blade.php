@@ -198,7 +198,11 @@
                             @endif
                             </h5>
                             <div class="lead-meta"><strong>Email:</strong> {{ $lead->email }}</div>
-                            <div class="lead-meta"><strong>Phone:</strong> {{ $lead->phone }}</div>
+                            <div class="lead-meta">
+                                <strong>Phone:</strong> 
+                                <span>{{ $lead->phone }}</span>
+                                <a href="tel:{{ $lead->phone }}" class="btn btn-primary btn-sm ml-4"><strong>Connect Lead</strong><i class="fa fa-phone ml-2"></i></a>
+                            </div>
                             <div class="lead-meta"><strong>Source:</strong> {{ $lead->lead_source }}</div>
                             <div class="mt-2">
                                 <button class="btn btn-sm {{ $buttonClass }}">{{ $statusText }}</button>

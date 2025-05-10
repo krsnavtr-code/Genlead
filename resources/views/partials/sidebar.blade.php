@@ -38,12 +38,6 @@
         <!-- Sidebar Menu -->
         <nav class="mt-2">
             <ul class="nav nav-pills nav-sidebar flex-column" style="gap: 5px;" data-widget="treeview" role="menu">
-                <li class="nav-item">
-                    <a href="#" class="nav-link disabled">
-                        <i class="nav-icon fas fa-smile"></i>
-                        <p>Hi, {{ $loggedInEmployee->emp_name }}</p>
-                    </a>
-                </li>
                 <li class="nav-item ">
                     <a href="/admin/home" class="nav-link w-100 {{ request()->is('admin/home') ? 'active' : ''}}">
                         <i class="nav-icon fas fa-home"></i>
@@ -101,6 +95,15 @@
                     <a href="{{ url('/admin/lead/payment-verify') }}" class="nav-link w-100 {{ request()->is('admin/lead/payment-verify') ? 'active' : '' }}">
                         <i class="nav-icon fas fa-check-circle"></i>
                         <p>Payment Verification</p>
+                    </a>
+                </li>
+                @endif
+
+                 @if($emp_job_role === 2 || $emp_job_role === 1)
+                <li class="nav-item">
+                    <a href="{{ route('how-to-use') }}" class="nav-link w-100 {{ request()->is('how-to-use') ? 'active' : '' }}">
+                        <i class="nav-icon fas fa-question-circle"></i>
+                        <p>How to Use</p>
                     </a>
                 </li>
                 @endif
