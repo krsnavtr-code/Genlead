@@ -29,18 +29,16 @@
         <div>
             <h1>Create task</h1>
         </div>
-        <div>
+        <!-- <div>
             <a href="{{ url('/i-admin/leads/add-lead') }}" 
             class="btn btn-danger btn-sm" 
             style=" color: white; padding: 5px 20px; font-size: 16px; font-weight: bold; border-radius: 4px; text-decoration: none; display: inline-flex; align-items: center; justify-content: center;">
          
-            <!-- + Mark -->
             <span style="font-size: 20px; font-weight: bold; margin-right: 8px;">&#43;</span>
          
-            <!-- Button Text -->
             Add Lead
          </a>
-        </div>
+        </div> -->
     </div>
 
     <div class="content">

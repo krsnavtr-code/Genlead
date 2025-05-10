@@ -92,23 +92,22 @@
     </div>
 
 <!-- Content Header (Page header) -->
-<div class="content-header sty-one d-flex justify-content-between align-items-center" style="float: right;">
-    <!-- <div>
+<!-- <div class="content-header sty-one d-flex justify-content-between align-items-center" style="float: right;">
+    <div>
         <h1>Pending Payment</h1>
-    </div> -->
+    </div>
     <div>
         <a href="{{ url('/i-admin/leads/add-lead') }}" 
         class="btn btn-danger btn-sm" 
         style=" color: white; padding: 5px 20px; font-size: 16px; font-weight: bold; border-radius: 4px; text-decoration: none; display: inline-flex; align-items: center; justify-content: center;">
      
-        <!-- + Mark -->
         <span style="font-size: 20px; font-weight: bold; margin-right: 8px;">&#43;</span>
      
-        <!-- Button Text -->
+       
         Add Lead
      </a>
     </div>
-</div>
+</div> -->
 
 <div class="pending-payment-container">
     <h2 class="section-title">Pending Payments</h2>
@@ -119,20 +118,20 @@
                 <p><strong>Lead Name:</strong> {{ $lead->first_name }} {{ $lead->last_name }}</p>
                 <p><strong>Email:</strong> {{ $lead->email }}</p>
                 <p><strong>Phone:</strong> {{ $lead->phone }}</p>
-                <p><strong>Pending Amount:</strong> <span class="pending-amount">₹{{ number_format($lead->pending_amount, 2) }}</span></p>
+                <!-- <p><strong>Pending Amount:</strong> <span class="pending-amount">₹{{ number_format($lead->pending_amount, 2) }}</span></p> -->
+                <a href="{{ url('/i-admin/leads/view/'.$lead->id) }}" class="btn btn-follow-up">Follow Up</a>
             </div>
             <div class="action-buttons">
-                <a href="{{ url('/i-admin/leads/view/'.$lead->id) }}" class="btn btn-follow-up">Follow Up</a>
-                <button class="btn btn-pending-payment" onclick="togglePaymentHistory({{ $lead->id }})">Paid Payment</button>
+                <!-- <button class="btn btn-pending-payment" onclick="togglePaymentHistory({{ $lead->id }})">Paid Payment</button> -->
             </div>
 
             <!-- Payment History Section -->
-            <div id="payment-history-{{ $lead->id }}" class="payment-history">
+            <!-- <div id="payment-history-{{ $lead->id }}" class="payment-history">
                 <h4>Payment History</h4>
                 @foreach($lead->payments as $payment)
                     <p>Amount Paid: ₹{{ number_format($payment->payment_amount, 2) }} on {{ $payment->created_at->format('d M Y') }}</p>
                 @endforeach
-            </div>
+            </div> -->
         </div>
     @endforeach
 </div>
