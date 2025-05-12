@@ -585,17 +585,18 @@ margin-bottom: 10px;
             <div class="col-12 col-md-4">
                 <div class="card summary-card bg-light">
                     <div class="card-body">
-                        <h6 class="text-muted">Payment Status</h6>
+                        <h6 class="text-muted">Pending Amount</h6>
                         @php
                             $totalPaid = $lead->payments->sum('payment_amount');
-                            $courseFees = 100000; // Replace with dynamic value as needed
-                            $pendingAmount = max($courseFees - $totalPaid, 0);
+                            $latestPayment = $lead->payments->sortByDesc('created_at')->first();
+                            $totalAmount = $latestPayment ? $latestPayment->total_amount : 0;
+                            $pendingAmount = max($totalAmount - $totalPaid, 0);
                         @endphp
                         <h5>
                             @if($pendingAmount <= 0)
                                 <span class="text-success">Fully Paid</span>
                             @else
-                                <span class="text-danger">Pending: ₹{{ number_format($pendingAmount, 2) }}</span>
+                                ₹{{ number_format($pendingAmount, 2) }} <small class="text-muted">(Pending)</small>
                             @endif
                         </h5>
                     </div>

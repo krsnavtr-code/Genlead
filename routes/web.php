@@ -62,6 +62,17 @@ Route::prefix('i-admin')->group(function () {
 
     // Payment Details API
     Route::get('/api/payment/{id}', [LeadController::class, 'getPaymentDetails'])->name('api.payment.details');
+    
+    // Payment Update Routes
+    Route::get('/payment/{id}/edit', [\App\Http\Controllers\personal\PaymentController::class, 'edit'])->name('payments.edit');
+    Route::put('/payment/{id}', [\App\Http\Controllers\personal\PaymentController::class, 'update'])->name('payments.update');
+    Route::get('/payment/{id}', [\App\Http\Controllers\personal\PaymentController::class, 'show'])->name('payments.show');
+    Route::get('/payment', [\App\Http\Controllers\personal\PaymentController::class, 'index'])->name('payments.index');
+    
+    // Payment Guide
+    Route::get('/payment-guide', function() {
+        return view('personal.payment-guide');
+    })->name('payment.guide');
 
 
     // Filter Routes

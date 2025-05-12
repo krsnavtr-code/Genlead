@@ -90,6 +90,14 @@
         <a href="{{ url('/admin/tasks') }}" class="btn m-1">Manage Tasks</a>
         <a href="{{ url('/i-admin/pending') }}" class="btn m-1">Pending Payment</a>
     </div>
+    
+    <!-- Payment Navigation -->
+    <div class="d-flex flex-wrap justify-content-center gap-2 mb-3">
+        <a href="{{ route('payments.index') }}" class="btn btn-primary">All Payments</a>
+        <a href="{{ url('/i-admin/pending') }}" class="btn btn-primary">Pending Payments</a>
+        <a href="{{ route('payment.verify') }}" class="btn btn-primary">Verify Payments</a>
+        <a href="{{ route('payment.guide') }}" class="btn btn-info">Payment Guide</a>
+    </div>
 
 <!-- Content Header (Page header) -->
 <!-- <div class="content-header sty-one d-flex justify-content-between align-items-center" style="float: right;">

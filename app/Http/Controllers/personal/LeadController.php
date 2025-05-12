@@ -415,8 +415,68 @@ public function showPaymentPage($leadId)
      if (!$lead) {
          abort(403, 'Access denied. You are not authorized to manage this lead.');
      }
+     
+     // Get payment history and calculate pending amount
+     $payments = Payment::where('lead_id', $leadId)->get();
+     $paymentHistory = [];
+     $totalPaid = 0;
+     $totalAmount = 0;
+     $startYear = null;
+     $duration = null;
+     $sessionDuration = null;
+     $sessionType = null;
+     $feeType = null;
+     
+     // Get the latest payment information
+     $latestPayment = $payments->sortByDesc('created_at')->first();
+     if ($latestPayment) {
+         $totalAmount = $latestPayment->total_amount ?? 0;
+         $startYear = $latestPayment->start_year ?? date('Y');
+         $duration = $latestPayment->duration ?? 3;
+         $sessionDuration = $latestPayment->session_duration;
+         $sessionType = $latestPayment->session;
+         $feeType = $latestPayment->fee_type;
+     }
+     
+     foreach ($payments as $payment) {
+         $paymentHistory[] = [
+             'date' => $payment->payment_date ? $payment->payment_date->format('d M Y') : $payment->created_at->format('d M Y'),
+             'amount' => $payment->payment_amount,
+             'status' => $payment->status,
+             'id' => $payment->id
+         ];
+         
+         if ($payment->status !== 'rejected') {
+             $totalPaid += $payment->payment_amount;
+         }
+     }
+     
+     // Calculate pending amount
+     $pendingAmount = $totalAmount - $totalPaid;
+     if ($pendingAmount < 0) $pendingAmount = 0;
+     
+     // Update lead status based on payment
+     if ($totalAmount > 0) {
+         if ($pendingAmount <= 0) {
+             $lead->status = 'payment_completed';
+         } else {
+             $lead->status = 'payment_partial';
+         }
+         $lead->save();
+     }
  
-     return view('personal.payment', compact('lead'));
+     return view('personal.payment', compact(
+         'lead', 
+         'paymentHistory', 
+         'totalPaid', 
+         'pendingAmount', 
+         'totalAmount',
+         'startYear',
+         'duration',
+         'sessionDuration',
+         'sessionType',
+         'feeType'
+     ));
 }
 
 public function processPayment(Request $request)
@@ -450,8 +510,12 @@ public function processPayment(Request $request)
         try {
             $validated = $request->validate([
                 'lead_id' => 'required|exists:leads,id',
+                'total_amount' => 'required|numeric|min:0',
+                'start_year' => 'required|integer|min:2000|max:2050',
+                'duration' => 'required|integer|min:1|max:10',
                 'session_duration' => 'required|string',
                 'session' => 'required|string',
+                'fee_type' => 'required|string',
                 'payment_screenshot' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
                 'utr_no' => 'required|digits:12|unique:payments,utr_no',
                 'payment_mode' => 'required|string',
@@ -506,22 +570,48 @@ public function processPayment(Request $request)
             return back()->withInput()->with('error', 'Failed to upload payment screenshot. Please try again.');
         }
 
+        // Calculate total paid so far for this lead (excluding the current payment)
+        $existingPayments = Payment::where('lead_id', $request->lead_id)->get();
+        $totalPaid = 0;
+        foreach ($existingPayments as $payment) {
+            if ($payment->status !== 'rejected') {
+                $totalPaid += $payment->payment_amount;
+            }
+        }
+        
+        // Calculate the actual pending amount after this payment
+        $totalAmount = $request->total_amount;
+        $paymentAmount = $request->payment_amount;
+        $pendingAmount = $totalAmount - ($totalPaid + $paymentAmount);
+        if ($pendingAmount < 0) $pendingAmount = 0;
+        
         // Prepare payment data
         $paymentData = [
             'lead_id' => $request->lead_id,
             'agent_id' => $agentId,
+            'total_amount' => $totalAmount,
+            'start_year' => $request->start_year,
+            'duration' => $request->duration,
             'session_duration' => $request->session_duration,
             'session' => $request->session,
+            'fee_type' => $request->fee_type,
             'payment_screenshot' => $filePath,
             'utr_no' => $request->utr_no,
             'payment_mode' => $request->payment_mode,
             'payment_details_input' => $request->payment_details_input,
-            'payment_amount' => $request->payment_amount,
-            'pending_amount' => $request->pending_amount,
+            'payment_amount' => $paymentAmount,
+            'pending_amount' => $pendingAmount,
             'bank' => $request->payment_mode === 'netbanking' ? $request->bank : null,
             'loan_amount' => $request->loan_amount,
             'loan_details' => $request->loan_details,
         ];
+        
+        \Log::info('Payment calculation', [
+            'total_amount' => $totalAmount,
+            'already_paid' => $totalPaid,
+            'current_payment' => $paymentAmount,
+            'pending_amount' => $pendingAmount
+        ]);
 
         \Log::info('Attempting to create payment record', $paymentData);
 
@@ -688,8 +778,36 @@ public function index()
 {
     $payment = Payment::findOrFail($id);
 
-    $payment->payment_verify = 1; // Mark as verified
+    // Update payment status to verified
+    $payment->status = Payment::STATUS_VERIFIED;
+    $payment->verified_by = auth()->id() ?? session()->get('user_id');
+    $payment->verified_at = now();
     $payment->save();
+    
+    // Update lead status based on payment
+    $lead = $payment->lead;
+    if ($lead) {
+        // Calculate total paid amount and total amount from payments
+        $payments = Payment::where('lead_id', $lead->id)->get();
+        $totalPaid = $payments->where('status', '!=', Payment::STATUS_REJECTED)
+            ->sum('payment_amount');
+        
+        // Get the latest total amount from payments
+        $latestPayment = $payments->sortByDesc('created_at')->first();
+        $totalAmount = $latestPayment ? $latestPayment->total_amount : 0;
+        
+        // Calculate pending amount
+        $pendingAmount = $totalAmount - $totalPaid;
+        
+        // Update lead status based on payment
+        if ($pendingAmount <= 0) {
+            $lead->status = 'payment_completed';
+        } else {
+            $lead->status = 'payment_partial';
+        }
+        
+        $lead->save();
+    }
 
     return redirect()->route('payment.verify')->with('success', 'Payment has been verified successfully.');
 }

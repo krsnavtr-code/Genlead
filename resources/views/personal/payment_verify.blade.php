@@ -7,6 +7,14 @@
     <div class="content-header sty-one">
         <h1>Payment Verification</h1>
     </div>
+    
+    <!-- Payment Navigation -->
+    <div class="d-flex flex-wrap justify-content-center gap-2 mb-3" style="margin-top: 15px;">
+        <a href="{{ route('payments.index') }}" class="btn btn-primary">All Payments</a>
+        <a href="{{ url('/i-admin/pending') }}" class="btn btn-primary">Pending Payments</a>
+        <a href="{{ route('payment.verify') }}" class="btn btn-primary">Verify Payments</a>
+        <a href="{{ route('payment.guide') }}" class="btn btn-info">Payment Guide</a>
+    </div>
 
     @if(session('success'))
         <div class="alert alert-success">{{ session('success') }}</div>
