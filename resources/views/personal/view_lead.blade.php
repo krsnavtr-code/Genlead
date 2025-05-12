@@ -549,11 +549,11 @@ margin-bottom: 10px;
                             @endif
                         </div>
 
-                        <div class="mt-2">
+                        <!-- <div class="mt-2">
                             <button class="btn btn-sm btn-outline-primary w-100" onclick="viewPaymentDetails({{ $payment->id }})">
                                 <i class="fas fa-eye"></i> View
                             </button>
-                        </div>
+                        </div> -->
                     </div>
                 </div>
             @endforeach
@@ -613,7 +613,7 @@ margin-bottom: 10px;
     </div>
 </div>
 
-<!-- Payment Details Modal -->
+{{-- <!-- Payment Details Modal -->
 <div class="modal fade" id="paymentDetailsModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
@@ -629,7 +629,7 @@ margin-bottom: 10px;
             </div>
         </div>
     </div>
-</div>
+</div> --}}
 
 <!-- Modal for Edit Form -->
 <div id="editModal" class="modal">
@@ -683,54 +683,54 @@ margin-bottom: 10px;
 
 <script>
 // Function to view payment details
-function viewPaymentDetails(paymentId) {
-    fetch(`/api/payments/${paymentId}`)
-        .then(response => response.json())
-        .then(data => {
-            const modal = new bootstrap.Modal(document.getElementById('paymentDetailsModal'));
-            const content = document.getElementById('paymentDetailsContent');
+// function viewPaymentDetails(paymentId) {
+//     fetch(`/api/payments/${paymentId}`)
+//         .then(response => response.json())
+//         .then(data => {
+//             const modal = new bootstrap.Modal(document.getElementById('paymentDetailsModal'));
+//             const content = document.getElementById('paymentDetailsContent');
             
-            // Format the payment details
-            const details = `
-                <div class="row">
-                    <div class="col-md-6">
-                        <p><strong>Payment Date:</strong> ${new Date(data.created_at).toLocaleDateString()}</p>
-                        <p><strong>Amount:</strong> ₹${parseFloat(data.payment_amount).toLocaleString('en-IN', {minimumFractionDigits: 2})}</p>
-                        <p><strong>Payment Mode:</strong> ${data.payment_mode.charAt(0).toUpperCase() + data.payment_mode.slice(1)}</p>
-                        <p><strong>UTR Number:</strong> ${data.utr_no}</p>
-                    </div>
-                    <div class="col-md-6">
-                        <p><strong>Session Duration:</strong> ${data.session_duration}</p>
-                        <p><strong>Session Type:</strong> ${data.session === 'semester' ? 'Semester Fee' : data.session === 'year' ? 'Yearly Fee' : 'Full Course'}</p>
-                        <p><strong>Status:</strong> 
-                            ${data.payment_verify 
-                                ? '<span class="badge bg-success">Verified</span>' 
-                                : '<span class="badge bg-warning">Pending Verification</span>'}
-                        </p>
-                    </div>
-                </div>
-                ${data.payment_screenshot ? `
-                    <div class="mt-3">
-                        <h6>Payment Screenshot:</h6>
-                        <img src="/${data.payment_screenshot}" alt="Payment Screenshot" class="img-fluid">
-                    </div>
-                ` : ''}
-                ${data.payment_details_input ? `
-                    <div class="mt-3">
-                        <h6>Payment Details:</h6>
-                        <p>${data.payment_details_input}</p>
-                    </div>
-                ` : ''}
-            `;
+//             // Format the payment details
+//             const details = `
+//                 <div class="row">
+//                     <div class="col-md-6">
+//                         <p><strong>Payment Date:</strong> ${new Date(data.created_at).toLocaleDateString()}</p>
+//                         <p><strong>Amount:</strong> ₹${parseFloat(data.payment_amount).toLocaleString('en-IN', {minimumFractionDigits: 2})}</p>
+//                         <p><strong>Payment Mode:</strong> ${data.payment_mode.charAt(0).toUpperCase() + data.payment_mode.slice(1)}</p>
+//                         <p><strong>UTR Number:</strong> ${data.utr_no}</p>
+//                     </div>
+//                     <div class="col-md-6">
+//                         <p><strong>Session Duration:</strong> ${data.session_duration}</p>
+//                         <p><strong>Session Type:</strong> ${data.session === 'semester' ? 'Semester Fee' : data.session === 'year' ? 'Yearly Fee' : 'Full Course'}</p>
+//                         <div class="payment-value">
+//                             ${data.payment_verify 
+//                                 ? '<span class="badge bg-success">Verified</span>' 
+//                                 : '<span class="badge bg-warning">Pending Verification</span>'}
+//                         </div>
+//                     </div>
+//                 </div>
+//                 ${data.payment_screenshot ? `
+//                     <div class="mt-3">
+//                         <h6>Payment Screenshot:</h6>
+//                         <img src="/${data.payment_screenshot}" alt="Payment Screenshot" class="img-fluid">
+//                     </div>
+//                 ` : ''}
+//                 ${data.payment_details_input ? `
+//                     <div class="mt-3">
+//                         <h6>Payment Details:</h6>
+//                         <p>${data.payment_details_input}</p>
+//                     </div>
+//                 ` : ''}
+//             `;
             
-            content.innerHTML = details;
-            modal.show();
-        })
-        .catch(error => {
-            console.error('Error fetching payment details:', error);
-            alert('Error loading payment details. Please try again.');
-        });
-}
+//             content.innerHTML = details;
+//             modal.show();
+//         })
+//         .catch(error => {
+//             console.error('Error fetching payment details:', error);
+//             alert('Error loading payment details. Please try again.');
+//         });
+// }
 
 // Initialize Bootstrap tooltips
 var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))

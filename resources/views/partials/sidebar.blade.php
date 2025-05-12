@@ -45,6 +45,7 @@
                     </a>
                 </li>
 
+                <!-- Show My Account for All Roles -->
                 @if($loggedInEmployee)
                 <li class="nav-item">
                     <a href="{{ url('/admin/my-account') }}" class="nav-link w-100 {{ request()->is('admin/my-account') ? 'active' : '' }}">
@@ -54,6 +55,7 @@
                 </li>
                 @endif
 
+                <!-- Show HRMS for HR (4) and Admin (1) -->
                 @if($emp_job_role === 4 || $emp_job_role === 1)
                 <li class="nav-item">
                     <a href="{{ route('hrms.manage_employees') }}" class="nav-link w-100 {{ request()->is('hrms/manage_employees*') ? 'active' : '' }}">
@@ -63,6 +65,7 @@
                 </li>
                 @endif
 
+                <!-- Show Leads for Agent (2) and Admin (1) -->
                 @if($emp_job_role === 2 || $emp_job_role === 1)
                 <li class="nav-item">
                     <a href="{{ url('/i-admin/leads/add-lead') }}" class="nav-link w-100 {{ request()->is('i-admin/leads/add-lead*') ? 'active' : '' }}">
@@ -72,6 +75,7 @@
                 </li>
                 @endif
 
+                <!-- Show New Join Panel for Admin (1) -->
                 @if($emp_job_role === 1)
                 <li class="nav-item">
                     <a href="{{ url('/admin/new-join-panel') }}" class="nav-link w-100 {{ request()->is('admin/new-join-panel') ? 'active' : '' }}">
@@ -81,6 +85,7 @@
                 </li>
                 @endif
 
+                <!-- Show All Login Access for Admin (1) -->
                 @if($emp_job_role === 1)
                 <li class="nav-item">
                     <a href="{{ url('/admin/all-login-access') }}" class="nav-link w-100 {{ request()->is('admin/all-login-access') ? 'active' : '' }}">
@@ -90,16 +95,18 @@
                 </li>
                 @endif
 
+                <!-- Show Payment Verification for Accountant (5) and Admin (1) -->
                 @if($emp_job_role === 5 || $emp_job_role === 1)
                 <li class="nav-item">
-                    <a href="{{ url('/admin/lead/payment-verify') }}" class="nav-link w-100 {{ request()->is('admin/lead/payment-verify') ? 'active' : '' }}">
+                    <a href="{{ route('payment.verify') }}" class="nav-link w-100 {{ request()->routeIs('payment.verify') ? 'active' : '' }}">
                         <i class="nav-icon fas fa-check-circle"></i>
                         <p>Payment Verification</p>
                     </a>
                 </li>
                 @endif
 
-                 @if($emp_job_role === 2 || $emp_job_role === 1)
+                <!-- Show How to Use for Agent (2) and Admin (1) -->
+                @if($emp_job_role === 2 || $emp_job_role === 1)
                 <li class="nav-item">
                     <a href="{{ route('how-to-use') }}" class="nav-link w-100 {{ request()->is('how-to-use') ? 'active' : '' }}">
                         <i class="nav-icon fas fa-question-circle"></i>
@@ -108,6 +115,7 @@
                 </li>
                 @endif
 
+                <!-- Show Logout for All Roles -->
                 <li class="nav-item">
                     <a href="{{ route('logout') }}" style="color: var(--logo-color);" class="nav-link text-bold w-100 {{ request()->is('logout') ? 'active' : '' }}">
                         <i class="nav-icon fas fa-sign-out-alt"></i>
