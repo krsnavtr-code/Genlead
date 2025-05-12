@@ -201,7 +201,7 @@
                             <div class="lead-meta">
                                 <strong>Phone:</strong> 
                                 <span>{{ $lead->phone }}</span>
-                                <a href="tel:{{ $lead->phone }}" class="btn btn-primary btn-sm ml-4"><strong>Connect Lead</strong><i class="fa fa-phone ml-2"></i></a>
+                                <a href="tel:{{ $lead->phone }}" class="btn btn-primary btn-sm" style="float: right;"><strong>Connect Lead</strong><i class="fa fa-phone ml-2"></i></a>
                             </div>
                             <div class="lead-meta"><strong>Source:</strong> {{ $lead->lead_source }}</div>
                             <div class="mt-2">

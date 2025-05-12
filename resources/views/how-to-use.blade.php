@@ -45,26 +45,29 @@
                                         <div class="card-body">
                                             <h5>Adding a New Lead</h5>
                                             <ol>
-                                                <li>Navigate to <strong>Leads > Add Lead</strong> from the sidebar menu</li>
+                                                <li>Navigate to <strong>Lead</strong> for add lead</li>
                                                 <li>Fill in all required information (fields marked with *)</li>
                                                 <li>Click <strong>Submit</strong> to add the lead to the system</li>
                                             </ol>
                                             
                                             <h5>Viewing and Managing Leads</h5>
                                             <ol>
-                                                <li>Go to <strong>Leads > Show Leads</strong> to see all your leads</li>
+                                                <li>Go to <strong>Leads > Manage Leads</strong> to see all your leads</li>
                                                 <li>Use the search box to find specific leads</li>
-                                                <li>Click on <strong>View</strong> to see detailed information</li>
                                                 <li>Click on <strong>Edit</strong> to modify lead information</li>
                                             </ol>
                                             
                                             <h5>Lead Status Management</h5>
                                             <p>Leads can have the following statuses:</p>
                                             <ul>
-                                                <li><span class="badge badge-primary">New</span> - Recently added leads</li>
-                                                <li><span class="badge badge-warning">In Progress</span> - Leads being worked on</li>
-                                                <li><span class="badge badge-success">Converted</span> - Successfully converted leads</li>
+                                             <li><span class="badge badge-primary">New</span> - Recently added leads</li>
+                                                <li><span class="badge badge-success">Connected</span> - Successfully converted leads</li>
+                                                <li><span class="badge badge-secondary">Not Connected</span> - Leads that are not connected</li>
+                                                <li><span class="badge badge-success">Qualified</span> - Leads that are qualified</li>
+                                                <li><span class="badge badge-secondary">Not Qualified</span> - Leads that are not qualified</li>
+                                                <li><span class="badge badge-warning">Connect in Future</span> - Leads that are to be connected at a later time</li>
                                                 <li><span class="badge badge-danger">Lost</span> - Leads that didn't convert</li>
+                                                <li><span class="badge badge-secondary">Closed</span> - Leads that are closed</li>
                                             </ul>
                                         </div>
                                     </div>
@@ -81,25 +84,28 @@
                                     </div>
                                     <div id="collapseTwo" class="collapse" aria-labelledby="headingTwo" data-parent="#howToUseAccordion">
                                         <div class="card-body">
-                                            <h5>Creating Follow-ups</h5>
+                                            <h5>To see your follow-ups</h5>
                                             <ol>
-                                                <li>From the lead detail page, scroll to the follow-up section</li>
-                                                <li>Enter follow-up details and select a date</li>
-                                                <li>Click <strong>Add Follow-up</strong> to schedule it</li>
+                                                <li>From the lead detail (<strong>Manage Leads</strong>) page, top of the page, click on <strong>Follow-up</strong></li>
+                                                <li>You will be redirected to <strong>Follow-up</strong> page where you can see all the follow-ups scheduled</li>
+                                                <!-- <li>Click <strong>Add Follow-up</strong> to schedule it</li> -->
                                             </ol>
                                             
-                                            <h5>Today's Follow-ups</h5>
+                                            <h5>Marking Follow-ups</h5>
                                             <ol>
-                                                <li>Navigate to <strong>Follow-ups > Today</strong> from the sidebar</li>
-                                                <li>View all follow-ups scheduled for today</li>
-                                                <li>Mark them as complete after contacting the lead</li>
+                                                <li>From the lead detail (<strong>Manage Leads</strong>) page,</li>
+                                                <li>Inside the lead card, click on the Update Status button</li>
+                                                <li>Select the status from the dropdown</li>
+                                                <li>Add date and time if required</li>
+                                                <li>Add notes</li>
+                                                <li>Click on Update</li>
                                             </ol>
                                         </div>
                                     </div>
                                 </div>
                                 
                                 <!-- Payments Section -->
-                                <div class="card">
+                                <!-- <div class="card">
                                     <div class="card-header" id="headingThree">
                                         <h2 class="mb-0">
                                             <button class="btn btn-link btn-block text-left collapsed" type="button" data-toggle="collapse" data-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
@@ -125,10 +131,10 @@
                                             </ol>
                                         </div>
                                     </div>
-                                </div>
+                                </div> -->
                                 
                                 <!-- Reports Section -->
-                                <div class="card">
+                                <!-- <div class="card">
                                     <div class="card-header" id="headingFour">
                                         <h2 class="mb-0">
                                             <button class="btn btn-link btn-block text-left collapsed" type="button" data-toggle="collapse" data-target="#collapseFour" aria-expanded="false" aria-controls="collapseFour">
@@ -156,7 +162,7 @@
                                             </ol>
                                         </div>
                                     </div>
-                                </div>
+                                </div> -->
                             </div>
                         </div>
                     </div>
