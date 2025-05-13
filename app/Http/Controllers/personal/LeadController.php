@@ -774,7 +774,44 @@ public function index()
         return view('personal.payment_verify', compact('payments'));
     }
 
-    public function verify(Request $request, $id)
+//     public function verify(Request $request, $id)
+// {
+//     $payment = Payment::findOrFail($id);
+
+//     // Update payment status to verified
+//     $payment->status = Payment::STATUS_VERIFIED;
+//     $payment->verified_by = auth()->id() ?? session()->get('user_id');
+//     $payment->verified_at = now();
+//     $payment->save();
+    
+//     // Update lead status based on payment
+//     $lead = $payment->lead;
+//     if ($lead) {
+//         // Calculate total paid amount and total amount from payments
+//         $payments = Payment::where('lead_id', $lead->id)->get();
+//         $totalPaid = $payments->where('status', '!=', Payment::STATUS_REJECTED)
+//             ->sum('payment_amount');
+        
+//         // Get the latest total amount from payments
+//         $latestPayment = $payments->sortByDesc('created_at')->first();
+//         $totalAmount = $latestPayment ? $latestPayment->total_amount : 0;
+        
+//         // Calculate pending amount
+//         $pendingAmount = $totalAmount - $totalPaid;
+        
+//         // Update lead status based on payment
+//         if ($pendingAmount <= 0) {
+//             $lead->status = 'payment_completed';
+//         } else {
+//             $lead->status = 'payment_partial';
+//         }
+        
+//         $lead->save();
+//     }
+
+//     return redirect()->route('payment.verify')->with('success', 'Payment has been verified successfully.');
+// }
+public function verify(Request $request, $id)
 {
     $payment = Payment::findOrFail($id);
 
@@ -783,7 +820,7 @@ public function index()
     $payment->verified_by = auth()->id() ?? session()->get('user_id');
     $payment->verified_at = now();
     $payment->save();
-    
+
     // Update lead status based on payment
     $lead = $payment->lead;
     if ($lead) {
@@ -791,21 +828,20 @@ public function index()
         $payments = Payment::where('lead_id', $lead->id)->get();
         $totalPaid = $payments->where('status', '!=', Payment::STATUS_REJECTED)
             ->sum('payment_amount');
-        
+
         // Get the latest total amount from payments
         $latestPayment = $payments->sortByDesc('created_at')->first();
         $totalAmount = $latestPayment ? $latestPayment->total_amount : 0;
-        
+
         // Calculate pending amount
         $pendingAmount = $totalAmount - $totalPaid;
-        
+
         // Update lead status based on payment
         if ($pendingAmount <= 0) {
             $lead->status = 'payment_completed';
         } else {
             $lead->status = 'payment_partial';
         }
-        
         $lead->save();
     }
 

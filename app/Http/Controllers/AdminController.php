@@ -415,9 +415,7 @@ public function importLeads(Request $request)
 
     // Required headers (match your database fields)
     $requiredHeaders = [
-        'first_name', 'last_name', 'email', 'email_domain', 'secondary_email',
-        'secondary_email_domain', 'phone', 'secondary_phone', 'lead_source',
-        'university', 'courses', 'college', 'branch', 'session_duration'
+        'first_name', 'email', 'phone', 'courses',
     ];
 
     // Ensure headers in the file match database fields
@@ -434,19 +432,9 @@ public function importLeads(Request $request)
         // Validate data for each row
         $validator = Validator::make($data, [
             'first_name' => 'required|string|max:255',
-            'last_name' => 'required|string|max:255',
             'email' => 'required|email|unique:leads,email',
-            'email_domain' => 'nullable|string|max:255',
-            'secondary_email' => 'nullable|email',
-            'secondary_email_domain' => 'nullable|string|max:255',
             'phone' => 'required|numeric',
-            'secondary_phone' => 'nullable|numeric',
-            'lead_source' => 'required|string|max:255',
-            'university' => 'nullable|string|max:255',
-            'courses' => 'nullable|string|max:255',
-            'college' => 'nullable|string|max:255',
-            'branch' => 'nullable|string|max:255',
-            'session_duration' => 'nullable|string|max:255',
+            'courses' => 'required|string|max:255',
         ]);
 
         if ($validator->fails()) {
@@ -456,19 +444,9 @@ public function importLeads(Request $request)
         // Save to the database
         Lead::create([
             'first_name' => $data['first_name'],
-            'last_name' => $data['last_name'],
             'email' => $data['email'],
-            'email_domain' => $data['email_domain'] ?? null,
-            'secondary_email' => $data['secondary_email'] ?? null,
-            'secondary_email_domain' => $data['secondary_email_domain'] ?? null,
             'phone' => $data['phone'],
-            'secondary_phone' => $data['secondary_phone'] ?? null,
-            'lead_source' => $data['lead_source'],
-            'university' => $data['university'] ?? null,
-            'courses' => $data['courses'] ?? null,
-            'college' => $data['college'] ?? null,
-            'branch' => $data['branch'] ?? null,
-            'session_duration' => $data['session_duration'] ?? null,
+            'courses' => $data['courses'],
             'agent_id' => $agentId,
         ]);
     }

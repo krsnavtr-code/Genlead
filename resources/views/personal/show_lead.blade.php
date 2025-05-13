@@ -240,6 +240,9 @@
                     <label for="leadsFile">Select CSV File:</label>
                     <input type="file" name="leads_file" id="leadsFile" class="form-control" accept=".csv" required>
                     <small class="form-text text-muted">Please upload a valid CSV file.</small>
+                    <small class="form-text text-muted">Required columns: 'first_name', 'email', 'phone', 'courses' with valid values.</small>
+                    <!-- <small class="form-text text-muted">Approximate time to upload 2MB file is 30 seconds.</small> -->
+                    <!-- <small class="form-text text-muted">Click <a href="{{ url('/i-admin/leads/download-sample-csv') }}">here</a> to download sample csv</small> -->
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>

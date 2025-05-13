@@ -44,6 +44,7 @@
                                     <th>Loan Details</th>
                                     <th>Payment Screenshot</th>
                                     <th>Actions</th>
+                                    <th>Payment Status</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -84,6 +85,21 @@
                                         @else
                                             <span class="badge badge-success"  style="display: inline-block; padding: 12px 33px; font-size: 15px; border-radius: 4px; text-align: center;">Verified</span>
                                         @endif
+                                    </td>
+                                    <td>
+                                        @php
+                                        $bgClass = '';
+                                        if ($payment->status === 'pending') {
+                                            $bgClass = 'bg-danger text-white';
+                                        } elseif ($payment->status === 'verified') {
+                                            $bgClass = 'bg-success text-white';
+                                        } elseif ($payment->status === 'rejected') {
+                                            $bgClass = 'bg-danger text-white';
+                                        }
+                                        @endphp
+                                        <p class="p-2 rounded {{ $bgClass }}">
+                                            {{ ucfirst($payment->status) }}
+                                        </p>
                                     </td>
                                 </tr>
                                 @endforeach
