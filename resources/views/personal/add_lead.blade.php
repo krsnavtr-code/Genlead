@@ -4,6 +4,10 @@
 
 @section('content')
 
+@php
+    $emp_job_role = session()->get('emp_job_role');
+@endphp
+
 <style>
     .lead-form-select{
         width: 100%;
@@ -20,15 +24,7 @@
 </style>
 
 <div class="content-wrapper">
-    <!-- Horizontal Navbar -->
-    <div class="horizontal-navbar d-flex flex-wrap justify-content-around py-2 border-bottom mb-3">
-        <a href="{{ url('/i-admin/show-leads') }}" class="">Manage Leads</a>
-        <a href="{{ url('/admin/activities/create') }}" class="">Add Activities</a>
-        <a href="{{ url('/admin/activities') }}" class="">Manage Activities</a>
-        <a href="{{ url('/admin/tasks/create') }}" class="">Create/Add Tasks</a>
-        <a href="{{ url('/admin/tasks') }}" class="">Manage Tasks</a>
-        <a href="{{ url('/i-admin/pending') }}" class="">Pending Payment</a>
-    </div>
+    @include('navbar')
 
     <div class="container">
         <div class="text-center mb-4">
