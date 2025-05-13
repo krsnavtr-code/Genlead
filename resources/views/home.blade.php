@@ -3,6 +3,11 @@
 @section('title', 'Genlead - Home')
 
 @section('content')
+
+@php
+    $emp_job_role = session()->get('emp_job_role');
+@endphp
+
 <div class="content-wrapper">
     <!-- Content Header (Page header) -->
     <div class="content-header">
@@ -23,6 +28,8 @@
     <!-- /.content-header -->
 
     <!-- Main content -->
+     <!-- home for admin and agent -->
+    @if ($emp_job_role == 1 || $emp_job_role == 2)
     <section class="content">
         <div class="container-fluid">
             <!-- Welcome Banner -->
@@ -285,6 +292,7 @@
             </div>
         </div>
     </section>
+    @endif
 </div>
 @endsection
 
