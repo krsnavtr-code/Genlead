@@ -45,7 +45,7 @@
 
                     <div class="d-flex justify-content-between align-items-center">
                         <!-- Trigger Modal -->
-                        <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#changePasswordModal{{ $employee->id }}">
+                        <button class="btn btn-sm btn-outline-primary" data-toggle="modal" data-target="#changePasswordModal{{ $employee->id }}">
                             Change Password
                         </button>
                     </div>
@@ -61,7 +61,7 @@
                         @csrf
                         <div class="modal-header">
                             <h5 class="modal-title" id="changePasswordModalLabel{{ $employee->id }}">Change Password</h5>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            <button type="button" class="btn-close" data-dismiss="modal" aria-label="Close"></button>
                         </div>
                         <div class="modal-body">
                             <input type="hidden" name="employee_id" value="{{ $employee->id }}">
@@ -75,7 +75,7 @@
                             </div>
                         </div>
                         <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
                             <button type="submit" class="btn btn-primary">Save changes</button>
                         </div>
                     </form>
