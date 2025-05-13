@@ -4,6 +4,10 @@
 
 @section('content')
 
+@php
+    $emp_job_role = session()->get('emp_job_role');
+@endphp
+
 <style>
       th,td {
         font-size: 16px;
@@ -20,7 +24,7 @@
     
    <!-- Content Header (Page header) -->
    <div class="content-header sty-one d-flex justify-content-between align-items-center">
-    <div class="d-flex align-items-center justify-content-between">
+    <div class="d-flex align-items-center justify-content-between w-100">
         <h1>Manage Activities</h1>
         <a href="{{ url('/admin/activities/create') }}" 
         class="btn btn-danger btn-sm float-end" 

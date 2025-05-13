@@ -60,7 +60,7 @@
 
    <!-- Content Header (Page header) -->
    <div class="content-header sty-one d-flex justify-content-between align-items-center">
-    <div>
+    <div class="d-flex align-items-center justify-content-between w-100">
         <h1>Manage Tasks</h1>
         <a href="{{ url('/admin/tasks/create') }}" 
         class="btn btn-danger btn-sm" 

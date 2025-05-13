@@ -4,6 +4,10 @@
 
 @section('content')
 
+@php
+    $emp_job_role = session()->get('emp_job_role');
+@endphp
+
 <style>
       label {
         font-size: 17px;
