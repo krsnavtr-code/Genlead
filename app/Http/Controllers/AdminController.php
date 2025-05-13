@@ -714,4 +714,40 @@ public function exportLeads()
         return redirect()->route('activities.index')->with('success', 'Activity deleted successfully.');
     }
 
+    public function showAgentData(Request $request) {
+        // Get all employees with different job roles for debugging
+        $allEmployees = Employee::all();
+        \Log::info('All employees:', $allEmployees->toArray());
+        
+        // Get all employees who are agents or have similar roles
+        $agents = Employee::whereIn('emp_job_role', ['agent', 'Agent', 'AGENT', 'sales_agent', 'sales'])->get();
+        \Log::info('Potential agents found:', ['count' => $agents->count()]);
+        
+        // If no agents found, try to get all employees
+        if ($agents->isEmpty()) {
+            $agents = Employee::all();
+            \Log::warning('No agents found with standard roles, falling back to all employees', ['count' => $agents->count()]);
+        }
+        
+        $agentData = null;
+        $agentLeads = [];
+
+        if ($request->has('agent_id') && $request->agent_id) {
+            // Get the selected agent's data
+            $agentData = Employee::find($request->agent_id);
+            
+            // Get leads assigned to this agent
+            if ($agentData) {
+                // First try with agent_id, then fall back to assigned_to if needed
+                $agentLeads = Lead::where('agent_id', $agentData->id)->get();
+                \Log::info('Agent leads query:', [
+                    'agent_id' => $agentData->id,
+                    'leads_count' => $agentLeads->count()
+                ]);
+            }
+        }
+        
+        return view('personal.agent_data', compact('agents', 'agentData', 'agentLeads'));
+    }
+
 }

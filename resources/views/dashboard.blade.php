@@ -337,7 +337,7 @@
                 </h3>
 
                 <div class="card-tools">
-                  <ul class="pagination pagination-sm">
+                  <ul class="pagination pagination-sm flex-wrap">
                     <li class="page-item"><a href="#" class="page-link">&laquo;</a></li>
                     <li class="page-item"><a href="#" class="page-link">1</a></li>
                     <li class="page-item"><a href="#" class="page-link">2</a></li>

@@ -202,7 +202,7 @@ public function show_leads() {
     if ($userRole == 2) { // Agent role
         $leads = Lead::where('agent_id', $userId)->paginate(50);
     } elseif ($userRole == 1) { // Admin role
-        $leads = Lead::paginate(50); 
+        $leads = Lead::paginate(15); 
         foreach ($leads as $lead) {
             $lead->is_fresh = $lead->agent_id == 1;
         }

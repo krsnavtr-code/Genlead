@@ -29,6 +29,7 @@ Route::prefix('admin')->group(function () {
     Route::post('/new-joinee/login', [NewJoinController::class, 'joineelogin'])->name('new_joinee.login');
     Route::get('/add-documents', [NewJoinController::class, 'uploadEmployeeForm']);
     Route::post('/upload-documents', [NewJoinController::class, 'store'])->name('documents.store');
+    Route::get('/agent-data', [AdminController::class, 'showAgentData'])->name('admin.agent.data');
 
     // Forgot Password
 
@@ -64,6 +65,8 @@ Route::prefix('admin')->middleware(['checkrole'])->group(function () {
                 $todayFollowupsList = collect([]);
             }
             
+            
+
             // Try to get pending payments
             try {
                 // Try with 'status' column first

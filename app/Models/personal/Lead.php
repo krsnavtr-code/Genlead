@@ -27,8 +27,11 @@ class Lead extends Model
         'session_duration',
         'status',
         'total_fees',
-        'pending_amount'
+        'pending_amount',
+        'assigned_to'
     ];
+
+
 
     protected $casts = [
         'total_fees' => 'decimal:2',
@@ -60,9 +63,12 @@ class Lead extends Model
         return $this->hasmany(FollowUp::class);
     }
 
+    /**
+     * Get the agent that the lead is assigned to
+     */
     public function agent()
     {
-        return $this->belongsTo(Employee::class,'agent_id','id');
+        return $this->belongsTo(Employee::class, 'agent_id', 'id');
     }
 
     public function payments(){
