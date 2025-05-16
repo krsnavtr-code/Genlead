@@ -30,6 +30,7 @@ Route::prefix('admin')->group(function () {
     Route::get('/add-documents', [NewJoinController::class, 'uploadEmployeeForm']);
     Route::post('/upload-documents', [NewJoinController::class, 'store'])->name('documents.store');
     Route::get('/agent-data', [AdminController::class, 'showAgentData'])->name('admin.agent.data');
+    Route::post('/transfer-leads', [AdminController::class, 'transferLeads'])->name('admin.leads.transfer');
 
     // Forgot Password
 

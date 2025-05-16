@@ -125,6 +125,26 @@ class AdminController extends Controller
 
     // }
 
+
+    
+    public function transferLeads(Request $request)
+    {
+        $request->validate([
+            'lead_ids' => 'required|array',
+            'lead_ids.*' => 'exists:leads,id',
+            'target_agent_id' => 'required|exists:employees,id',
+        ]);
+        
+        $leadIds = $request->input('lead_ids');
+        $targetAgentId = $request->input('target_agent_id');
+        
+        // Update the agent_id for the selected leads
+        \App\Models\personal\Lead::whereIn('id', $leadIds)
+            ->update(['agent_id' => $targetAgentId]);
+            
+        return redirect()->back()->with('success', 'Leads transferred successfully!');
+    }
+    
     public function logout(Request $request)
     {
             // Clear all session data
@@ -714,40 +734,26 @@ public function exportLeads()
         return redirect()->route('activities.index')->with('success', 'Activity deleted successfully.');
     }
 
-    public function showAgentData(Request $request) {
-        // Get all employees with different job roles for debugging
-        $allEmployees = Employee::all();
-        \Log::info('All employees:', $allEmployees->toArray());
-        
-        // Get all employees who are agents or have similar roles
-        $agents = Employee::whereIn('emp_job_role', ['agent', 'Agent', 'AGENT', 'sales_agent', 'sales'])->get();
-        \Log::info('Potential agents found:', ['count' => $agents->count()]);
-        
-        // If no agents found, try to get all employees
-        if ($agents->isEmpty()) {
-            $agents = Employee::all();
-            \Log::warning('No agents found with standard roles, falling back to all employees', ['count' => $agents->count()]);
-        }
+    public function showAgentData(Request $request)
+    {
+        // Get all agents except admin
+        $agents = Employee::where('emp_job_role', '!=', 'admin')->get();
         
         $agentData = null;
-        $agentLeads = [];
-
-        if ($request->has('agent_id') && $request->agent_id) {
-            // Get the selected agent's data
-            $agentData = Employee::find($request->agent_id);
+        $agentLeads = collect();
+        
+        // If an agent is selected, get their data and leads
+        if ($request->has('agent_id')) {
+            $agentId = $request->input('agent_id');
+            $agentData = Employee::find($agentId);
             
-            // Get leads assigned to this agent
             if ($agentData) {
-                // First try with agent_id, then fall back to assigned_to if needed
-                $agentLeads = Lead::where('agent_id', $agentData->id)->get();
-                \Log::info('Agent leads query:', [
-                    'agent_id' => $agentData->id,
-                    'leads_count' => $agentLeads->count()
-                ]);
+                $agentLeads = \App\Models\personal\Lead::where('agent_id', $agentId)
+                    ->orderBy('created_at', 'desc')
+                    ->get();
             }
         }
         
         return view('personal.agent_data', compact('agents', 'agentData', 'agentLeads'));
     }
-
 }
