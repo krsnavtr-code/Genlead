@@ -97,7 +97,9 @@
                                             <input type="checkbox" name="lead_ids[]" value="{{ $lead->id }}" class="lead-checkbox">
                                         </td>
                                         <td>{{ $index + 1 }}</td>
-                                        <td>{{ $lead->first_name }} {{ $lead->last_name }}</td>
+                                        <td>
+                                            <a href="{{ url('/i-admin/leads/view/'.$lead->id) }}">{{ $lead->first_name }} {{ $lead->last_name }}</a>
+                                        </td>
                                         <td>{{ $lead->email }}</td>
                                         <td>{{ $lead->phone }}</td>
                                         <td>

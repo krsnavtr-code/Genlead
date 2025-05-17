@@ -43,6 +43,7 @@
                                     <option value="100">Select 100</option>
                                 </select>
                                 <input class="ml-2" type="checkbox" id="select_all"> <label for="select_all">Select All</label>
+                                <button type="submit" class="btn btn-primary ml-4">Transfer Leads</button>
                             </div>
 
                             @foreach($freshLeads as $index => $lead)    
@@ -80,7 +81,6 @@
                             @endforeach
                         </div>
                     </div>
-                    <button type="submit" class="btn btn-primary mt-3">Transfer Leads</button>
                 </form>
             </div>
         </div>
