@@ -161,7 +161,9 @@
                     @endif
                     <a href="{{ route('followups.today') }}" class="btn btn-info">Today Follow-up</a>
 
+                    @if(session()->get('emp_job_role') == 1)
                     <a href="{{ route('admin.agent.data') }}" class="btn btn-primary">Agent Data</a>
+                    @endif
                 </div>
 
                 <!-- Flash Messages -->
@@ -382,7 +384,7 @@
 
           </div>
           <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
             <button type="submit" class="btn btn-primary">Update Status</button>
           </div>
         </div>
@@ -403,6 +405,31 @@ $(document).ready(function() {
         $('#updateStatusModal').modal('show');
     });
 });
+
+
+// Show/Hide Next Follow-up calendar Field
+document.addEventListener('DOMContentLoaded', function () {
+    const statusDropdown = document.getElementById('new_status');
+    const followUpDiv = document.getElementById('next_follow_up').closest('.form-group');
+
+    function toggleFollowUpField() {
+      const selectedValue = statusDropdown.value;
+      const hiddenStatuses = ['not_interested', 'admission_done'];
+      if (hiddenStatuses.includes(selectedValue)) {
+        followUpDiv.style.display = 'none';
+        document.getElementById('next_follow_up').required = false;
+      } else {
+        followUpDiv.style.display = 'block';
+        document.getElementById('next_follow_up').required = true;
+      }
+    }
+
+    // Run on page load (in case modal is already open with selected value)
+    toggleFollowUpField();
+
+    // Run on change
+    statusDropdown.addEventListener('change', toggleFollowUpField);
+  });
 </script>
 
 @endsection <!-- End of content section -->

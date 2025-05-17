@@ -27,33 +27,41 @@ class SiteHelper
                 'name' => 'New'
             ],
             [
-                'code' => 'contacted',
-                'name' => 'Contacted'
+                'code' => 'interested',
+                'name' => 'Interested'
             ],
             [
-                'code'=> 'not_connected',
-                'name'=> 'Not Connected'
+                'code'=> 'not_interested',
+                'name'=> 'Not Interested'
             ],
             [
-                'code'=> 'qualified',
-                'name'=> 'Qualified'
+                'code'=> 'follow_up_callback',
+                'name'=> 'Follow Up / Callback'
             ],
             [
-                'code'=> 'not_qualified',
-                'name'=> 'Not Qualified'
+                'code'=> 'follow_up_ringing',
+                'name'=> 'Follow Up / Ringing'
             ],
             [
-                'code'=> 'future',
-                'name'=> 'Contact in Future'
+                'code'=> 'follow_up_hang_up',
+                'name'=> 'Follow Up / Hang Up'
             ],
             [
-                'code'=> 'lost',
-                'name'=> 'Lost'
+                'code'=> 'follow_up_rpnc',
+                'name'=> 'Follow Up / RPNC'
             ],
             [
-                'code'=> 'closed',
-                'name'=> 'Closed'
-            ],            
+                'code'=> 'not_contacted',
+                'name'=> 'Not Contacted'
+            ],
+            [
+                'code'=> 'registration_done',
+                'name'=> 'Registration Done'
+            ],
+            [
+                'code'=> 'admission_done',
+                'name'=> 'Admission Done'
+            ],    
         ];
     }
 }
