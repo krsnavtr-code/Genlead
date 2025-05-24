@@ -45,7 +45,7 @@ class SiteHelper
                     'category' => 'New Leads',
                     'subcategories' => [
                         ['code' => 'C_new', 'name' => 'New'],
-                        ['code' => 'C_not_contacted', 'name' => 'Not Contacted'],
+                        ['code' => 'C_not_connected', 'name' => 'Not Connected'],
                     ]
                 ],
                 [
@@ -53,6 +53,7 @@ class SiteHelper
                     'subcategories' => [
                         ['code' => 'C_interested', 'name' => 'Interested'],
                         ['code' => 'C_not_interested', 'name' => 'Not Interested'],
+                        ['code' => 'C_wrong_number', 'name' => 'Wrong Number'],
                     ]
                 ],
                 [

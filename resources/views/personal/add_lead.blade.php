@@ -125,6 +125,8 @@
                                 <option value="MCA">MCA</option>
                                 <option value="M.Com">M.Com</option>
                                 <option value="M.Sc">M.Sc</option>
+                                <option value="MAJMC">MAJMC</option>
+                                <option value="MA">MA</option>
                                 <option value="BBA">BBA</option>
                                 <option value="BCA">BCA</option>
                                 <option value="B.Sc">B.Sc</option>

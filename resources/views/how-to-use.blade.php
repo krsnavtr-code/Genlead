@@ -58,16 +58,49 @@
                                             </ol>
                                             
                                             <h5>Lead Status Management</h5>
-                                            <p>Leads can have the following statuses:</p>
+                                            <p>Leads are categorized into two main types with their respective statuses:</p>
+                                            
+                                            <h6><span class="badge badge-danger">Hot Lead</span></h6>
                                             <ul>
-                                             <li><span class="badge badge-primary">New</span> - Recently added leads</li>
-                                                <li><span class="badge badge-success">Connected</span> - Successfully converted leads</li>
-                                                <li><span class="badge badge-secondary">Not Connected</span> - Leads that are not connected</li>
-                                                <li><span class="badge badge-success">Qualified</span> - Leads that are qualified</li>
-                                                <li><span class="badge badge-secondary">Not Qualified</span> - Leads that are not qualified</li>
-                                                <li><span class="badge badge-warning">Connect in Future</span> - Leads that are to be connected at a later time</li>
-                                                <li><span class="badge badge-danger">Lost</span> - Leads that didn't convert</li>
-                                                <li><span class="badge badge-secondary">Closed</span> - Leads that are closed</li>
+                                                <li><strong>Follow Ups</strong>
+                                                    <ul>
+                                                        <li><span class="badge badge-warning">Callback</span> - Lead requested a callback</li>
+                                                        <li><span class="badge badge-info">Ringing</span> - Call is in progress</li>
+                                                        <li><span class="badge badge-secondary">Hang Up</span> - Call was disconnected</li>
+                                                        <li><span class="badge badge-dark">RPNC</span> - Right Person Not Contacted</li>
+                                                    </ul>
+                                                </li>
+                                                <li><strong>Converted</strong>
+                                                    <ul>
+                                                        <li><span class="badge badge-success">Registration Done</span> - Lead has completed registration</li>
+                                                        <li><span class="badge badge-success">Admission Done</span> - Lead has completed admission process</li>
+                                                    </ul>
+                                                </li>
+                                            </ul>
+                                            
+                                            <h6><span class="badge badge-primary">Cold Lead</span></h6>
+                                            <ul>
+                                                <li><strong>New Leads</strong>
+                                                    <ul>
+                                                        <li><span class="badge badge-primary">New</span> - Recently added lead</li>
+                                                        <li><span class="badge badge-secondary">Not Connected</span> - Initial contact not established</li>
+                                                    </ul>
+                                                </li>
+                                                <li><strong>Interest</strong>
+                                                    <ul>
+                                                        <li><span class="badge badge-success">Interested</span> - Lead has shown interest</li>
+                                                        <li><span class="badge badge-secondary">Not Interested</span> - Lead is not interested</li>
+                                                        <li><span class="badge badge-dark">Wrong Number</span> - Incorrect contact information</li>
+                                                    </ul>
+                                                </li>
+                                                <li><strong>Follow Ups</strong>
+                                                    <ul>
+                                                        <li><span class="badge badge-warning">Callback</span> - Lead requested a callback</li>
+                                                        <li><span class="badge badge-info">Ringing</span> - Call is in progress</li>
+                                                        <li><span class="badge badge-secondary">Hang Up</span> - Call was disconnected</li>
+                                                        <li><span class="badge badge-dark">RPNC</span> - Right Person Not Contacted</li>
+                                                    </ul>
+                                                </li>
                                             </ul>
                                         </div>
                                     </div>
