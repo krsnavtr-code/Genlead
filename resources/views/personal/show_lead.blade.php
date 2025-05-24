@@ -98,11 +98,27 @@
 <div class="content-wrapper" >
 
     @include('navbar')
+    <!-- Content Header (Page header) -->
+    <div class="content-header">
+        <div class="container-fluid">
+            <div class="row mb-2">
+                <div class="col-sm-6">
+                    <h1 class="m-0">Manage Leads</h1>
+                </div>
+                <div class="col-sm-6">
+                    <ol class="breadcrumb float-sm-right">
+                        <li class="breadcrumb-item"><a href="{{ route('home') }}">Home</a></li>
+                        <li class="breadcrumb-item active">Manage Leads</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <!-- Content Header (Page header) -->
     <div class="container-fluid mb-2">
         <div class="d-flex flex-md-row align-items-center justify-content-between gap-3">
-            <p class="h5 m-0 fw-semibold text-dark">Manage Leads</p>
+            <!-- <p class="h5 m-0 fw-semibold text-dark">Manage Leads</p> -->
             <a href="{{ url('/i-admin/leads/add-lead') }}" 
                class="btn btn-danger d-inline-flex align-items-center px-2  fs-6 fw-bold rounded-2 shadow-sm">
               <span class="fs-5">&#43;</span> Add Lead

@@ -29,7 +29,7 @@
 
     <!-- Main content -->
      <!-- home for admin and agent -->
-    @if ($emp_job_role == 1 || $emp_job_role == 2)
+    @if ($emp_job_role == 1)
     <section class="content">
         <div class="container-fluid">
             <!-- Welcome Banner -->

@@ -68,7 +68,7 @@
                 <!-- Show Leads for Agent (2) and Admin (1) -->
                 @if($emp_job_role === 2 || $emp_job_role === 1)
                 <li class="nav-item">
-                    <a href="{{ url('/i-admin/leads/add-lead') }}" class="nav-link w-100 {{ request()->is('i-admin/leads/add-lead*') ? 'active' : '' }}">
+                    <a href="{{ url('/i-admin/show-leads') }}" class="nav-link w-100 {{ request()->is('i-admin/leads/add-lead*') ? 'active' : '' }}">
                         <i class="nav-icon fas fa-plus-circle" style="color: #1E7E34;"></i>
                         <p>Leads</p>
                     </a>
