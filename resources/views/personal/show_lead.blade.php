@@ -156,7 +156,7 @@
                 <!-- Action Buttons -->
                 <div class="d-flex flex-wrap mb-4" style="gap: 8px;">
                     @if(session()->get('emp_job_role') == 1)
-                        <button class="btn btn-primary" onclick="location.href='{{ route('leads.transfer.view') }}'">Transfer & Share Leads</button>
+                        <a href="{{ route('leads.transfer.view') }}" class="btn btn-primary">Transfer & Share Leads</a>
                         <button class="btn btn-primary" data-toggle="modal" data-target="#importModal">Import Leads</button>
                     @endif
                     <a href="{{ route('followups.today') }}" class="btn btn-info">Today Follow-up</a>
@@ -366,9 +366,19 @@
             <div class="form-group">
                 <label for="new_status">New Status</label>
                 <select name="new_status" id="new_status" class="form-control" required>
-                    @foreach(App\Helpers\SiteHelper::getLeadStatus() as $status)
-                                        <option value="{{ $status['code'] }}">{{ $status['name'] }}</option>
+                    @foreach(App\Helpers\SiteHelper::getLeadStatus() as $leadType => $categories)
+                        <optgroup label="{{ $leadType }}">
+                            @foreach($categories as $category)
+                                <optgroup label="&nbsp;&nbsp;→ {{ $category['category'] }}">
+                                    @foreach($category['subcategories'] as $subcategory)
+                                        <option value="{{ $subcategory['code'] }}">
+                                            &nbsp;&nbsp;&nbsp;&nbsp;{{ $subcategory['name'] }}
+                                        </option>
                                     @endforeach
+                                </optgroup>
+                            @endforeach
+                        </optgroup>
+                    @endforeach
                 </select>
             </div>
 

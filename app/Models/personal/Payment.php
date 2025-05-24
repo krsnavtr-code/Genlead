@@ -6,6 +6,18 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\Registration;
 
+/**
+ * @property int $id
+ * @property int $lead_id
+ * @property int $agent_id
+ * @property string $status
+ * @property string $payment_amount
+ * @property string $total_amount
+ * @property \Carbon\Carbon $payment_date
+ * @property \Carbon\Carbon $verified_at
+ * @property \App\Models\personal\Lead $lead
+ * @property \App\Models\personal\Agent $agent
+ */
 class Payment extends Model
 {
 

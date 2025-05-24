@@ -22,46 +22,49 @@ class SiteHelper
     public static function getLeadStatus()
     {
         return [
-            [
-                'code' => 'new',
-                'name' => 'New'
+            'Hot Lead' => [
+                [
+                    'category' => 'Follow Ups',
+                    'subcategories' => [
+                        ['code'=> 'H_follow_up_callback', 'name'=> 'Callback'],
+                        ['code'=> 'H_follow_up_ringing', 'name'=> 'Ringing'],
+                        ['code'=> 'H_follow_up_hang_up', 'name'=> 'Hang Up'],
+                        ['code'=> 'H_follow_up_rpnc', 'name'=> 'RPNC'],
+                    ]
+                ],
+                [
+                    'category' => 'Converted',
+                    'subcategories' => [
+                        ['code' => 'H_registration_done', 'name' => 'Registration Done'],
+                        ['code' => 'H_admission_done', 'name' => 'Admission Done'],
+                    ]
+                ],
             ],
-            [
-                'code' => 'interested',
-                'name' => 'Interested'
+            'Cold Lead' => [
+                [
+                    'category' => 'New Leads',
+                    'subcategories' => [
+                        ['code' => 'C_new', 'name' => 'New'],
+                        ['code' => 'C_not_contacted', 'name' => 'Not Contacted'],
+                    ]
+                ],
+                [
+                    'category' => 'Interest',
+                    'subcategories' => [
+                        ['code' => 'C_interested', 'name' => 'Interested'],
+                        ['code' => 'C_not_interested', 'name' => 'Not Interested'],
+                    ]
+                ],
+                [
+                    'category' => 'Follow Ups',
+                    'subcategories' => [
+                        ['code' => 'C_follow_up_callback', 'name' => 'Callback'],
+                        ['code' => 'C_follow_up_ringing', 'name' => 'Ringing'],
+                        ['code' => 'C_follow_up_hang_up', 'name' => 'Hang Up'],
+                        ['code' => 'C_follow_up_rpnc', 'name' => 'RPNC'],
+                    ]
+                ],
             ],
-            [
-                'code'=> 'not_interested',
-                'name'=> 'Not Interested'
-            ],
-            [
-                'code'=> 'follow_up_callback',
-                'name'=> 'Follow Up / Callback'
-            ],
-            [
-                'code'=> 'follow_up_ringing',
-                'name'=> 'Follow Up / Ringing'
-            ],
-            [
-                'code'=> 'follow_up_hang_up',
-                'name'=> 'Follow Up / Hang Up'
-            ],
-            [
-                'code'=> 'follow_up_rpnc',
-                'name'=> 'Follow Up / RPNC'
-            ],
-            [
-                'code'=> 'not_contacted',
-                'name'=> 'Not Contacted'
-            ],
-            [
-                'code'=> 'registration_done',
-                'name'=> 'Registration Done'
-            ],
-            [
-                'code'=> 'admission_done',
-                'name'=> 'Admission Done'
-            ],    
         ];
     }
 }
