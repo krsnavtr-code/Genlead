@@ -13,10 +13,10 @@ use App\Models\Deal;
 use App\Models\Employee;
 use App\Models\Registration;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Response;
 use Illuminate\Support\Facades\Session;
@@ -855,39 +855,78 @@ class LeadController extends Controller
 
     public function updateStatus(Request $request)
     {
-        $request->validate([
-            'lead_id' => 'required|exists:leads,id',
-            'new_status' => 'required|string',
-        ]);
+        try {
+            $request->validate([
+                'lead_id' => 'required|exists:leads,id',
+                'new_status' => 'required|string',
+                'comments' => 'required|string|max:1000',
+            ]);
 
-        // Update Lead Status
-        $lead = Lead::findOrFail($request->lead_id);
+            // Get the authenticated agent's ID
+            $agentId = session()->get('user_id');
+            if (!$agentId) {
+                throw new \Exception('Agent not authenticated');
+            }
 
-        // Only proceed if status is actually changing
-        if ($lead->status !== $request->new_status) {
+            // Update Lead Status
+            $lead = Lead::findOrFail($request->lead_id);
+            
+            // Verify the agent has access to this lead
+            if ($lead->agent_id != $agentId) {
+                throw new \Exception('You do not have permission to update this lead.');
+            }
+
             $oldStatus = $lead->status;
-            $lead->status = $request->new_status;
-            $lead->next_lead_datetime = $request->next_follow_up ?? null;
+            $newStatus = $request->new_status;
+            $statusChanged = $oldStatus !== $newStatus;
+
+            // Only update status if it's actually changing
+            if ($statusChanged) {
+                $lead->status = $newStatus;
+            }
+            
+            // Update next follow-up time if provided
+            if ($request->filled('next_follow_up')) {
+                $lead->next_lead_datetime = $request->next_follow_up;
+            }
+            
             $lead->save();
 
-            // Delete any existing status update follow-ups for this lead
-            FollowUp::where('lead_id', $lead->id)
-                ->where('agent_id', $lead->agent_id)
-                ->where('action', 'like', 'status-update%')
-                ->delete();
+            // Prepare comments for the follow-up
+            $comments = $request->comments;
+            if ($statusChanged) {
+                $oldStatusFormated = ucfirst(str_replace('_', ' ', $oldStatus));
+                $newStatusFormated = ucfirst(str_replace('_', ' ', $newStatus));
+                $statusComment = "Status changed from " . $oldStatusFormated . " to " . $newStatusFormated;
+                $comments = $statusComment . (empty($comments) ? '' : "\n" . $comments);
+            }
 
-            // Create a new status update entry
+            // Create a new follow-up entry
             $followUp = new FollowUp();
             $followUp->lead_id = $lead->id;
-            $followUp->agent_id = $lead->agent_id;
-            $followUp->comments = $request->comments ?: 'Status changed from ' . ucfirst($oldStatus) . ' to ' . ucfirst($request->new_status);
-            $followUp->follow_up_time = $request->next_follow_up ?? now()->addDay();
+            $followUp->agent_id = $agentId;
+            $followUp->comments = $comments;
+            $followUp->follow_up_time = $request->next_follow_up ?: now()->addDay();
             $followUp->action = 'status-update';
             $followUp->save();
 
-            return redirect()->back()->with('success', 'Lead status updated successfully.');
-        }
+            // Return JSON response for AJAX
+            return response()->json([
+                'success' => true,
+                'message' => 'Lead status updated successfully.',
+                'status' => $newStatus,
+                'next_follow_up' => $followUp->follow_up_time
+            ]);
 
-        return redirect()->back()->with('info', 'No changes were made to the lead status.');
+        } catch (\Exception $e) {
+            // Log the error
+            Log::error('Error updating lead status: ' . $e->getMessage());
+            
+            // Return JSON error response
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage()
+            ], 500);
+        }
     }
 }

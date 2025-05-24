@@ -351,95 +351,127 @@
 <!-- Update Status Modal -->
 <div class="modal fade" id="updateStatusModal" tabindex="-1" role="dialog" aria-labelledby="updateStatusModalLabel" aria-hidden="true">
   <div class="modal-dialog" role="document">
-    <form id="updateStatusForm" method="POST" action="{{ url('/i-admin/leads/update-status') }}">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="updateStatusModalLabel">Update Lead Status</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <form id="updateStatusForm" action="{{ url('/i-admin/leads/update-status') }}" method="POST">
         @csrf
         <input type="hidden" name="lead_id" id="modal_lead_id">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title" id="updateStatusModalLabel">Update Lead Status & Reminder</h5>
-            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-              <span aria-hidden="true">&times;</span>
-            </button>
+        <div class="modal-body">
+          <div class="form-group">
+            <label for="new_status">New Status</label>
+            <select name="new_status" id="new_status" class="form-control" required>
+              @foreach(App\Helpers\SiteHelper::getLeadStatus() as $leadType => $categories)
+                <optgroup label="{{ $leadType }}">
+                  @foreach($categories as $category)
+                    <optgroup label="&nbsp;&nbsp;→ {{ $category['category'] }}">
+                      @foreach($category['subcategories'] as $subcategory)
+                        <option value="{{ $subcategory['code'] }}">
+                          &nbsp;&nbsp;&nbsp;&nbsp;{{ $subcategory['name'] }}
+                        </option>
+                      @endforeach
+                    </optgroup>
+                  @endforeach
+                </optgroup>
+              @endforeach
+            </select>
           </div>
-          <div class="modal-body">
 
-            <div class="form-group">
-                <label for="new_status">New Status</label>
-                <select name="new_status" id="new_status" class="form-control" required>
-                    @foreach(App\Helpers\SiteHelper::getLeadStatus() as $leadType => $categories)
-                        <optgroup label="{{ $leadType }}">
-                            @foreach($categories as $category)
-                                <optgroup label="&nbsp;&nbsp;→ {{ $category['category'] }}">
-                                    @foreach($category['subcategories'] as $subcategory)
-                                        <option value="{{ $subcategory['code'] }}">
-                                            &nbsp;&nbsp;&nbsp;&nbsp;{{ $subcategory['name'] }}
-                                        </option>
-                                    @endforeach
-                                </optgroup>
-                            @endforeach
-                        </optgroup>
-                    @endforeach
-                </select>
-            </div>
-
-            <div class="form-group">
-                <label for="next_follow_up">Next Follow-up Date & Time</label>
-                <input type="datetime-local" name="next_follow_up" id="next_follow_up" class="form-control" required>
-            </div>
-
-            <div class="form-group">
-                <label for="comments">Comments</label>
-                <input type="text" name="comments" id="comments" class="form-control" required>
-            </div>
-
+          <div class="form-group" id="follow_up_container">
+            <label for="next_follow_up">Next Follow-up Date & Time</label>
+            <input type="datetime-local" name="next_follow_up" id="next_follow_up" class="form-control">
           </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-            <button type="submit" class="btn btn-primary">Update Status</button>
+
+          <div class="form-group">
+            <label for="comments">Comments</label>
+            <textarea name="comments" id="comments" class="form-control" placeholder="Add status update comments" required></textarea>
           </div>
         </div>
-    </form>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-primary">Update Status</button>
+        </div>
+      </form>
+    </div>
   </div>
 </div>
 
 
 <script>
 $(document).ready(function() {
+    // Handle update status button click
     $('.update-status-btn').click(function() {
         var leadId = $(this).data('lead-id');
         var currentStatus = $(this).data('current-status');
 
+        // Set form values
         $('#modal_lead_id').val(leadId);
         $('#new_status').val(currentStatus);
-
+        
+        // Reset form and show modal
+        $('#updateStatusForm')[0].reset();
         $('#updateStatusModal').modal('show');
+        
+        // Trigger change to update UI based on initial status
+        $('#new_status').trigger('change');
+    });
+
+    // Show/Hide Next Follow-up calendar Field based on status
+    $('#new_status').change(function() {
+        const selectedValue = $(this).val();
+        const followUpContainer = $('#follow_up_container');
+        const hiddenStatuses = [
+            'C_not_interested',
+            'H_admission_done'
+        ];
+        
+        if (hiddenStatuses.includes(selectedValue)) {
+            followUpContainer.hide();
+            $('#next_follow_up').removeAttr('required');
+        } else {
+            followUpContainer.show();
+            $('#next_follow_up').attr('required', 'required');
+        }
+    });
+
+    // Handle form submission
+    $('#updateStatusForm').on('submit', function(e) {
+        e.preventDefault();
+        
+        var form = $(this);
+        var formData = form.serialize();
+        var url = form.attr('action');
+        
+        $.ajax({
+            url: url,
+            type: 'POST',
+            data: formData,
+            success: function(response) {
+                if (response.success) {
+                    // Show success message
+                    alert('Status updated successfully!');
+                    // Reload the page to see the changes
+                    location.reload();
+                } else {
+                    // Show error message
+                    alert('Error: ' + response.message);
+                }
+            },
+            error: function(xhr) {
+                // Show error message
+                var errorMessage = 'An error occurred while updating the status.';
+                if (xhr.responseJSON && xhr.responseJSON.message) {
+                    errorMessage = xhr.responseJSON.message;
+                }
+                alert('Error: ' + errorMessage);
+            }
+        });
     });
 });
-
-
-// Show/Hide Next Follow-up calendar Field
-document.addEventListener('DOMContentLoaded', function () {
-    const statusDropdown = document.getElementById('new_status');
-    const followUpDiv = document.getElementById('next_follow_up').closest('.form-group');
-
-    function toggleFollowUpField() {
-      const selectedValue = statusDropdown.value;
-      const hiddenStatuses = ['not_interested', 'admission_done'];
-      if (hiddenStatuses.includes(selectedValue)) {
-        followUpDiv.style.display = 'none';
-        document.getElementById('next_follow_up').required = false;
-      } else {
-        followUpDiv.style.display = 'block';
-        document.getElementById('next_follow_up').required = true;
-      }
-    }
-
-    // Run on page load (in case modal is already open with selected value)
-    toggleFollowUpField();
-
-    // Run on change
-    statusDropdown.addEventListener('change', toggleFollowUpField);
-  });
 </script>
 
 @endsection <!-- End of content section -->
