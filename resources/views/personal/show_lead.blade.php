@@ -116,15 +116,14 @@
     </div>
 
     <!-- Content Header (Page header) -->
-    <div class="container-fluid mb-2">
+    <!-- <div class="container-fluid mb-2">
         <div class="d-flex flex-md-row align-items-center justify-content-between gap-3">
-            <!-- <p class="h5 m-0 fw-semibold text-dark">Manage Leads</p> -->
             <a href="{{ url('/i-admin/leads/add-lead') }}" 
                class="btn btn-danger d-inline-flex align-items-center px-2  fs-6 fw-bold rounded-2 shadow-sm">
               <span class="fs-5">&#43;</span> Add Lead
             </a>
         </div>
-    </div>
+    </div> -->
 
 
     <!-- Main content -->
@@ -140,6 +139,7 @@
                     </div>
 
                     <!-- Lead Source -->
+                    @if(session()->get('emp_job_role') == 1)
                     <div class="col-md-3 col-12">
                         <select name="lead_source" class="form-select lead-form-select" onchange="this.form.submit()">
                             <option value="All">Lead Source</option>
@@ -148,8 +148,10 @@
                             @endforeach
                         </select>
                     </div>
+                    @endif
 
                     <!-- Date Range -->
+                    @if(session()->get('emp_job_role') == 1)
                     <div class="col-md-3 col-12">
                         <select name="date_range" class="form-select lead-form-select" onchange="this.form.submit()">
                             <option value="All">Date Range</option>
@@ -158,6 +160,7 @@
                             @endforeach
                         </select>
                     </div>
+                    @endif
 
                     <!-- Time Frame -->
                     <div class="col-md-3 col-12">
@@ -172,17 +175,38 @@
                 <!-- Action Buttons -->
                 <div class="d-flex flex-wrap mb-4" style="gap: 8px;">
                     @if(session()->get('emp_job_role') == 1)
-                        <a href="{{ route('leads.transfer.view') }}" class="btn btn-primary">Transfer & Share Leads</a>
-                        <button class="btn btn-primary" data-toggle="modal" data-target="#importModal">Import Leads</button>
+                    <div class="dropdown">
+                        <button class="btn btn-info dropdown-toggle px-3" type="button"
+                            id="leadDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            Leads
+                        </button>
+                        <div class="dropdown-menu px-2" aria-labelledby="leadDropdown">
+                            <a class="dropdown-item text-white bg-success mb-1" href="{{ route('leads.transfer.view') }}" style="border-radius: 5px;">Transfer & Share Leads</a>
+                            <button class="dropdown-item text-white bg-info mb-1" data-toggle="modal" data-target="#importModal">Import Leads</button>
+                            <a class="dropdown-item text-white bg-warning mb-1" href="{{ route('admin.agent.data') }}" style="border-radius: 5px;">Agent Data</a>
+                        </div>
+                    </div>
                     @endif
-                    <a href="{{ route('followups.today') }}" class="btn btn-info">Today's Follow-ups</a>
-                    <a href="{{ route('followups.tomorrow') }}" class="btn btn-info">Tomorrow's Follow-ups</a>
-                    <a href="{{ route('followups.upcoming') }}" class="btn btn-info">Upcoming Follow-ups</a>
-                    <a href="{{ route('followups.overdue') }}" class="btn btn-danger">Overdue Follow-ups</a>
 
-                    @if(session()->get('emp_job_role') == 1)
-                    <a href="{{ route('admin.agent.data') }}" class="btn btn-primary">Agent Data</a>
-                    @endif
+                    
+                    <div class="dropdown">
+                        <button class="btn btn-info dropdown-toggle px-3" type="button"
+                            id="followupDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            Follow-ups
+                        </button>
+                        <div class="dropdown-menu px-2" aria-labelledby="followupDropdown">
+                            <a class="dropdown-item text-white bg-success mb-1" href="{{ route('followups.today') }}" style="border-radius: 5px;">Today's Follow-ups</a>
+                            <a class="dropdown-item text-white bg-info mb-1" href="{{ route('followups.tomorrow') }}" style="border-radius: 5px;">Tomorrow's Follow-ups</a>
+                            <a class="dropdown-item text-white bg-warning mb-1" href="{{ route('followups.upcoming') }}" style="border-radius: 5px;">Upcoming Follow-ups</a>
+                            <a class="dropdown-item text-white bg-danger" href="{{ route('followups.overdue') }}" style="border-radius: 5px;">Overdue Follow-ups</a>
+                        </div>
+                    </div>
+
+                    <div class="lead_add">
+                        <a href="{{ url('/i-admin/leads/add-lead') }}" class="btn btn-danger rounded-2 ">
+                            <span class="fs-5">&#43;</span> Add Lead
+                        </a>
+                    </div>
                 </div>
 
                 <!-- Flash Messages -->
