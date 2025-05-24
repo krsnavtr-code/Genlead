@@ -12,13 +12,6 @@
         </ol>
     </div>
 
-    @php
-        $followUps = \App\Models\personal\FollowUp::with(['lead', 'agent'])
-            ->where('follow_up_time', '>=', \Carbon\Carbon::today()->startOfDay())
-            ->where('follow_up_time', '<=', \Carbon\Carbon::today()->endOfDay())
-            ->orderBy('follow_up_time', 'asc')
-            ->get();
-    @endphp
     <!-- Main Content -->
     <div class="content">
         <div class="card">
