@@ -46,9 +46,11 @@ Route::prefix('i-admin')->group(function () {
     Route::get('/leads-view/edit/{id}', [LeadController::class, 'editview']);
     Route::post('/leads/{id}', [LeadController::class, 'updateview']);
 
-    // Today follow up routes
-
+    // Follow-up routes
     Route::get('/followups/today', [LeadController::class, 'todayFollowUps'])->name('followups.today');
+    Route::get('/followups/tomorrow', [LeadController::class, 'tomorrowFollowUps'])->name('followups.tomorrow');
+    Route::get('/followups/upcoming', [LeadController::class, 'upcomingFollowUps'])->name('followups.upcoming');
+    Route::get('/followups/overdue', [LeadController::class, 'overdueFollowUps'])->name('followups.overdue');
 
 
     // Payment process Routes

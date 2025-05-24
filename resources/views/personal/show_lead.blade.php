@@ -159,7 +159,10 @@
                         <a href="{{ route('leads.transfer.view') }}" class="btn btn-primary">Transfer & Share Leads</a>
                         <button class="btn btn-primary" data-toggle="modal" data-target="#importModal">Import Leads</button>
                     @endif
-                    <a href="{{ route('followups.today') }}" class="btn btn-info">Today Follow-up</a>
+                    <a href="{{ route('followups.today') }}" class="btn btn-info">Today's Follow-ups</a>
+                    <a href="{{ route('followups.tomorrow') }}" class="btn btn-info">Tomorrow's Follow-ups</a>
+                    <a href="{{ route('followups.upcoming') }}" class="btn btn-info">Upcoming Follow-ups</a>
+                    <a href="{{ route('followups.overdue') }}" class="btn btn-danger">Overdue Follow-ups</a>
 
                     @if(session()->get('emp_job_role') == 1)
                     <a href="{{ route('admin.agent.data') }}" class="btn btn-primary">Agent Data</a>
@@ -231,11 +234,10 @@
                     <thead class="table-info w-100">
                         <tr class="w-100">
                             <th>#</th>
-                            <th>Name</th>
+                            <th>Name & Status</th>
                             <th class="display_none">Email</th>
                             <th class="display_none">Phone</th>
-                            <th class="display_none">Source</th>
-                            <th>Status</th>
+                            <!-- <th class="display_none">Source</th> -->
                             <th>Actions</th>
                         </tr>
                     </thead>
@@ -262,19 +264,10 @@
                         @endphp --}}
                         <tr class="w-100">
                             <td style="padding: 5px; text-align: center; font-size: 12px;">{{ $loop->iteration }}</td>
-                            <td style="padding: 5px; font-size: 14px;">
+                            <td class="d-flex flex-column align-items-start" style="padding: 5px; font-size: 14px;">
                                 <a href="{{ url('/i-admin/leads/view/'.$lead->id) }}">
                                     {{ $lead->first_name }} {{ $lead->last_name }}
                                 </a>
-                                @if($lead->is_fresh)
-                                    <span class="badge bg-success ms-1" style="font-size: 12px;">Fresh</span>
-                                @endif
-                            </td>
-                            <td class="display_none" style="padding: 5px;">{{ $lead->email }}</td>
-                            <td class="display_none" style="padding: 5px;">{{ $lead->phone }}</td>
-                            <td class="display_none" style="padding: 5px;">{{ $lead->lead_source }}</td>
-                            <!-- <button class="btn btn-sm lead-status-btn {{ $buttonClass }}">{{ $statusText }}</button> -->
-                            <td style="padding: 5px;">
                                 @php
                                     $statusColor = [
                                         'new' => 'bg-secondary',
@@ -285,14 +278,29 @@
                                         'future' => 'bg-primary',
                                         'lost' => 'bg-dark',
                                         'closed' => 'bg-light text-dark',
+                                        'registration_done' => 'bg-success',
+                                        'admission_done' => 'bg-success',
+                                        'interested' => 'bg-primary',
+                                        'not_interested' => 'bg-danger',
+                                        'wrong_number' => 'bg-dark',
+                                        'follow_up_callback' => 'bg-warning',
+                                        'follow_up_ringing' => 'bg-warning',
+                                        'follow_up_hang_up' => 'bg-info',
+                                        'follow_up_rpnc' => 'bg-info',
                                     ];
 
                                     $statusKey = strtolower(str_replace(' ', '_', $lead->status)); // sanitize
                                     $badgeClass = $statusColor[$statusKey] ?? 'bg-secondary';
                                 @endphp
-
                                 <span class="badge {{ $badgeClass }}">{{ $lead->status }}</span>
+                                @if($lead->is_fresh)
+                                    <span class="badge bg-success ms-1" style="font-size: 12px;">Fresh</span>
+                                @endif
                             </td>
+                            <td class="display_none" style="padding: 5px;">{{ $lead->email }}</td>
+                            <td class="display_none" style="padding: 5px;">{{ $lead->phone }}</td>
+                            <!-- <td class="display_none" style="padding: 5px;">{{ $lead->lead_source }}</td> -->
+                            <!-- <button class="btn btn-sm lead-status-btn {{ $buttonClass }}">{{ $statusText }}</button> -->
 
                             <td style="padding: 5px;">
                                 <a href="tel:{{ $lead->phone }}" class="btn btn-primary btn-sm" title="Call">

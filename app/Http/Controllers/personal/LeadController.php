@@ -322,8 +322,8 @@ class LeadController extends Controller
         $userId = session()->get('user_id');
         $userRole = session()->get('emp_job_role');
 
-        $todayStart = Carbon::today()->startOfDay();  // 2024-06-11 00:00:00
-        $todayEnd = Carbon::today()->endOfDay();  // 2024-06-11 23:59:59
+        $todayStart = Carbon::today()->startOfDay();
+        $todayEnd = Carbon::today()->endOfDay();
 
         $query = \App\Models\personal\FollowUp::with(['lead', 'agent'])
             ->whereBetween('follow_up_time', [$todayStart, $todayEnd]);
@@ -332,8 +332,83 @@ class LeadController extends Controller
             $query->where('agent_id', $userId);
         }
 
-        $followUps = $query->get();
+        $followUps = $query->orderBy('follow_up_time', 'asc')->get();
         return view('followups.today', compact('followUps'));
+    }
+    
+    public function tomorrowFollowUps()
+    {
+        $userId = session()->get('user_id');
+        $userRole = session()->get('emp_job_role');
+
+        $tomorrowStart = Carbon::tomorrow()->startOfDay();
+        $tomorrowEnd = Carbon::tomorrow()->endOfDay();
+
+        $query = \App\Models\personal\FollowUp::with(['lead', 'agent'])
+            ->whereBetween('follow_up_time', [$tomorrowStart, $tomorrowEnd]);
+
+        if ($userRole == 2) {
+            $query->where('agent_id', $userId);
+        }
+
+        $followUps = $query->orderBy('follow_up_time', 'asc')->get();
+        return view('followups.tomorrow', compact('followUps'));
+    }
+    
+    public function upcomingFollowUps()
+    {
+        $userId = session()->get('user_id');
+        $userRole = session()->get('emp_job_role');
+
+        $tomorrow = Carbon::tomorrow()->endOfDay();
+
+        $query = \App\Models\personal\FollowUp::with(['lead', 'agent'])
+            ->where('follow_up_time', '>', $tomorrow)
+            ->orderBy('follow_up_time', 'asc');
+
+        if ($userRole == 2) {
+            $query->where('agent_id', $userId);
+        }
+
+        $followUps = $query->get();
+        return view('followups.upcoming', compact('followUps'));
+    }
+    
+    public function overdueFollowUps()
+    {
+        $userId = session()->get('user_id');
+        $userRole = session()->get('emp_job_role');
+        $today = Carbon::today();
+
+        // Get all leads with follow-ups
+        $query = \App\Models\personal\Lead::with(['followUps' => function($q) {
+            $q->orderBy('follow_up_time', 'desc');
+        }, 'followUps.agent']);
+
+        if ($userRole == 2) {
+            $query->where('agent_id', $userId);
+        }
+
+        $leads = $query->get();
+        
+        $overdueFollowUps = collect();
+        
+        foreach ($leads as $lead) {
+            if ($lead->followUps->isNotEmpty()) {
+                $latestFollowUp = $lead->followUps->first();
+                
+                // Check if the latest follow-up is overdue and not updated today
+                if ($latestFollowUp->follow_up_time < now() && 
+                    $latestFollowUp->updated_at->startOfDay() < $today) {
+                    $overdueFollowUps->push($latestFollowUp);
+                }
+            }
+        }
+        
+        // Sort by follow-up time
+        $followUps = $overdueFollowUps->sortBy('follow_up_time');
+        
+        return view('followups.overdue', compact('followUps'));
     }
 
     public function login(Request $request)

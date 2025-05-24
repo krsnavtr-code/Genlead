@@ -54,15 +54,52 @@ Route::prefix('admin')->middleware(['checkrole'])->group(function () {
             
             // Try to get follow-ups
             try {
-                $todayFollowups = \App\Models\personal\FollowUp::whereDate('follow_up_time', \Carbon\Carbon::today())->count();
-                $todayFollowupsList = \App\Models\personal\FollowUp::with('lead')
-                    ->whereDate('follow_up_time', \Carbon\Carbon::today())
+                $userId = session()->get('user_id');
+                $userRole = session()->get('emp_job_role');
+                
+                // Today's follow-ups
+                $todayQuery = \App\Models\personal\FollowUp::whereDate('follow_up_time', \Carbon\Carbon::today());
+                if ($userRole == 2) {
+                    $todayQuery->where('agent_id', $userId);
+                }
+                $todayFollowups = $todayQuery->count();
+                
+                $todayFollowupsList = $todayQuery->with('lead')
                     ->orderBy('follow_up_time', 'asc')
                     ->take(5)
                     ->get();
+                    
+                // Tomorrow's follow-ups
+                $tomorrowQuery = \App\Models\personal\FollowUp::whereDate('follow_up_time', \Carbon\Carbon::tomorrow());
+                if ($userRole == 2) {
+                    $tomorrowQuery->where('agent_id', $userId);
+                }
+                $tomorrowFollowups = $tomorrowQuery->count();
+                
+                // Upcoming follow-ups (all future follow-ups after tomorrow)
+                $tomorrow = \Carbon\Carbon::tomorrow();
+                $upcomingQuery = \App\Models\personal\FollowUp::where('follow_up_time', '>', $tomorrow->endOfDay());
+                if ($userRole == 2) {
+                    $upcomingQuery->where('agent_id', $userId);
+                }
+                $upcomingFollowups = $upcomingQuery->count();
+                
+                // Overdue follow-ups (only include if not updated today)
+                $today = \Carbon\Carbon::today();
+                $overdueQuery = \App\Models\personal\FollowUp::where('follow_up_time', '<', \Carbon\Carbon::now())
+                    ->whereDate('updated_at', '<', $today);
+                    
+                if ($userRole == 2) {
+                    $overdueQuery->where('agent_id', $userId);
+                }
+                $overdueFollowups = $overdueQuery->count();
+                
             } catch (\Exception $e) {
                 // If there's an error, set default values
                 $todayFollowups = 0;
+                $tomorrowFollowups = 0;
+                $thisWeekFollowups = 0;
+                $overdueFollowups = 0;
                 $todayFollowupsList = collect([]);
             }
             

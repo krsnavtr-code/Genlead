@@ -95,6 +95,48 @@
                         <a href="/i-admin/followups/today" class="small-box-footer">View Follow-ups <i class="fas fa-arrow-circle-right"></i></a>
                     </div>
                 </div>
+                
+                <div class="col-lg-3 col-6">
+                    <!-- Tomorrow's Follow-ups -->
+                    <div class="small-box bg-info">
+                        <div class="inner">
+                            <h3>{{ $tomorrowFollowups ?? 0 }}</h3>
+                            <p>Tomorrow's Follow-ups</p>
+                        </div>
+                        <div class="icon">
+                            <i class="fas fa-calendar-day"></i>
+                        </div>
+                        <a href="/i-admin/followups/tomorrow" class="small-box-footer">View Follow-ups <i class="fas fa-arrow-circle-right"></i></a>
+                    </div>
+                </div>
+                
+                <div class="col-lg-3 col-6">
+                    <!-- Upcoming Follow-ups -->
+                    <div class="small-box bg-success">
+                        <div class="inner">
+                            <h3>{{ $upcomingFollowups ?? 0 }}</h3>
+                            <p>Upcoming Follow-ups</p>
+                        </div>
+                        <div class="icon">
+                            <i class="fas fa-calendar-alt"></i>
+                        </div>
+                        <a href="/i-admin/followups/upcoming" class="small-box-footer">View Follow-ups <i class="fas fa-arrow-circle-right"></i></a>
+                    </div>
+                </div>
+                
+                <div class="col-lg-3 col-6">
+                    <!-- Overdue Follow-ups -->
+                    <div class="small-box bg-danger">
+                        <div class="inner">
+                            <h3>{{ $overdueFollowups ?? 0 }}</h3>
+                            <p>Overdue Follow-ups</p>
+                        </div>
+                        <div class="icon">
+                            <i class="fas fa-exclamation-triangle"></i>
+                        </div>
+                        <a href="/i-admin/followups/overdue" class="small-box-footer">View Follow-ups <i class="fas fa-arrow-circle-right"></i></a>
+                    </div>
+                </div>
 
                 <div class="col-lg-3 col-6">
                     <!-- Pending Payments -->
