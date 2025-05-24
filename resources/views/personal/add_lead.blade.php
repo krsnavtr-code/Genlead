@@ -83,10 +83,20 @@
                                 </select>
                             </div>
 
-                            <label for="status" class="form-label mt-3">Status<span class="text-danger">*</span></label>
+                            <label for="status" class="form-label mt-3">Status <span class="text-danger">*</span></label>
                             <select name="status" id="status" class="form-select lead-form-select" required>
-                                @foreach(App\Helpers\SiteHelper::getLeadStatus() as $status)
-                                    <option value="{{ $status['code'] }}">{{ $status['name'] }}</option>
+                                @foreach(App\Helpers\SiteHelper::getLeadStatus() as $leadType => $categories)
+                                    <optgroup label="{{ $leadType }}">
+                                        @foreach($categories as $category)
+                                            <optgroup label="&nbsp;&nbsp;→ {{ $category['category'] }}">
+                                                @foreach($category['subcategories'] as $subcategory)
+                                                    <option value="{{ $subcategory['code'] }}">
+                                                        &nbsp;&nbsp;&nbsp;&nbsp;{{ $subcategory['name'] }}
+                                                    </option>
+                                                @endforeach
+                                            </optgroup>
+                                        @endforeach
+                                    </optgroup>
                                 @endforeach
                             </select>
 
@@ -109,7 +119,19 @@
                             <input type="text" id="college" name="college" class="form-control">
 
                             <label for="courses" class="form-label mt-3">Courses<span class="text-danger">*</span></label>
-                            <input type="text" id="courses" name="courses" class="form-control" required>
+                            <select name="courses" id="courses" class="form-select lead-form-select" required>
+                                <option value="">Select Course</option>
+                                <option value="MBA">MBA</option>
+                                <option value="MCA">MCA</option>
+                                <option value="M.Com">M.Com</option>
+                                <option value="M.Sc">M.Sc</option>
+                                <option value="BBA">BBA</option>
+                                <option value="BCA">BCA</option>
+                                <option value="B.Sc">B.Sc</option>
+                                <option value="B.Com">B.Com</option>
+                                <option value="B.Tech">Software</option>
+                                <option value="M.Tech">Other</option>
+                            </select>
 
                             <label for="branch" class="form-label mt-3">Branch</label>
                             <input type="text" id="branch" name="branch" class="form-control">
