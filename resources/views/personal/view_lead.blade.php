@@ -364,21 +364,21 @@ margin-bottom: 10px;
             </div>
         </div>
 
-        <div class="lead-properties">
+        <!-- <div class="lead-properties">
             <h4>Lead Properties:</h4>
             <div><span class="fAaWVZ">Lead Age:</span><span class="gpZObK">{{ intval(\Carbon\Carbon::parse($lead->created_at)->diffInDays(now())) }} Days</span></div>
             <div><span class="fAaWVZ">Lead Source:</span><span class="gpZObK">{{ $lead->lead_source }}</span></div>
             {{-- <div><span class="fAaWVZ">Lead Status:</span><span class="gpZObK"> {{ ucfirst($lead->lead_status) }}</span></div> --}}
             <div><span class="fAaWVZ">University:</span><span class="gpZObK">{{ $lead->university ?? '-' }}</span></div>
             <div><span class="fAaWVZ">Course:</span><span class="gpZObK">{{ $lead->courses ?? '-' }}</span></div>
-    </div>
+        </div> -->
     </div>
 
     <!-- Right Content Area with Tabs and Content -->
     <div class="lead-right">
         <div class="tabs">
             <span class="active-tab" data-tab="lead-details">Lead Details</span>
-            <span data-tab="follow-up">Follow-Up</span>
+            <!-- <span data-tab="follow-up">Follow-Up</span> -->
             <span data-tab="conversations">Conversations</span>
             <span data-tab="payment-history">Payment History</span>
         </div>
@@ -424,7 +424,7 @@ margin-bottom: 10px;
             <span id="iconLead" onclick="toggleSection('leadInfo', 'iconLead')" style="cursor: pointer;">&#9650;</span>
         </div>
 
-        {{-- <button class="btn btn-warning btn-sm position-absolute top-0 end-0 m-2" onclick="openModal()">Edit</button> --}}
+        <!-- <button class="btn btn-warning btn-sm position-absolute top-0 end-0 m-2" onclick="openModal()">Edit</button> -->
 
         <div id="leadInfo" class="card-body">
             <div class="row mb-3">
