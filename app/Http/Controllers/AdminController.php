@@ -32,42 +32,77 @@ class AdminController extends Controller
 
     public function store(Request $request)
     {
-        $validatedData = $request->validate([
-            'emp_username' => 'required|string|max:50',
-            'emp_password' => 'required|string|min:3',
-        ]);
+        try {
+            $validatedData = $request->validate([
+                'emp_username' => 'required|string|max:50',
+                'emp_password' => 'required|string|min:3',
+            ]);
 
-        // Find the agent by username
-        $agent = \App\Models\personal\Agent::where('emp_username', $validatedData['emp_username'])->first();
+            Log::info('Login attempt started', [
+                'username' => $validatedData['emp_username'],
+                'ip' => $request->ip()
+            ]);
 
-        // Log the login attempt for debugging
-        Log::info('Admin login attempt', [
-            'username' => $validatedData['emp_username'],
-            'agent_found' => $agent ? 'yes' : 'no'
-        ]);
+            // Find the agent by username
+            $agent = \App\Models\personal\Agent::where('emp_username', $validatedData['emp_username'])->first();
 
-        // Check if agent exists and password matches
-        if (!$agent || $agent->emp_password !== $validatedData['emp_password']) {
-            Log::warning('Login failed for username: ' . $validatedData['emp_username']);
-            return back()->with('error', 'Invalid credentials. Please enter the correct username and password.');
+            Log::debug('Agent lookup result', [
+                'username' => $validatedData['emp_username'],
+                'agent_found' => $agent ? 'yes' : 'no',
+                'agent_id' => $agent ? $agent->id : null,
+                'stored_password' => $agent ? substr($agent->emp_password, 0, 5) . '...' : 'not found',
+                'input_password' => substr($validatedData['emp_password'], 0, 1) . '...' . substr($validatedData['emp_password'], -1),
+                'password_length' => strlen($validatedData['emp_password'])
+            ]);
+
+            // Check if agent exists and password matches
+            if (!$agent) {
+                Log::warning('Agent not found', ['username' => $validatedData['emp_username']]);
+                return back()->with('error', 'Invalid credentials. Please check your username and password.');
+            }
+
+            if ($agent->emp_password !== $validatedData['emp_password']) {
+                Log::warning('Password mismatch', [
+                    'agent_id' => $agent->id,
+                    'stored_password' => substr($agent->emp_password, 0, 5) . '...',
+                    'input_password' => substr($validatedData['emp_password'], 0, 1) . '...' . substr($validatedData['emp_password'], -1),
+                    'stored_length' => strlen($agent->emp_password),
+                    'input_length' => strlen($validatedData['emp_password'])
+                ]);
+                return back()->with('error', 'Invalid credentials. Please check your username and password.');
+            }
+
+            // Authenticate the user
+            if (Auth::guard('agent')->loginUsingId($agent->id)) {
+                // Store user data in session
+                $request->session()->regenerate();
+                session([
+                    'user_id' => $agent->id,
+                    'emp_job_role' => $agent->emp_job_role,
+                    'emp_name' => $agent->emp_name,
+                    'logged_in' => true
+                ]);
+
+                Log::info('Login successful', [
+                    'agent_id' => $agent->id,
+                    'username' => $agent->emp_username,
+                    'role' => $agent->emp_job_role,
+                    'session_id' => session()->getId()
+                ]);
+
+                return redirect()->intended(route('home'));
+            } else {
+                Log::error('Auth::loginUsingId failed', ['agent_id' => $agent->id]);
+                return back()->with('error', 'Authentication failed. Please try again.');
+            }
+
+        } catch (\Exception $e) {
+            Log::error('Login error: ' . $e->getMessage(), [
+                'exception' => $e,
+                'trace' => $e->getTraceAsString()
+            ]);
+            return back()->with('error', 'An error occurred during login. Please try again.');
         }
-
-        // Log the successful login
-        Log::info('Login successful', [
-            'agent_id' => $agent->id,
-            'username' => $agent->emp_username,
-            'role' => $agent->emp_job_role
-        ]);
-
-        // Store user data in session
-        session([
-            'user_id' => $agent->id,
-            'emp_job_role' => $agent->emp_job_role,
-            'emp_name' => $agent->emp_name,
-            'logged_in' => true
-        ]);
-
-        return redirect()->route('home');
     }
 
     public function myAccount()

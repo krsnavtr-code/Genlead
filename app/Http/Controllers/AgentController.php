@@ -142,17 +142,24 @@ class AgentController extends Controller
             // Generate a temporary password
             $tempPassword = Str::random(8);
             
-            // Send document upload email using the existing template
-            // Mail::send('emails.selected', [
-            //     'candidate' => (object)[
-            //         'name' => $agent->emp_name
-            //     ],
-            //     'username' => $agent->emp_username,
-            //     'password' => $tempPassword
-            // ], function ($message) use ($agent) {
-            //     $message->to($agent->emp_email)
-            //             ->subject('Welcome to Our Company');
-            // });
+            // Send welcome email with credentials
+            try {
+                Mail::send('emails.selected', [
+                    'candidate' => (object)[
+                        'name' => $agent->emp_name
+                    ],
+                    'username' => $agent->emp_username,
+                    'password' => $tempPassword
+                ], function($message) use ($agent) {
+                    $message->to($agent->emp_email, $agent->emp_name)
+                          ->subject('Welcome to Our Company - Your Account Details');
+                });
+                
+                Log::info('Welcome email sent to: ' . $agent->emp_email);
+            } catch (\Exception $e) {
+                Log::error('Failed to send welcome email: ' . $e->getMessage());
+                // Continue with registration even if email fails
+            }
             
             // Store the plain text password in the database
             $agent->emp_password = $tempPassword; // Storing in plain text for authentication
