@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use App\Models\Registration;
 use App\Models\personal\Lead;
 use App\Models\Deal;
@@ -36,23 +37,37 @@ class AdminController extends Controller
             'emp_password' => 'required|string|min:3',
         ]);
 
-        // Find the employee by username
-        $employee = Employee::where('emp_username', $validatedData['emp_username'])->first();
+        // Find the agent by username
+        $agent = \App\Models\personal\Agent::where('emp_username', $validatedData['emp_username'])->first();
 
+        // Log the login attempt for debugging
+        Log::info('Admin login attempt', [
+            'username' => $validatedData['emp_username'],
+            'agent_found' => $agent ? 'yes' : 'no'
+        ]);
 
-        // $userId = $employee->id ;
-        // dd($userId);
-
-        if (!$employee || $employee->emp_password !== $validatedData['emp_password']) {
-            // Pass error message to the session
-           return back()->with('error', 'Invalid credentials. Please enter the correct username and password.');
+        // Check if agent exists and password matches
+        if (!$agent || $agent->emp_password !== $validatedData['emp_password']) {
+            Log::warning('Login failed for username: ' . $validatedData['emp_username']);
+            return back()->with('error', 'Invalid credentials. Please enter the correct username and password.');
         }
-        session(['user_id' => $employee->id,]);
 
-        // dd(session('user_id')  );
-        // Redirect to the dashboard
+        // Log the successful login
+        Log::info('Login successful', [
+            'agent_id' => $agent->id,
+            'username' => $agent->emp_username,
+            'role' => $agent->emp_job_role
+        ]);
+
+        // Store user data in session
+        session([
+            'user_id' => $agent->id,
+            'emp_job_role' => $agent->emp_job_role,
+            'emp_name' => $agent->emp_name,
+            'logged_in' => true
+        ]);
+
         return redirect()->route('home');
-
     }
 
     public function myAccount()

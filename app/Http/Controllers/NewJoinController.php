@@ -290,28 +290,70 @@ class NewJoinController extends Controller
      // Handle agent login
      public function agentlogin(Request $request)
      {
-         $request->validate([
-             'username' => 'required',
-             'password' => 'required',
-         ]);
+         try {
+             Log::info('Agent login attempt started', ['ip' => $request->ip()]);
+             
+             $validated = $request->validate([
+                 'username' => 'required|string',
+                 'password' => 'required|string',
+             ]);
  
-         $username = $request->input('username');
-         $password = $request->input('password');
+             $username = $validated['username'];
+             $password = $validated['password'];
  
-         // Find the agent by username
-         $agent = Agent::where('username', $username)->first();
+             Log::info('Looking for agent', ['username' => $username]);
+             
+             // Find the agent by emp_username
+             $agent = Agent::where('emp_username', $username)->first();
+             
+             if (!$agent) {
+                 Log::warning('Agent not found', ['username' => $username]);
+                 return back()->withErrors(['error' => 'Invalid username or password.'])->withInput();
+             }
+             
+             Log::debug('Agent found', [
+                 'agent_id' => $agent->id,
+                 'stored_password' => $agent->emp_password,
+                 'input_password' => $password,
+                 'passwords_match' => $password === $agent->emp_password ? 'yes' : 'no'
+             ]);
  
-         // Check if the agent exists and the password matches (without hashing)
-         if ($agent && $password === $agent->password) {
-             // Authenticate the agent
-             Auth::login($agent);
+             // Check if the password matches
+             if ($password === $agent->emp_password) {
+                 // Authenticate the agent using the 'agent' guard
+                 if (Auth::guard('agent')->loginUsingId($agent->id)) {
+                     // Store user data in session
+                     $request->session()->regenerate();
+                     session([
+                         'user_id' => $agent->id,
+                         'emp_job_role' => $agent->emp_job_role,
+                         'emp_name' => $agent->emp_name,
+                         'logged_in' => true
+                     ]);
+                     
+                     Log::info('Login successful', [
+                         'agent_id' => $agent->id,
+                         'name' => $agent->emp_name,
+                         'role' => $agent->emp_job_role
+                     ]);
  
-             // Redirect to the home route
-             return redirect()->route('home');
+                     return redirect()->intended(route('home'));
+                 } else {
+                     Log::error('Auth::loginUsingId failed', ['agent_id' => $agent->id]);
+                     return back()->withErrors(['error' => 'Authentication failed. Please try again.']);
+                 }
+             }
+ 
+             Log::warning('Invalid password', ['agent_id' => $agent->id]);
+             return back()->withErrors(['error' => 'Invalid username or password.'])->withInput();
+             
+         } catch (\Exception $e) {
+             Log::error('Login error: ' . $e->getMessage(), [
+                 'exception' => $e,
+                 'trace' => $e->getTraceAsString()
+             ]);
+             return back()->withErrors(['error' => 'An error occurred. Please try again.']);
          }
- 
-         // If authentication fails, redirect back with an error
-         return back()->withErrors(['error' => 'Invalid credentials. Please try again.']);
      }
 
 

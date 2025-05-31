@@ -9,6 +9,8 @@ use App\Models\Registration;
 use App\Models\personal\Lead;
 use App\Models\personal\FollowUp;
 use App\Models\personal\Agent;
+use App\Http\Controllers\AgentController;
+use App\Http\Controllers\NewJoinController;
 use App\Models\personal\Attendance;
 use App\Models\personal\Payment;
 use App\Models\ManageList;
@@ -19,6 +21,16 @@ use Carbon\Carbon;
 
 
 Route::get('/send-reminder',  [CronJobController::class, 'SendLeadReminders']);
+
+// Agent Routes
+Route::get('/agent/register', [AgentController::class, 'showRegistrationForm'])->name('agent.register.form');
+Route::post('/agent/register', [AgentController::class, 'register'])->name('agent.register');
+Route::get('/agent/verify-otp', [AgentController::class, 'verifyOtpForm'])->name('agent.verify-otp');
+Route::post('/agent/verify-otp', [AgentController::class, 'verifyOtp'])->name('agent.verify-otp');
+
+// Agent Login Routes
+Route::get('/agent/login', [NewJoinController::class, 'agentLoginForm'])->name('agent.login');
+Route::post('/agent/login', [NewJoinController::class, 'agentlogin'])->name('agent.login.submit');
 
 
 Route::prefix('i-admin')->group(function () {

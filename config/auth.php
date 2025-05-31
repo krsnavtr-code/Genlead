@@ -14,8 +14,8 @@ return [
     */
 
     'defaults' => [
-        'guard' => env('AUTH_GUARD', 'web'),
-        'passwords' => 'registrations', 
+        'guard' => env('AUTH_GUARD', 'agent'),
+        'passwords' => 'agents', 
     ],
 
     /*
@@ -36,9 +36,9 @@ return [
     */
 
     'guards' => [
-        'web' => [
+        'agent' => [
             'driver' => 'session',
-            'provider' => 'registrations',
+            'provider' => 'agents',
         ],
     ],
 
@@ -59,24 +59,12 @@ return [
     |
     */
 
-    // 'providers' => [
-    //     'users' => [
-    //         'driver' => 'eloquent',
-    //         'model' => env('AUTH_MODEL', App\Models\User::class),
-    //     ],
-
-    //     // 'users' => [
-    //     //     'driver' => 'database',
-    //     //     'table' => 'users',
-    //     // ],
-    // ],
-
     'providers' => [
-    'registrations' => [
-        'driver' => 'eloquent',
-        'model' => App\Models\Registration::class,
+        'agents' => [
+            'driver' => 'eloquent',
+            'model' => App\Models\personal\Agent::class,
+        ],
     ],
-],
 
 
     /*

@@ -15,11 +15,17 @@
                     <div class="alert alert-danger">{{ $errors->first() }}</div>
                 @endif --}}
 
-                <form action="{{ route('agent.login') }}" method="POST">
+                @if($errors->any())
+                    <div class="alert alert-danger">
+                        {{ $errors->first() }}
+                    </div>
+                @endif
+
+                <form action="{{ route('agent.login.submit') }}" method="POST">
                     @csrf
                     <div class="form-group">
                         <label for="username">Username:</label>
-                        <input type="text" name="username" class="form-control" required>
+                        <input type="text" name="username" class="form-control" value="{{ old('username') }}" required>
                     </div>
                     <div class="form-group">
                         <label for="password">Password:</label>
