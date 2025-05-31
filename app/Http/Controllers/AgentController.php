@@ -94,57 +94,66 @@ class AgentController extends Controller
                 'otp' => 'required|string|digits:6',
             ]);
 
-            // Get stored OTP from session
+            // Get stored OTP and agent data from session
             $storedOtp = session('agent_otp');
+            $agentData = session('agent_data');
             
-            if (!$storedOtp) {
-                throw new \Exception('OTP session expired. Please try again.');
+            if (!$storedOtp || !$agentData) {
+                Log::warning('Session data missing');
+                return back()->withErrors(['error' => 'Session expired. Please register again.']);
             }
 
-            Log::info('OTP validation passed');
+            $submittedOtp = $request->input('otp');
+            
             Log::info('Session data verified');
             Log::info('Stored OTP: ' . $storedOtp);
-
-            // Get agent data from session
-            $agentData = session('agent_data');
             Log::info('Agent data: ' . json_encode($agentData));
 
-            if (!$agentData) {
-                throw new \Exception('Agent data not found in session.');
+            if ($submittedOtp !== $storedOtp) {
+                return back()->withErrors(['otp' => 'Invalid OTP. Please try again.']);
             }
 
-            // Create agent record
-            $agent = new Agent();
-            $agent->emp_name = $agentData['emp_name'];
-            $agent->emp_email = $agentData['emp_email'];
-            $agent->emp_phone = $agentData['emp_phone'];
-            $agent->emp_location = $agentData['emp_location'];
-            $agent->emp_password = $agentData['emp_password']; // Already hashed
-            $agent->emp_job_role = $agentData['emp_job_role'];
-            $agent->emp_username = $agentData['emp_username'];
-            $agent->emp_join_date = $agentData['emp_join_date'];
-            
-            Log::info('Agent data before save: ' . json_encode($agent->toArray()));
-            
-            $agent->save();
+            // Check if username already exists
+            $existingAgent = Agent::where('emp_username', $agentData['emp_username'])->first();
+            if ($existingAgent) {
+                Log::warning('Username already exists: ' . $agentData['emp_username']);
+                return back()->withErrors(['error' => 'This username is already taken. Please try a different one.']);
+            }
+
+            // Check if email already exists
+            $existingEmail = Agent::where('emp_email', $agentData['emp_email'])->first();
+            if ($existingEmail) {
+                Log::warning('Email already exists: ' . $agentData['emp_email']);
+                return back()->withErrors(['error' => 'This email is already registered. Please use a different email.']);
+            }
+
+            // Remove sensitive data before saving
+            $agentData = array_diff_key($agentData, ['emp_password_hash' => '']);
+            Log::info('Agent data before save: ' . json_encode($agentData));
+
+            // Create the agent
+            $agent = Agent::create($agentData);
+
+            if (!$agent) {
+                throw new \Exception('Failed to create agent');
+            }
 
             Log::info('Agent created successfully with data: ' . json_encode([
                 'id' => $agent->id,
                 'name' => $agent->emp_name,
                 'email' => $agent->emp_email
             ]));
-            
-            Log::info('Agent created successfully');
-            
-            // Clear session data
-            session()->forget(['agent_otp', 'agent_data']);
 
             // Generate a temporary password
             $tempPassword = Str::random(8);
-            
+
+            // Store the plain text password in the database
+            $agent->emp_password = $tempPassword; // Storing in plain text for authentication
+            $agent->save();
+
             // Send welcome email with credentials
             try {
-                Mail::send('emails.selected', [
+                Mail::send('emails.agent_credentials', [
                     'candidate' => (object)[
                         'name' => $agent->emp_name
                     ],
@@ -154,23 +163,21 @@ class AgentController extends Controller
                     $message->to($agent->emp_email, $agent->emp_name)
                           ->subject('Welcome to Our Company - Your Account Details');
                 });
-                
+
                 Log::info('Welcome email sent to: ' . $agent->emp_email);
             } catch (\Exception $e) {
                 Log::error('Failed to send welcome email: ' . $e->getMessage());
                 // Continue with registration even if email fails
             }
-            
-            // Store the plain text password in the database
-            $agent->emp_password = $tempPassword; // Storing in plain text for authentication
-            $agent->save();
-            
-            
+
+            // Clear session data
+            session()->forget(['agent_otp', 'agent_data']);
+
             return redirect('/')->with('success', 'Agent created successfully!');
-            
+
         } catch (\Exception $e) {
             Log::error('OTP Verification Error: ' . $e->getMessage());
-            return back()->withErrors(['error' => 'Registration failed. Please try again.']);
+            return back()->withErrors(['error' => 'Registration failed. ' . $e->getMessage()]);
         }
     }
 }
