@@ -25,6 +25,7 @@ Route::get('/send-reminder',  [CronJobController::class, 'SendLeadReminders']);
 // Agent Routes
 Route::get('/agent/register', [AgentController::class, 'showRegistrationForm'])->name('agent.register.form');
 Route::post('/agent/register', [AgentController::class, 'register'])->name('agent.register');
+Route::post('/agent/check-email', [AgentController::class, 'checkEmail'])->name('agent.check-email');
 Route::get('/agent/verify-otp', [AgentController::class, 'verifyOtpForm'])->name('agent.verify-otp');
 Route::post('/agent/verify-otp', [AgentController::class, 'verifyOtp'])->name('agent.verify-otp');
 

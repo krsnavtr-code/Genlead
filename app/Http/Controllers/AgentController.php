@@ -32,6 +32,32 @@ class AgentController extends Controller
      * @param string $name
      * @return string
      */
+    /**
+     * Check if an email is already registered
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function checkEmail(Request $request)
+    {
+        $request->validate([
+            'email' => 'required|email'
+        ]);
+        
+        $exists = \App\Models\personal\Agent::where('emp_email', $request->email)->exists();
+        
+        return response()->json([
+            'available' => !$exists,
+            'email' => $request->email
+        ]);
+    }
+
+    /**
+     * Generate a unique username from a name
+     * 
+     * @param string $name
+     * @return string
+     */
     private function generateUniqueUsername($name)
     {
         // Convert name to lowercase and replace spaces with underscores
@@ -66,11 +92,19 @@ class AgentController extends Controller
             $validatedData = $request->validate([
                 'name' => 'required|string|max:255',
                 'email' => 'required|email|unique:employees,emp_email',
-                'phone' => 'required|numeric|digits:10',
+                'phone' => [
+                    'required',
+                    'numeric',
+                    'digits:10',
+                    'regex:/^[0-9]{10}$/'
+                ],
                 'address' => 'required|string',
                 'password' => 'required|min:8',
             ], [
-                'email.unique' => 'This email is already registered.'
+                'email.unique' => 'This email is already registered.',
+                'phone.numeric' => 'Phone number must contain only numbers.',
+                'phone.digits' => 'Phone number must be exactly 10 digits long.',
+                'phone.regex' => 'Please enter a valid 10-digit phone number.'
             ]);
             
             // Generate a unique username from the agent's name

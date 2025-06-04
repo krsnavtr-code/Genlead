@@ -2,7 +2,11 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Genlead - Registration</title>
+    <title>Genlead - Agent Registration</title>
+    <meta name="description" content="Register as an agent to connect with leads and provide admission services.">
+    <meta name="keywords" content="Genlead, Agent Registration, Admission Services">
+    <meta name="author" content="Genlead">
+    <link rel="icon" type="image/png" href="https://genlead.in/images/gen-logo.jpeg">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -227,24 +231,38 @@
                 </div>
 
                 <div class="form-group">
-                    <input type="email" class="form-control @error('email') is-invalid @enderror" 
-                           name="email" value="{{ old('email') }}" placeholder="Email Address" required>
-                    @error('email')
-                        <div class="invalid-feedback">{{ $message }}</div>
-                    @enderror
+                    <div class="input-group">
+                        <input type="email" class="form-control @error('email') is-invalid @enderror" 
+                               id="email" name="email" value="{{ old('email') }}" 
+                               placeholder="Email" required>
+                        <span class="input-group-text">
+                            <i class="fas fa-envelope"></i>
+                        </span>
+                        @error('email')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
+                    <small id="emailHelp" class="form-text"></small>
                 </div>
 
                 <div class="form-group">
-                    <input type="tel" class="form-control @error('phone') is-invalid @enderror" 
-                           name="phone" value="{{ old('phone') }}" placeholder="Phone Number" required>
-                    @error('phone')
-                        <div class="invalid-feedback">{{ $message }}</div>
-                    @enderror
+                    <div class="input-group">
+                        <input type="tel" class="form-control @error('phone') is-invalid @enderror" 
+                               id="phone" name="phone" value="{{ old('phone') }}" 
+                               placeholder="Phone" required maxlength="10">
+                        <span class="input-group-text">
+                            <i class="fas fa-phone"></i>
+                        </span>
+                        @error('phone')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
+                    <small id="phoneHelp" class="form-text"></small>
                 </div>
 
                 <div class="form-group">
                     <textarea class="form-control @error('address') is-invalid @enderror" 
-                              name="address" rows="2" placeholder="Your Address" required>{{ old('address') }}</textarea>
+                              name="address" rows="1" placeholder="Place" required>{{ old('address') }}</textarea>
                     @error('address')
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
@@ -294,5 +312,128 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            const csrfToken = $('meta[name="csrf-token"]').attr('content');
+            let emailCheckInProgress = false;
+            let emailTimeout;
+
+            // Function to check email availability
+            function checkEmailAvailability(email) {
+                if (!isValidEmail(email)) return;
+                
+                emailCheckInProgress = true;
+                const emailField = $('#email');
+                const emailHelp = $('#emailHelp');
+                
+                emailField.removeClass('is-invalid is-valid');
+                emailHelp.removeClass('text-danger text-success')
+                    .html('<span class="spinner-border spinner-border-sm" role="status"></span> Checking email...');
+                
+                $.ajax({
+                    url: '{{ route("agent.check-email") }}',
+                    type: 'POST',
+                    data: {
+                        _token: csrfToken,
+                        email: email
+                    },
+                    success: function(response) {
+                        if (response.available) {
+                            emailField.removeClass('is-invalid');
+                            emailField.addClass('is-valid');
+                            emailHelp.removeClass('text-danger').addClass('text-success').text('Email is available!');
+                        } else {
+                            emailField.removeClass('is-valid');
+                            emailField.addClass('is-invalid');
+                            emailHelp.removeClass('text-success').addClass('text-danger').text('This email is already registered.');
+                        }
+                    },
+                    error: function(xhr) {
+                        console.error('Error checking email:', xhr.responseText);
+                        emailHelp.removeClass('text-success').addClass('text-danger')
+                            .text('Error checking email. Please try again.');
+                    },
+                    complete: function() {
+                        emailCheckInProgress = false;
+                    }
+                });
+            }
+
+            // Simple email validation
+            function isValidEmail(email) {
+                const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                return re.test(email);
+            }
+
+            // Check email on input change (with debounce)
+            $('#email').on('input', function() {
+                const email = $(this).val().trim();
+                
+                // Clear previous timeout
+                clearTimeout(emailTimeout);
+                
+                // Reset status
+                $(this).removeClass('is-valid is-invalid');
+                const emailHelp = $('#emailHelp');
+                emailHelp.removeClass('text-success text-danger')
+                    .text('');
+                
+                // Only check if email is valid
+                if (email.length > 0) {
+                    if (!isValidEmail(email)) {
+                        $(this).addClass('is-invalid');
+                        emailHelp.addClass('text-danger').text('Please enter a valid email address.');
+                        return;
+                    }
+                    
+                    emailTimeout = setTimeout(() => {
+                        if (!emailCheckInProgress) {
+                            checkEmailAvailability(email);
+                        }
+                    }, 500);
+                }
+            });
+
+            // Phone number validation
+            $('#phone').on('input', function() {
+                const phone = $(this).val().trim();
+                const phoneHelp = $('#phoneHelp');
+                
+                // Remove non-numeric characters
+                const numericPhone = phone.replace(/\D/g, '');
+                $(this).val(numericPhone);
+                
+                // Reset status
+                $(this).removeClass('is-valid is-invalid');
+                phoneHelp.removeClass('text-success text-danger');
+                
+                if (phone.length === 0) {
+                    phoneHelp.text('');
+                    return;
+                }
+                
+                if (phone.length < 10) {
+                    $(this).addClass('is-invalid');
+                    phoneHelp.addClass('text-danger').text('Phone number must be 10 digits');
+                } else if (phone.length > 10) {
+                    $(this).val(phone.substring(0, 10));
+                    $(this).addClass('is-valid');
+                    phoneHelp.addClass('text-success').text('Valid phone number');
+                } else {
+                    $(this).addClass('is-valid');
+                    phoneHelp.addClass('text-success').text('Valid phone number');
+                }
+            });
+            
+            // Prevent non-numeric input
+            $('#phone').on('keypress', function(e) {
+                const charCode = e.which ? e.which : e.keyCode;
+                if (charCode > 31 && (charCode < 48 || charCode > 57)) {
+                    return false;
+                }
+                return true;
+            });
+        });
+    </script>
 </body>
 </html>
