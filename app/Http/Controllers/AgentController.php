@@ -19,6 +19,46 @@ class AgentController extends Controller
     {
         return view('agent.register');
     }
+    
+    /**
+     * Check if a username is available
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    /**
+     * Generate a unique username from a name
+     * 
+     * @param string $name
+     * @return string
+     */
+    private function generateUniqueUsername($name)
+    {
+        // Convert name to lowercase and replace spaces with underscores
+        $baseUsername = strtolower(preg_replace('/[^a-zA-Z0-9_]/', '', str_replace(' ', '_', $name)));
+        
+        // If the base username is empty, use a default prefix
+        if (empty($baseUsername)) {
+            $baseUsername = 'user' . time();
+        }
+        
+        $username = $baseUsername;
+        $counter = 1;
+        
+        // Check if username exists, if it does, append a number and try again
+        while (\App\Models\personal\Agent::where('emp_username', $username)->exists()) {
+            $username = $baseUsername . $counter;
+            $counter++;
+            
+            // Safety check to prevent infinite loops
+            if ($counter > 100) {
+                $username = $baseUsername . '_' . time();
+                break;
+            }
+        }
+        
+        return $username;
+    }
 
     public function register(Request $request)
     {
@@ -29,7 +69,12 @@ class AgentController extends Controller
                 'phone' => 'required|numeric|digits:10',
                 'address' => 'required|string',
                 'password' => 'required|min:8',
+            ], [
+                'email.unique' => 'This email is already registered.'
             ]);
+            
+            // Generate a unique username from the agent's name
+            $validatedData['emp_username'] = $this->generateUniqueUsername($validatedData['name']);
 
             Log::info('Registration data validated successfully');
             Log::info('Validated data: ' . json_encode($validatedData));
@@ -50,7 +95,7 @@ class AgentController extends Controller
                 'emp_password' => $validatedData['password'], // Storing password in plain text for authentication
                 'emp_password_hash' => Hash::make($validatedData['password']), // Also store hashed version for security
                 'emp_job_role' => 2,
-                'emp_username' => Str::slug($validatedData['name']),
+                'emp_username' => $validatedData['emp_username'],
                 'emp_join_date' => now()
             ]]);
 
