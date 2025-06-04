@@ -12,7 +12,7 @@ class FollowUp extends Model
 
     use HasFactory;
 
-    protected $fillable = ['lead_id', 'agent_id', 'follow_up_time', 'comments', 'action'];
+    protected $fillable = ['lead_id', 'agent_id', 'follow_up_time', 'comments', 'action', 'notified'];
 
 
     // Define the relationship with Lead
