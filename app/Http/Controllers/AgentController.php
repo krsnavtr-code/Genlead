@@ -159,7 +159,57 @@ class AgentController extends Controller
 
     public function verifyOtpForm()
     {
+        // Check if we have agent data in session
+        if (!session('agent_data')) {
+            return redirect()->route('agent.register.form')
+                ->with('error', 'Session expired. Please register again.');
+        }
+        
         return view('agent.verify-otp');
+    }
+    
+    /**
+     * Resend OTP to the agent's email
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function resendOtp(Request $request)
+    {
+        try {
+            // Check if we have agent data in session
+            $agentData = session('agent_data');
+            if (!$agentData) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Session expired. Please register again.'
+                ], 400);
+            }
+            
+            // Generate new OTP
+            $otp = str_pad(rand(0, 999999), 6, '0', STR_PAD_LEFT);
+            
+            // Store new OTP in session
+            session(['agent_otp' => $otp]);
+            
+            // Send new OTP email
+            Mail::raw('Your new OTP for agent registration is: ' . $otp, function ($message) use ($agentData) {
+                $message->to($agentData['emp_email'])
+                      ->subject('New OTP for Agent Registration');
+            });
+            
+            return response()->json([
+                'success' => true,
+                'message' => 'New OTP has been sent to your email.'
+            ]);
+            
+        } catch (\Exception $e) {
+            Log::error('Error resending OTP: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to resend OTP. Please try again.'
+            ], 500);
+        }
     }
 
     public function verifyOtp(Request $request)
@@ -168,9 +218,18 @@ class AgentController extends Controller
             Log::info('Starting OTP verification');
             Log::info('Submitted data: ' . json_encode($request->all()));
 
-            // Validate OTP
-            $request->validate([
-                'otp' => 'required|string|digits:6',
+            // Validate OTP format
+            $validated = $request->validate([
+                'otp' => [
+                    'required',
+                    'string',
+                    'digits:6',
+                    'regex:/^[0-9]{6}$/'
+                ]
+            ], [
+                'otp.required' => 'Please enter the OTP.',
+                'otp.digits' => 'OTP must be exactly 6 digits.',
+                'otp.regex' => 'Please enter a valid 6-digit OTP.'
             ]);
 
             // Get stored OTP and agent data from session
@@ -179,18 +238,45 @@ class AgentController extends Controller
             
             if (!$storedOtp || !$agentData) {
                 Log::warning('Session data missing');
-                return back()->withErrors(['error' => 'Session expired. Please register again.']);
+                return back()
+                    ->withInput()
+                    ->withErrors(['otp' => 'Your session has expired. Please register again.']);
             }
 
             $submittedOtp = $request->input('otp');
             
             Log::info('Session data verified');
             Log::info('Stored OTP: ' . $storedOtp);
+            Log::info('Submitted OTP: ' . $submittedOtp);
             Log::info('Agent data: ' . json_encode($agentData));
 
+            // Check if OTP matches
             if ($submittedOtp !== $storedOtp) {
-                return back()->withErrors(['otp' => 'Invalid OTP. Please try again.']);
+                // Check if we should show remaining attempts
+                $attempts = session('otp_attempts', 0) + 1;
+                session(['otp_attempts' => $attempts]);
+                
+                $remainingAttempts = max(0, 5 - $attempts);
+                
+                if ($remainingAttempts <= 0) {
+                    // Clear session after too many attempts
+                    session()->forget(['agent_otp', 'agent_data', 'otp_attempts']);
+                    return redirect()->route('agent.register.form')
+                        ->with('error', 'Too many failed attempts. Please register again.');
+                }
+                
+                $message = 'The OTP you entered is incorrect.';
+                if ($remainingAttempts < 3) {
+                    $message .= ' ' . $remainingAttempts . ' attempts remaining.';
+                }
+                
+                return back()
+                    ->withInput()
+                    ->withErrors(['otp' => $message]);
             }
+            
+            // Reset attempts on successful OTP verification
+            session()->forget('otp_attempts');
 
             // Check if username already exists
             $existingAgent = Agent::where('emp_username', $agentData['emp_username'])->first();

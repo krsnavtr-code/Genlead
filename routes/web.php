@@ -28,6 +28,7 @@ Route::post('/agent/register', [AgentController::class, 'register'])->name('agen
 Route::post('/agent/check-email', [AgentController::class, 'checkEmail'])->name('agent.check-email');
 Route::get('/agent/verify-otp', [AgentController::class, 'verifyOtpForm'])->name('agent.verify-otp');
 Route::post('/agent/verify-otp', [AgentController::class, 'verifyOtp'])->name('agent.verify-otp');
+Route::post('/agent/resend-otp', [AgentController::class, 'resendOtp'])->name('agent.resend-otp');
 
 // Agent Login Routes
 Route::get('/agent/login', [NewJoinController::class, 'agentLoginForm'])->name('agent.login');

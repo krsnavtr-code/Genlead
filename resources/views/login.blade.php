@@ -17,7 +17,7 @@
 
     <style>
         body {
-            background: url('{{ asset('images/background-image.png') }}') no-repeat center center;
+            background: url("{{ asset('images/background-image.png') }}") no-repeat center center;
             background-size: cover;
             height: 100vh;
             font-family: 'Poppins', sans-serif;
@@ -41,6 +41,7 @@
     <div class="login-card card shadow-lg p-4" style="width: 100%; max-width: 420px; border-radius: 1rem; background-color: #fff;">
         <div class="text-center mb-4">
             <img src="{{ asset('images/gen-logo.jpeg') }}" alt="GenLead Logo" style="height: 80px;">
+            <p>Check your email for login credentials</p>
         </div>
 
         <!-- Display Error Message -->
