@@ -62,6 +62,7 @@
                                         <a href="{{ route('admin.team.member.edit', $member->id) }}" class="btn btn-sm btn-primary">
                                             <i class="fas fa-edit"></i> Edit
                                         </a>
+                                        
                                     </td>
                                 </tr>
                             @empty

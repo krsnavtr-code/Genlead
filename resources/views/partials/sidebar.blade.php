@@ -85,6 +85,16 @@
                 </li>
                 @endif
 
+                <!-- Assign Agents to Team Leader for Admin (1) -->
+                @if($emp_job_role === 1)
+                <li class="nav-item">
+                    <a href="{{ url('/admin/assign-agents-to-team-leader') }}" class="nav-link w-100 {{ request()->is('admin/assign-agents-to-team-leader') ? 'active' : '' }}">
+                        <i class="nav-icon fas fa-users" style="color: #0062CC;"></i>
+                        <p>Assign Agents to Team Leader</p>
+                    </a>
+                </li>
+                @endif
+
                 <!-- Show New Join Panel for Admin (1) -->
                 @if($emp_job_role === 1)
                 <li class="nav-item">

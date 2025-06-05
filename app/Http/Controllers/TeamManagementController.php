@@ -112,4 +112,53 @@ class TeamManagementController extends Controller
             'title' => 'Team Performance'
         ]);
     }
+    
+    /**
+     * Show the form to assign agents to team leaders (Admin only)
+     */
+    public function showAssignAgentsForm()
+    {
+        if (session('emp_job_role') !== 1) {
+            abort(403, 'Unauthorized access.');
+        }
+
+        // Get all team leaders (role 6)
+        $teamLeaders = Employee::where('emp_job_role', 6)
+            ->orderBy('emp_name')
+            ->get();
+
+        // Get all agents (role 2)
+        $agents = Employee::where('emp_job_role', 2)
+            ->orderBy('emp_name')
+            ->get();
+
+        return view('team_management.assign_agents', [
+            'teamLeaders' => $teamLeaders,
+            'agents' => $agents,
+            'title' => 'Assign Agents to Team Leaders'
+        ]);
+    }
+
+    /**
+     * Process the assignment of agents to team leaders (Admin only)
+     */
+    public function assignAgentsToTeamLeader(Request $request)
+    {
+        if (session('emp_job_role') !== 1) {
+            abort(403, 'Unauthorized access.');
+        }
+
+        $validated = $request->validate([
+            'team_leader_id' => 'required|exists:employees,id,emp_job_role,6', // Must be a team leader
+            'agent_ids' => 'required|array',
+            'agent_ids.*' => 'exists:employees,id,emp_job_role,2', // Must be an agent
+        ]);
+
+        // Update the reports_to field for selected agents
+        Employee::whereIn('id', $validated['agent_ids'])
+            ->update(['reports_to' => $validated['team_leader_id']]);
+
+        return redirect()->route('admin.assign.agents.form')
+            ->with('success', 'Agents have been successfully assigned to the team leader.');
+    }
 }
