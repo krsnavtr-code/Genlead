@@ -37,7 +37,8 @@
                                 1 => 'SuperAdmin',
                                 2 => 'Agent',
                                 4 => 'HR',
-                                5 => 'Accountant'
+                                5 => 'Accountant',
+                                6 => 'Team Lead'
                             ];
                         @endphp
                         {{ $roles[$employee->emp_job_role] ?? 'Unknown Role' }}

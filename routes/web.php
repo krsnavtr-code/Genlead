@@ -3,7 +3,6 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Storage;
 use App\Http\Controllers\personal\LeadController;
-use App\Http\Controllers\AdminController;
 use App\Http\Controllers\CronJobController;
 use App\Models\Registration;
 use App\Models\personal\Lead;
@@ -17,10 +16,29 @@ use App\Models\ManageList;
 use App\Models\NewEmployee;
 use App\Models\Deal;
 use App\Models\Document;
+use App\Models\Employee;
 use Carbon\Carbon;
-
+use App\Http\Controllers\TeamManagementController;
 
 Route::get('/send-reminder',  [CronJobController::class, 'SendLeadReminders']);
+
+// Team Management Routes for Team Leaders
+Route::middleware(['auth'])
+    ->prefix('admin')
+    ->name('admin.')
+    ->group(function () {
+        Route::get('/team-management', [\App\Http\Controllers\TeamManagementController::class, 'index'])
+            ->name('team.management');
+        
+        Route::get('/team/performance', [\App\Http\Controllers\TeamManagementController::class, 'performance'])
+            ->name('team.performance');
+            
+        Route::get('/team/member/{id}/edit', [\App\Http\Controllers\TeamManagementController::class, 'edit'])
+            ->name('team.member.edit');
+            
+        Route::put('/team/member/{id}', [\App\Http\Controllers\TeamManagementController::class, 'update'])
+            ->name('team.member.update');
+    });
 
 // Agent Routes
 Route::get('/agent/register', [AgentController::class, 'showRegistrationForm'])->name('agent.register.form');
@@ -93,7 +111,7 @@ Route::prefix('i-admin')->group(function () {
 
     // Filter Routes
 
-    Route::get('/lead', [AdminController::class, 'index'])->name('leads.index');
+    Route::get('/lead', [\App\Http\Controllers\AdminController::class, 'index'])->name('leads.index');
 
 
     // Agent Login Routes
