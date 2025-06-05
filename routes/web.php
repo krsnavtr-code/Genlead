@@ -22,11 +22,20 @@ use App\Http\Controllers\TeamManagementController;
 
 Route::get('/send-reminder',  [CronJobController::class, 'SendLeadReminders']);
 
+// Test route for debugging
+Route::get('/test-js', function() {
+    return view('test-js');
+});
+
 // Admin Routes
 Route::middleware(['auth'])
     ->prefix('admin')
     ->name('admin.')
     ->group(function () {
+        // Update employee role
+        Route::post('/update-employee-role', [\App\Http\Controllers\ManageController::class, 'updateEmployeeRole'])
+            ->name('update.employee.role');
+            
         // Assign Agents to Team Leader
         Route::get('/assign-agents-to-team-leader', [\App\Http\Controllers\TeamManagementController::class, 'showAssignAgentsForm'])
             ->name('assign.agents.form');

@@ -20,6 +20,7 @@ use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 use Carbon\Carbon;
 use Illuminate\Support\MessageBag;
+use Illuminate\Support\Facades\Log;
 
 
 
@@ -377,5 +378,73 @@ public function showAllEmployees()
      return redirect()->back()->with('success', 'Password successfully changed.');
  }
 
+ /**
+  * Update an employee's role
+  */
+ public function updateEmployeeRole(Request $request)
+ {
+     // Ensure only superadmin can perform this action
+     if (session('emp_job_role') !== 1) {
+         return response()->json(['success' => false, 'message' => 'Unauthorized access.'], 403);
+     }
+
+     $request->validate([
+         'employee_id' => 'required|exists:employees,id',
+         'new_role' => 'required|in:1,2,4,5,6', // Validate against existing role IDs
+     ]);
+
+     try {
+         $employee = Employee::findOrFail($request->employee_id);
+         
+         // Prevent changing the role of the current superadmin (optional)
+         if ($employee->id === session('emp_id')) {
+             return response()->json([
+                 'success' => false, 
+                 'message' => 'You cannot change your own role.'
+             ], 400);
+         }
+         
+         $oldRole = $employee->emp_job_role;
+         $employee->emp_job_role = $request->new_role;
+         $employee->save();
+
+         // If changing to/from team leader role, handle team assignments
+         if ($oldRole == 6 || $request->new_role == 6) {
+             // If user was a team leader and is no longer one, remove agents assigned to them
+             if ($oldRole == 6) {
+                 Employee::where('reports_to', $employee->id)
+                     ->update(['reports_to' => null]);
+             }
+         }
+
+         return response()->json([
+             'success' => true, 
+             'message' => 'Role updated successfully.',
+             'role_name' => $this->getRoleName($request->new_role)
+         ]);
+     } catch (\Exception $e) {
+         Log::error('Error updating employee role: ' . $e->getMessage());
+         return response()->json([
+             'success' => false, 
+             'message' => 'An error occurred while updating the role.'
+         ], 500);
+     }
+ }
+ 
+ /**
+  * Get the display name for a role ID
+  */
+ private function getRoleName($roleId)
+ {
+     $roles = [
+         1 => 'SuperAdmin',
+         2 => 'Agent',
+         4 => 'HR',
+         5 => 'Accountant',
+         6 => 'Team Leader'
+     ];
+     
+     return $roles[$roleId] ?? 'Unknown Role';
+ }
 
 }

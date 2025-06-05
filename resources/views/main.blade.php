@@ -6,7 +6,7 @@
     <title>@yield('title', 'Dashboard')</title>
 
     <!-- Google Font: Source Sans Pro -->
-    <link rel="stylesheet" href="{{ asset('https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Font Awesome -->
     <link rel="stylesheet" href="{{ asset('plugins/fontawesome-free/css/all.min.css') }}">
     <!-- Ionicons -->
@@ -192,7 +192,7 @@
 
 
 
-<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<!-- <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script> -->
 
 <!-- Popper.js (required for dropdowns, tooltips, popovers) -->
 <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
@@ -212,5 +212,27 @@
 
 
 
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    
+    <!-- Bootstrap 4 JS Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- SweetAlert2 for notifications -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
+    <!-- AdminLTE App -->
+    <script src="{{ asset('dist/js/adminlte.min.js') }}"></script>
+    
+    <!-- Custom scripts from child views -->
+    @stack('scripts')
+    
+    <!-- Debug script -->
+    <script>
+        console.log('Main layout scripts loaded');
+        console.log('jQuery version:', $.fn.jquery);
+        console.log('Bootstrap version:', $.fn.tooltip ? 'Loaded' : 'Not loaded');
+        console.log('SweetAlert2 version:', typeof Swal !== 'undefined' ? 'Loaded' : 'Not loaded');
+    </script>
 </body>
 </html>
