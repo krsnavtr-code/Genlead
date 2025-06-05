@@ -55,8 +55,8 @@
                 </li>
                 @endif
 
-                <!-- Show HRMS for HR (4) and Admin (1) -->
-                @if($emp_job_role === 4 || $emp_job_role === 1)
+                <!-- Show HRMS for HR (4), Admin (1) -->
+                @if(in_array($emp_job_role, [1, 4]))
                 <li class="nav-item">
                     <a href="{{ route('hrms.manage_employees') }}" class="nav-link w-100 {{ request()->is('hrms/manage_employees*') ? 'active' : '' }}">
                         <i class="nav-icon fas fa-users" style="color: #0062CC;"></i>
@@ -65,12 +65,22 @@
                 </li>
                 @endif
 
-                <!-- Show Leads for Agent (2) and Admin (1) -->
-                @if($emp_job_role === 2 || $emp_job_role === 1)
+                <!-- Show Leads for Agent (2), Admin (1) -->
+                @if(in_array($emp_job_role, [1, 2]))
                 <li class="nav-item">
                     <a href="{{ url('/i-admin/show-leads') }}" class="nav-link w-100 {{ request()->is('i-admin/leads/add-lead*') ? 'active' : '' }}">
                         <i class="nav-icon fas fa-plus-circle" style="color: #1E7E34;"></i>
                         <p>Leads</p>
+                    </a>
+                </li>
+                @endif
+
+                <!-- Team management for Team Leader (6) -->
+                @if($emp_job_role === 6)
+                <li class="nav-item">
+                    <a href="{{ url('/admin/team-management') }}" class="nav-link w-100 {{ request()->is('admin/team-management') ? 'active' : '' }}">
+                        <i class="nav-icon fas fa-users" style="color: #0062CC;"></i>
+                        <p>Team Management</p>
                     </a>
                 </li>
                 @endif
@@ -95,8 +105,8 @@
                 </li>
                 @endif
 
-                <!-- Show Payment Verification for Accountant (5) and Admin (1) -->
-                @if($emp_job_role === 5 || $emp_job_role === 1)
+                <!-- Show Payment Verification for Accountant (5), Admin (1) -->
+                @if(in_array($emp_job_role, [1, 5]))
                 <li class="nav-item">
                     <a href="{{ route('payment.verify') }}" class="nav-link w-100 {{ request()->routeIs('payment.verify') ? 'active' : '' }}">
                         <i class="nav-icon fas fa-check-circle"></i>
@@ -105,8 +115,8 @@
                 </li>
                 @endif
 
-                <!-- Show How to Use for Agent (2) and Admin (1) -->
-                @if($emp_job_role === 2 || $emp_job_role === 1)
+                <!-- Show How to Use for Agent (2), Admin (1) -->
+                @if(in_array($emp_job_role, [1, 2]))
                 <li class="nav-item">
                     <a href="{{ route('how-to-use') }}" class="nav-link w-100 {{ request()->is('how-to-use') ? 'active' : '' }}">
                         <i class="nav-icon fas fa-question-circle"></i>
