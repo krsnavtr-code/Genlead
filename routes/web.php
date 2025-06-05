@@ -46,6 +46,10 @@ Route::middleware(['auth'])
             
         Route::put('/team/member/{id}', [\App\Http\Controllers\TeamManagementController::class, 'update'])
             ->name('team.member.update');
+            
+        // Team Member Followups
+        Route::get('/team/member/{id}/followups', [\App\Http\Controllers\TeamManagementController::class, 'memberFollowups'])
+            ->name('team.member.followups');
     });
 
 // Agent Routes

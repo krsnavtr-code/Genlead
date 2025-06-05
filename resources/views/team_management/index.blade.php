@@ -62,7 +62,9 @@
                                         <a href="{{ route('admin.team.member.edit', $member->id) }}" class="btn btn-sm btn-primary">
                                             <i class="fas fa-edit"></i> Edit
                                         </a>
-                                        
+                                        <a href="{{ route('admin.team.member.followups', $member->id) }}" class="btn btn-sm btn-info">
+                                            <i class="fas fa-eye"></i> View Followups
+                                        </a>
                                     </td>
                                 </tr>
                             @empty

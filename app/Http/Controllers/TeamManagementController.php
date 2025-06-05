@@ -161,4 +161,34 @@ class TeamManagementController extends Controller
         return redirect()->route('admin.assign.agents.form')
             ->with('success', 'Agents have been successfully assigned to the team leader.');
     }
+    
+    /**
+     * Display all followups for a specific team member
+     */
+    public function memberFollowups($id)
+    {
+        // Only allow team leaders to access their team members' followups
+        if (session('emp_job_role') !== 6) {
+            abort(403, 'Unauthorized access.');
+        }
+        
+        $teamMember = Employee::findOrFail($id);
+        
+        // Verify that this team member reports to the current team leader
+        if ($teamMember->reports_to !== Auth::id()) {
+            abort(403, 'Unauthorized access to this team member\'s followups.');
+        }
+        
+        // Get all followups for this team member
+        $followups = \App\Models\personal\FollowUp::with(['lead', 'agent'])
+            ->where('agent_id', $id)
+            ->orderBy('follow_up_time', 'desc')
+            ->paginate(20);
+            
+        return view('team_management.member_followups', [
+            'teamMember' => $teamMember,
+            'followups' => $followups,
+            'title' => 'Followups - ' . $teamMember->emp_name
+        ]);
+    }
 }
