@@ -277,6 +277,21 @@
                     @enderror
                 </div>
 
+                <div class="form-group">
+                    <div class="input-group">
+                        <input type="text" class="form-control @error('referral_code') is-invalid @enderror" 
+                               name="referral_code" value="{{ old('referral_code') }}" 
+                               placeholder="Referral Code (Optional)">
+                        <span class="input-group-text">
+                            <i class="fas fa-user-friends"></i>
+                        </span>
+                        @error('referral_code')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
+                    <small class="form-text text-muted">Enter the referral code if you were referred by an existing agent</small>
+                </div>
+
                 <div class="form-group w-50 mx-auto">
                     <button type="submit" class="btn btn-primary btn-submit w-100">
                         Register as Agent

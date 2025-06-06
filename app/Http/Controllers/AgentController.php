@@ -89,6 +89,7 @@ class AgentController extends Controller
     public function register(Request $request)
     {
         try {
+            // Validate the request data
             $validatedData = $request->validate([
                 'name' => 'required|string|max:255',
                 'email' => 'required|email|unique:employees,emp_email',
@@ -100,15 +101,27 @@ class AgentController extends Controller
                 ],
                 'address' => 'required|string',
                 'password' => 'required|min:8',
+                'referral_code' => 'nullable|string|exists:employees,referral_code',
             ], [
                 'email.unique' => 'This email is already registered.',
                 'phone.numeric' => 'Phone number must contain only numbers.',
                 'phone.digits' => 'Phone number must be exactly 10 digits long.',
-                'phone.regex' => 'Please enter a valid 10-digit phone number.'
+                'phone.regex' => 'Please enter a valid 10-digit phone number.',
+                'referral_code.exists' => 'The referral code is invalid.'
             ]);
             
             // Generate a unique username from the agent's name
             $validatedData['emp_username'] = $this->generateUniqueUsername($validatedData['name']);
+
+            // Find referrer if referral code is provided
+            $referrer = null;
+            if (!empty($validatedData['referral_code'])) {
+                $referrer = Agent::where('referral_code', $validatedData['referral_code'])->first();
+                
+                if (!$referrer) {
+                    return back()->with('error', 'Invalid referral code. Please check and try again.');
+                }
+            }
 
             Log::info('Registration data validated successfully');
             Log::info('Validated data: ' . json_encode($validatedData));
@@ -120,8 +133,8 @@ class AgentController extends Controller
             // Store OTP in session
             session(['agent_otp' => $otp]);
 
-            // Store agent data in session
-            session(['agent_data' => [
+            // Prepare agent data for session
+            $agentData = [
                 'emp_name' => $validatedData['name'],
                 'emp_email' => $validatedData['email'],
                 'emp_phone' => $validatedData['phone'],
@@ -130,8 +143,16 @@ class AgentController extends Controller
                 'emp_password_hash' => Hash::make($validatedData['password']), // Also store hashed version for security
                 'emp_job_role' => 2,
                 'emp_username' => $validatedData['emp_username'],
-                'emp_join_date' => now()
-            ]]);
+                'emp_join_date' => now(),
+            ];
+
+            // Add referrer_id if referral code is valid
+            if ($referrer) {
+                $agentData['referrer_id'] = $referrer->id;
+            }
+
+            // Store agent data in session
+            session(['agent_data' => $agentData]);
 
             Log::info('Session data stored');
             Log::info('Current session: ' . json_encode(session()->all()));
