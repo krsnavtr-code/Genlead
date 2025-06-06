@@ -51,6 +51,22 @@ class Employee extends Model
     }
     
     /**
+     * Get the team leader this employee reports to
+     */
+    public function reportsTo()
+    {
+        return $this->belongsTo(Employee::class, 'reports_to');
+    }
+    
+    /**
+     * Get all team members that report to this employee
+     */
+    public function teamMembers()
+    {
+        return $this->hasMany(Employee::class, 'reports_to');
+    }
+    
+    /**
      * Get all leads assigned to this employee
      */
     public function leads()
@@ -82,10 +98,10 @@ class Employee extends Model
     /**
      * Get the team members that report to this employee (for team leaders)
      */
-    public function teamMembers()
-    {
-        return $this->hasMany(Employee::class, 'reports_to');
-    }
+    // public function teamMembers()
+    // {
+    //     return $this->hasMany(Employee::class, 'reports_to');
+    // }
 
     /**
      * Get the team leader this employee reports to

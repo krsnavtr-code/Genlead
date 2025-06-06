@@ -9,8 +9,8 @@ use App\Models\personal\LeadStatus;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
+use Carbon\Carbon;
 
 class TeamManagementController extends Controller
 {
@@ -27,63 +27,128 @@ class TeamManagementController extends Controller
      */
     public function index()
     {
-        // Only allow team leaders (role 6) to access
-        if (session('emp_job_role') !== 6) {
-            abort(403, 'Unauthorized access.');
+        // Check if user is authenticated
+        if (!Auth::check()) {
+            return redirect()->route('login');
         }
 
-        // Get the current team leader's ID
-        $teamLeaderId = Auth::id();
+        // Debug logging
+        Log::info('Team Management Access Attempt', [
+            'user_id' => Auth::id(),
+            'role' => session('emp_job_role'),
+            'all_session' => session()->all()
+        ]);
+
+        // Allow both admin (role 1) and team leaders (role 6) to access
+        if (!in_array(session('emp_job_role'), [1, 6])) {
+            abort(403, 'You do not have permission to access this page. Only Team Leaders and Admins can access this section.');
+        }
 
         // Get all active lead statuses for the dropdown
         $leadStatuses = LeadStatus::active()->ordered()->get();
+        
+        // Check if user is admin (role 1) or team leader (role 6)
+        $isAdmin = session('emp_job_role') == 1;
+        $teamLeaderId = Auth::id();
 
-        // Get all agents (role 2) that report to this team leader
-        $teamMembers = Employee::where('emp_job_role', 2) // Agents
-            ->where('reports_to', $teamLeaderId)
-            ->withCount(['leads as total_leads'])
-            ->withCount(['leads as converted_leads' => function($query) {
-                $convertedStatus = LeadStatus::where('name', 'Converted')->first();
-                $query->when($convertedStatus, function($q) use ($convertedStatus) {
-                    $q->where('status_id', $convertedStatus->id);
-                }, function($q) {
-                    $q->where('status', 'converted'); // Fallback to string status
-                });
-            }])
-            ->withCount(['leads as pending_leads' => function($query) {
-                $pendingStatus = LeadStatus::where('name', 'Pending')->first();
-                $query->when($pendingStatus, function($q) use ($pendingStatus) {
-                    $q->where('status_id', $pendingStatus->id);
-                }, function($q) {
-                    $q->where('status', 'pending'); // Fallback to string status
-                });
-            }])
-            ->withCount(['leads as rejected_leads' => function($query) {
-                $rejectedStatus = LeadStatus::where('name', 'Rejected')->first();
-                $query->when($rejectedStatus, function($q) use ($rejectedStatus) {
-                    $q->where('status_id', $rejectedStatus->id);
-                }, function($q) {
-                    $q->where('status', 'rejected'); // Fallback to string status
-                });
-            }])
-            ->with(['leads' => function($query) use ($leadStatuses) {
-                $query->select('id', 'agent_id', 'status_id', 'first_name', 'last_name', 'created_at')
-                    ->with(['status' => function($q) {
-                        $q->select('id', 'name', 'color');
-                    }])
-                    ->orderBy('created_at', 'desc')
-                    ->take(5);
-            }])
-            ->get();
+        if (!$isAdmin) {
+            // For team leaders, only show their direct reports
+            $query = Employee::where('emp_job_role', 2) // Agents
+                ->where('reports_to', $teamLeaderId);
+                
+            $teamMembers = $query->withCount(['leads as total_leads'])
+                ->withCount(['leads as converted_leads' => function($query) {
+                    $convertedStatus = LeadStatus::where('name', 'Converted')->first();
+                    $query->when($convertedStatus, function($q) use ($convertedStatus) {
+                        $q->where('status_id', $convertedStatus->id);
+                    }, function($q) {
+                        $q->where('status', 'converted');
+                    });
+                }])
+                ->withCount(['leads as pending_leads' => function($query) {
+                    $pendingStatus = LeadStatus::where('name', 'Pending')->first();
+                    $query->when($pendingStatus, function($q) use ($pendingStatus) {
+                        $q->where('status_id', $pendingStatus->id);
+                    }, function($q) {
+                        $q->where('status', 'pending');
+                    });
+                }])
+                ->withCount(['leads as rejected_leads' => function($query) {
+                    $rejectedStatus = LeadStatus::where('name', 'Rejected')->first();
+                    $query->when($rejectedStatus, function($q) use ($rejectedStatus) {
+                        $q->where('status_id', $rejectedStatus->id);
+                    }, function($q) {
+                        $q->where('status', 'rejected');
+                    });
+                }])
+                ->get();
+                
+            return view('team_management.index', compact('teamMembers', 'leadStatuses'));
+        } else {
+            // For admins, separate agents into with team and without team
+            $agentsWithTeam = Employee::where('emp_job_role', 2)
+                ->whereNotNull('reports_to')
+                ->with(['reportsTo' => function($q) {
+                    $q->select('id', 'emp_name');
+                }])
+                ->withCount(['leads as total_leads'])
+                ->withCount(['leads as converted_leads' => function($query) {
+                    $convertedStatus = LeadStatus::where('name', 'Converted')->first();
+                    $query->when($convertedStatus, function($q) use ($convertedStatus) {
+                        $q->where('status_id', $convertedStatus->id);
+                    }, function($q) {
+                        $q->where('status', 'converted');
+                    });
+                }])
+                ->withCount(['leads as pending_leads' => function($query) {
+                    $pendingStatus = LeadStatus::where('name', 'Pending')->first();
+                    $query->when($pendingStatus, function($q) use ($pendingStatus) {
+                        $q->where('status_id', $pendingStatus->id);
+                    }, function($q) {
+                        $q->where('status', 'pending');
+                    });
+                }])
+                ->withCount(['leads as rejected_leads' => function($query) {
+                    $rejectedStatus = LeadStatus::where('name', 'Rejected')->first();
+                    $query->when($rejectedStatus, function($q) use ($rejectedStatus) {
+                        $q->where('status_id', $rejectedStatus->id);
+                    }, function($q) {
+                        $q->where('status', 'rejected');
+                    });
+                }])
+                ->get();
 
-        // Get all available statuses for filtering
-        $statuses = LeadStatus::all();
-
-        return view('team_management.index', [
-            'teamMembers' => $teamMembers,
-            'statuses' => $statuses,
-            'title' => 'Team Management'
-        ]);
+            $agentsWithoutTeam = Employee::where('emp_job_role', 2)
+                ->whereNull('reports_to')
+                ->withCount(['leads as total_leads'])
+                ->withCount(['leads as converted_leads' => function($query) {
+                    $convertedStatus = LeadStatus::where('name', 'Converted')->first();
+                    $query->when($convertedStatus, function($q) use ($convertedStatus) {
+                        $q->where('status_id', $convertedStatus->id);
+                    }, function($q) {
+                        $q->where('status', 'converted');
+                    });
+                }])
+                ->withCount(['leads as pending_leads' => function($query) {
+                    $pendingStatus = LeadStatus::where('name', 'Pending')->first();
+                    $query->when($pendingStatus, function($q) use ($pendingStatus) {
+                        $q->where('status_id', $pendingStatus->id);
+                    }, function($q) {
+                        $q->where('status', 'pending');
+                    });
+                }])
+                ->withCount(['leads as rejected_leads' => function($query) {
+                    $rejectedStatus = LeadStatus::where('name', 'Rejected')->first();
+                    $query->when($rejectedStatus, function($q) use ($rejectedStatus) {
+                        $q->where('status_id', $rejectedStatus->id);
+                    }, function($q) {
+                        $q->where('status', 'rejected');
+                    });
+                }])
+                ->get();
+                
+            return view('team_management.index', compact('agentsWithTeam', 'agentsWithoutTeam', 'leadStatuses'));
+        }
     }
 
     /**
