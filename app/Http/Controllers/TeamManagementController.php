@@ -10,6 +10,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Log;
 
 class TeamManagementController extends Controller
 {
@@ -499,6 +500,65 @@ class TeamManagementController extends Controller
     /**
      * Transfer leads between team members
      */
+    /**
+     * Display the agent referral chain
+     */
+    public function agentReferralChain()
+    {
+        // Only allow admins (1) and team leaders (2) to access
+        if (!in_array(session('emp_job_role'), [1, 2])) {
+            abort(403, 'Unauthorized access.');
+        }
+
+        $currentUser = Auth::user();
+        
+        // If admin, show all agents, otherwise show only the current user's referrals
+        $query = Employee::where('emp_job_role', 2); // Only agents
+        
+        if ($currentUser->emp_job_role != 1) { // If not admin
+            $query->where('referrer_id', $currentUser->id);
+        }
+        
+        $agents = $query->withCount(['referrals as direct_referrals_count'])
+            ->with(['referrals' => function($query) {
+                $query->where('emp_job_role', 2); // Only count agent referrals
+            }])
+            ->get();
+
+        // Build the referral tree
+        $referralTree = [];
+        foreach ($agents as $agent) {
+            if ($agent->referrer_id === null || $agent->referrer_id == $currentUser->id) {
+                $referralTree[] = $this->buildReferralTree($agent, $agents);
+            }
+        }
+
+        return view('team.referral-chain', [
+            'referralTree' => $referralTree,
+            'currentUser' => $currentUser
+        ]);
+    }
+
+    /**
+     * Recursively build the referral tree
+     */
+    private function buildReferralTree($agent, $allAgents, $level = 0)
+    {
+        // Limit the depth to prevent infinite recursion
+        if ($level > 10) {
+            $agent->referrals = collect();
+            return $agent;
+        }
+
+        $referrals = $allAgents->where('referrer_id', $agent->id);
+        
+        $agent->referrals = $referrals->map(function($referral) use ($allAgents, $level) {
+            return $this->buildReferralTree($referral, $allAgents, $level + 1);
+        });
+
+        return $agent;
+    }
+
     public function transferLeads(Request $request)
     {
         if (session('emp_job_role') !== 6) {

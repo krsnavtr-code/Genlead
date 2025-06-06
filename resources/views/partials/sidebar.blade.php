@@ -95,6 +95,16 @@
                 </li>
                 @endif
 
+                <!-- Agent referral team chain view -->
+                @if(in_array($emp_job_role, [1, 2]))
+                <li class="nav-item">
+                    <a href="{{ url('/admin/agent-referral-chain') }}" class="nav-link w-100 {{ request()->is('admin/agent-referral-chain') ? 'active' : '' }}">
+                        <i class="nav-icon fas fa-users" style="color: #0062CC;"></i>
+                        <p>Agents Chain</p>
+                    </a>
+                </li>
+                @endif
+
                 <!-- Show New Join Panel for Admin (1) -->
                 @if(in_array($emp_job_role, [1]))
                 <li class="nav-item">

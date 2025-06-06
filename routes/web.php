@@ -49,6 +49,10 @@ Route::middleware(['auth'])
         // Team Management Routes for Team Leaders
         Route::get('/team-management', [\App\Http\Controllers\TeamManagementController::class, 'index'])
             ->name('team.management');
+            
+        // Agent Referral Chain
+        Route::get('/agent-referral-chain', [\App\Http\Controllers\TeamManagementController::class, 'agentReferralChain'])
+            ->name('agent.referral.chain');
         
         Route::get('/team/performance', [\App\Http\Controllers\TeamManagementController::class, 'performance'])
             ->name('team.performance');
