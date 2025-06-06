@@ -481,21 +481,30 @@ class TeamManagementController extends Controller
             abort(403, 'Unauthorized access to this team member\'s followups.');
         }
 
-        // Get upcoming and past followups
-        $upcomingFollowups = FollowUp::with(['lead', 'agent'])
+        // Get today's followups
+        $todayFollowups = FollowUp::with(['lead', 'agent'])
             ->where('agent_id', $id)
-            ->where('follow_up_time', '>=', now())
+            ->whereDate('follow_up_time', now()->toDateString())
             ->orderBy('follow_up_time', 'asc')
             ->get();
 
+        // Get upcoming followups (after today)
+        $upcomingFollowups = FollowUp::with(['lead', 'agent'])
+            ->where('agent_id', $id)
+            ->where('follow_up_time', '>', now()->endOfDay())
+            ->orderBy('follow_up_time', 'asc')
+            ->get();
+
+        // Get past followups (before today)
         $pastFollowups = FollowUp::with(['lead', 'agent'])
             ->where('agent_id', $id)
-            ->where('follow_up_time', '<', now())
+            ->where('follow_up_time', '<', now()->startOfDay())
             ->orderBy('follow_up_time', 'desc')
             ->paginate(15);
 
         return view('team_management.member_followups', [
             'teamMember' => $teamMember,
+            'todayFollowups' => $todayFollowups,
             'upcomingFollowups' => $upcomingFollowups,
             'pastFollowups' => $pastFollowups,
             'title' => 'Followups - ' . $teamMember->emp_name

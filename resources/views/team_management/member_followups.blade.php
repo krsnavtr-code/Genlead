@@ -51,7 +51,12 @@
                 <div class="card-body">
                     <ul class="nav nav-tabs" id="followupTabs" role="tablist">
                         <li class="nav-item">
-                            <a class="nav-link active" id="upcoming-tab" data-toggle="tab" href="#upcoming" role="tab" aria-controls="upcoming" aria-selected="true">
+                            <a class="nav-link active" id="today-tab" data-toggle="tab" href="#today" role="tab" aria-controls="today" aria-selected="true">
+                                Today Follow-ups <span class="badge badge-primary">{{ $todayFollowups->count() }}</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" id="upcoming-tab" data-toggle="tab" href="#upcoming" role="tab" aria-controls="upcoming" aria-selected="true">
                                 Upcoming Follow-ups <span class="badge badge-primary">{{ $upcomingFollowups->count() }}</span>
                             </a>
                         </li>
@@ -63,6 +68,65 @@
                     </ul>
                     
                     <div class="tab-content mt-3" id="followupTabsContent">
+                        <!-- Today Follow-ups Tab -->
+                        <div class="tab-pane fade show active" id="today" role="tabpanel" aria-labelledby="today-tab">
+                            @if($todayFollowups->count() > 0)
+                                <div class="table-responsive">
+                                    <table class="table table-bordered table-striped">
+                                        <thead>
+                                            <tr>
+                                                <th>#</th>
+                                                <th>Lead</th>
+                                                <th>Follow-up Time</th>
+                                                <th>Status</th>
+                                                <th>Notes</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach($todayFollowups as $index => $followup)
+                                                <tr>
+                                                    <td>{{ $index + 1 }}</td>
+                                                    <td>
+                                                        @if($followup->lead)
+                                                            <a href="{{ route('leads.view', $followup->lead_id) }}">
+                                                                {{ $followup->lead->first_name ?? '' }} {{ $followup->lead->last_name ?? '' }}
+                                                            </a>
+                                                            @if($followup->lead->email)
+                                                                <br><small class="text-muted">{{ $followup->lead->email }}</small>
+                                                            @endif
+                                                        @else
+                                                            <span class="text-muted">Lead not found</span>
+                                                        @endif
+                                                    </td>
+                                                    <td>
+                                                        {{ $followup->followup_time ? \Carbon\Carbon::parse($followup->followup_time)->format('M d, Y h:i A') : 'Not set' }}
+                                                    </td>
+                                                    <td>
+                                                        <span class="badge {{ $followup->status === 'completed' ? 'badge-success' : 'badge-warning' }}">
+                                                            {{ ucfirst($followup->status) }}
+                                                        </span>
+                                                    </td>
+                                                    <td>
+                                                        @if($followup->notes)
+                                                            <button type="button" class="btn btn-sm btn-outline-primary view-notes" data-notes="{{ $followup->notes }}">
+                                                                View Notes
+                                                            </button>
+                                                        @else
+                                                            <span class="text-muted">No notes</span>
+                                                        @endif
+                                                    </td>
+                                                </tr>
+                                            @endforeach
+                                        </tbody>
+                                    </table>
+                                </div>
+                            @else
+                                <div class="alert alert-info">
+                                    No follow-ups scheduled for today.
+                                </div>
+                            @endif
+                        </div>
+
                         <!-- Upcoming Follow-ups Tab -->
                         <div class="tab-pane fade show active" id="upcoming" role="tabpanel" aria-labelledby="upcoming-tab">
                             @if($upcomingFollowups->count() > 0)

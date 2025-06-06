@@ -1,5 +1,12 @@
 @extends('main')
 
+@section('title', 'Team Management')
+
+@php
+$emp_job_role = session('emp_job_role');
+@endphp
+
+
 @section('content')
 <div class="content-wrapper">
     <div class="content-header">
@@ -18,6 +25,18 @@
         </div>
     </div>
 
+    <!-- Assign Agents to Team Leader for Admin (1) -->
+    @if(in_array($emp_job_role, [1]))
+    <div class="card">
+        <div class="card-header">
+            <a href="{{ url('/admin/assign-agents-to-team-leader') }}" class="nav-link w-100 {{ request()->is('admin/assign-agents-to-team-leader') ? 'active' : '' }}">
+                <i class="nav-icon fas fa-user-plus" style="color: #0062CC;"></i>
+                <span>Assign Agents to Team Leader</span>
+            </a>
+        </div>
+    </div>
+    @endif
+
     <section class="content">
         <div class="container-fluid">
             @if(session('success'))
@@ -30,7 +49,7 @@
             @if(isset($agentsWithTeam) && isset($agentsWithoutTeam))
                 {{-- Admin View --}}
                 <div class="card">
-                    <div class="card-header">
+                    <div class="card-header bg-success">
                         <h3 class="card-title">Agents with Teams</h3>
                     </div>
                     <div class="card-body p-0">
@@ -42,10 +61,10 @@
                                     <th>Email</th>
                                     <th>Phone</th>
                                     <th>Total Leads</th>
-                                    <th>Converted</th>
-                                    <th>Pending</th>
-                                    <th>Rejected</th>
-                                    <th>Status</th>
+                                    <!-- <th>Converted</th> -->
+                                    <!-- <th>Pending</th> -->
+                                    <!-- <th>Rejected</th> -->
+                                    <!-- <th>Status</th> -->
                                     <th>Actions</th>
                                 </tr>
                             </thead>
@@ -57,14 +76,14 @@
                                         <td>{{ $member->emp_email }}</td>
                                         <td>{{ $member->emp_phone }}</td>
                                         <td>{{ $member->total_leads }}</td>
-                                        <td>{{ $member->converted_leads }}</td>
-                                        <td>{{ $member->pending_leads }}</td>
-                                        <td>{{ $member->rejected_leads }}</td>
-                                        <td>
+                                        <!-- <td>{{ $member->converted_leads }}</td> -->
+                                        <!-- <td>{{ $member->pending_leads }}</td> -->
+                                        <!-- <td>{{ $member->rejected_leads }}</td> -->
+                                        <!-- <td>
                                             <span class="badge badge-{{ $member->emp_status === 'active' ? 'success' : 'danger' }}">
                                                 {{ ucfirst($member->emp_status) }}
                                             </span>
-                                        </td>
+                                        </td> -->
                                         <td>
                                             <a href="{{ route('admin.team.member.edit', $member->id) }}" class="btn btn-sm btn-primary">
                                                 <i class="fas fa-edit"></i> Edit
@@ -96,10 +115,10 @@
                                     <th>Email</th>
                                     <th>Phone</th>
                                     <th>Total Leads</th>
-                                    <th>Converted</th>
-                                    <th>Pending</th>
-                                    <th>Rejected</th>
-                                    <th>Status</th>
+                                    <!-- <th>Converted</th> -->
+                                    <!-- <th>Pending</th> -->
+                                    <!-- <th>Rejected</th> -->
+                                    <!-- <th>Status</th> -->
                                     <th>Actions</th>
                                 </tr>
                             </thead>
@@ -110,23 +129,20 @@
                                         <td>{{ $member->emp_email }}</td>
                                         <td>{{ $member->emp_phone }}</td>
                                         <td>{{ $member->total_leads }}</td>
-                                        <td>{{ $member->converted_leads }}</td>
-                                        <td>{{ $member->pending_leads }}</td>
-                                        <td>{{ $member->rejected_leads }}</td>
-                                        <td>
+                                        <!-- <td>{{ $member->converted_leads }}</td> -->
+                                        <!-- <td>{{ $member->pending_leads }}</td> -->
+                                        <!-- <td>{{ $member->rejected_leads }}</td> -->
+                                        <!-- <td>
                                             <span class="badge badge-{{ $member->emp_status === 'active' ? 'success' : 'danger' }}">
                                                 {{ ucfirst($member->emp_status) }}
                                             </span>
-                                        </td>
+                                        </td> -->
                                         <td>
                                             <a href="{{ route('admin.team.member.edit', $member->id) }}" class="btn btn-sm btn-primary">
                                                 <i class="fas fa-edit"></i> Edit
                                             </a>
                                             <a href="{{ route('admin.team.member.followups', $member->id) }}" class="btn btn-sm btn-info">
                                                 <i class="fas fa-eye"></i> View Followups
-                                            </a>
-                                            <a href="{{ route('admin.assign.agents.form', ['agent_id' => $member->id]) }}" class="btn btn-sm btn-success">
-                                                <i class="fas fa-user-plus"></i> Assign Team
                                             </a>
                                         </td>
                                     </tr>
@@ -158,10 +174,10 @@
                                     <th>Email</th>
                                     <th>Phone</th>
                                     <th>Total Leads</th>
-                                    <th>Converted</th>
-                                    <th>Pending</th>
-                                    <th>Rejected</th>
-                                    <th>Status</th>
+                                    <!-- <th>Converted</th> -->
+                                    <!-- <th>Pending</th> -->
+                                    <!-- <th>Rejected</th> -->
+                                    <!-- <th>Status</th> -->
                                     <th>Actions</th>
                                 </tr>
                             </thead>
@@ -169,17 +185,17 @@
                                 @forelse($teamMembers as $member)
                                     <tr>
                                         <td>{{ $member->emp_name }}</td>
-                                        <td>{{ $member->emp_email }}</td>
-                                        <td>{{ $member->emp_phone }}</td>
+                                        <td>{{ substr($member->emp_email, 0, 2) . '****' . substr($member->emp_email, -2) }}</td>
+                                        <td>{{ substr($member->emp_phone, 0, 2) . '****' . substr($member->emp_phone, -2) }}</td>
                                         <td>{{ $member->total_leads }}</td>
-                                        <td>{{ $member->converted_leads }}</td>
-                                        <td>{{ $member->pending_leads }}</td>
-                                        <td>{{ $member->rejected_leads }}</td>
-                                        <td>
+                                        <!-- <td>{{ $member->converted_leads }}</td> -->
+                                        <!-- <td>{{ $member->pending_leads }}</td> -->
+                                        <!-- <td>{{ $member->rejected_leads }}</td> -->
+                                        <!-- <td>
                                             <span class="badge badge-{{ $member->emp_status === 'active' ? 'success' : 'danger' }}">
                                                 {{ ucfirst($member->emp_status) }}
                                             </span>
-                                        </td>
+                                        </td> -->
                                         <td>
                                             <a href="{{ route('admin.team.member.edit', $member->id) }}" class="btn btn-sm btn-primary">
                                                 <i class="fas fa-edit"></i> Edit

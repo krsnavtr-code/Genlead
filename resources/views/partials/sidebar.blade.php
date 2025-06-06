@@ -85,16 +85,6 @@
                 </li>
                 @endif
 
-                <!-- Assign Agents to Team Leader for Admin (1) -->
-                @if(in_array($emp_job_role, [1]))
-                <li class="nav-item">
-                    <a href="{{ url('/admin/assign-agents-to-team-leader') }}" class="nav-link w-100 {{ request()->is('admin/assign-agents-to-team-leader') ? 'active' : '' }}">
-                        <i class="nav-icon fas fa-user-plus" style="color: #0062CC;"></i>
-                        <p>Assign Agents</p>
-                    </a>
-                </li>
-                @endif
-
                 <!-- Agent referral team chain view -->
                 @if(in_array($emp_job_role, [1, 2]))
                 <li class="nav-item">
