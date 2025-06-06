@@ -221,13 +221,16 @@ Route::prefix('admin')->middleware(['checkrole'])->group(function () {
     // Download Documents routes
     Route::get('employee/download-offer-letter/{id}', [NewJoinController::class, 'downloadOfferLetter'])->name('employee.download_offer_letter');
     Route::get('employee/download-experience-letter/{id}', [NewJoinController::class, 'downloadExperienceLetter'])->name('employee.download_experience_letter');
-    Route::get('employee/download-id-card/{id}', [NewJoinController::class, 'downloadIDCard'])->name('employee.download_id_card');
 
     Route::get('/hrms/manage-employees', [NewJoinController::class, 'index'])->name('hrms.manage_employees');
     Route::get('/hrms/verify-document/{id}', [NewJoinController::class, 'verifyDocument']);
     Route::get('/hrms/candidate-interview-result', [NewJoinController::class, 'candidateInterviewResult']);
     Route::post('/submit-interview-result', [NewJoinController::class, 'submitInterviewResult'])->name('hrms.submit_interview_result');
 
+    // ID Card Download Route - Only requires authentication, not specific role
+    Route::get('employee/download-id-card/{id}', [NewJoinController::class, 'downloadIDCard'])
+        ->middleware(['auth'])
+        ->name('employee.download_id_card');
 
     // Superadmin New joinee panel
 

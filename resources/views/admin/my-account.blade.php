@@ -143,21 +143,54 @@
                     </div>
                 </div>
 
+                <!-- Download Offer Letter -->
                 @if ($employee->emp_job_role == 2)
                     <div class="download-button">
-                        <a href="/admin/employee/download-offer-letter/{{ $employee->id }}" class="btn btn-success">
+                        <a href="/admin/employee/download-offer-letter/{{ $employee->id }}" class="btn btn-success" target="_blank">
                             <i class="fas fa-file-download"></i> Download Offer Letter
+                        </a>
+                    </div>
+                @endif
+                <!-- Download Id Card -->
+                @if ($employee->emp_job_role == 2)
+                    <div class="download-button">
+                        <a href="/admin/employee/download-id-card/{{ $employee->id }}" class="btn btn-success">
+                            <i class="fas fa-file-download"></i> Download ID Card
                         </a>
                     </div>
                 @endif
 
                 @if ($employee->referral_code)
                     <div class="account-section-title"><i class="fas fa-user-friends"></i> Referral Program</div>
-                    <p><span class="info-label">Your Referral Link:</span></p>
-                    <a href="https://collegevihar.com/agent/join?refid={{ $employee->referral_code }}"
+                    <div class="row">
+                        <div class="col-sm-6 info-item">
+                            <i class="fas fa-user-friends"></i>
+                            <span class="info-label">Referral Code:</span>
+                            <span style="color: var(--primary-color);">{{ $employee->referral_code }}</span>
+                        </div>
+                        <!-- <div class="col-sm-6 info-item">
+                            <i class="fas fa-user-friends"></i>
+                            <span class="info-label">Referral Link:</span>
+                            <a href="https://genlead.in/agent/join?refid={{ $employee->referral_code }}" target="_blank" style="color: var(--primary-color);">https://genlead.in/agent/join?refid={{ $employee->referral_code }}</a>
+                        </div> -->
+                    </div>
+                    <!-- Copy referral code -->
+                    <button class="btn btn-primary btn-sm" onclick="copyReferralCode()">Copy Referral Code</button>
+                    <span id="copy-message" style="display: none; color: var(--primary-color); font-weight: bold; margin-top: 10px;">Copied!</span>
+                    <script>
+                        function copyReferralCode() {
+                            navigator.clipboard.writeText('{{ $employee->referral_code }}');
+                            // text message
+                            document.getElementById('copy-message').style.display = 'block';
+                            setTimeout(() => {
+                                document.getElementById('copy-message').style.display = 'none';
+                            }, 3000);
+                        }
+                    </script>
+                    <!-- <a href="https://collegevihar.com/agent/join?refid={{ $employee->referral_code }}"
                        class="referral-link" target="_blank">
                        https://collegevihar.com/agent/join?refid={{ $employee->referral_code }}
-                    </a>
+                    </a> -->
                 @endif
             </div>
         </div>

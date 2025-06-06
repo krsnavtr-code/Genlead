@@ -32,6 +32,9 @@ Route::middleware(['auth'])
     ->prefix('admin')
     ->name('admin.')
     ->group(function () {
+        // ID Card Download Route
+        Route::get('employee/download-id-card/{id}', [NewJoinController::class, 'downloadIDCard'])
+            ->name('employee.download_id_card');
         // Update employee role
         Route::post('/update-employee-role', [\App\Http\Controllers\ManageController::class, 'updateEmployeeRole'])
             ->name('update.employee.role');
