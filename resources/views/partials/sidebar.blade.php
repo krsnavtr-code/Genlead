@@ -46,7 +46,7 @@
                 </li>
 
                 <!-- Show My Account for All Roles -->
-                @if($loggedInEmployee)
+                @if(in_array($emp_job_role, [1, 2, 4, 5, 6]))
                 <li class="nav-item">
                     <a href="{{ url('/admin/my-account') }}" class="nav-link w-100 {{ request()->is('admin/my-account') ? 'active' : '' }}">
                         <i class="nav-icon fas fa-user"></i>
@@ -76,7 +76,7 @@
                 @endif
 
                 <!-- Team management for Team Leader (6) -->
-                @if($emp_job_role === 6)
+                @if(in_array($emp_job_role, [1, 6]))
                 <li class="nav-item">
                     <a href="{{ url('/admin/team-management') }}" class="nav-link w-100 {{ request()->is('admin/team-management') ? 'active' : '' }}">
                         <i class="nav-icon fas fa-users" style="color: #0062CC;"></i>
@@ -86,17 +86,17 @@
                 @endif
 
                 <!-- Assign Agents to Team Leader for Admin (1) -->
-                @if($emp_job_role === 1)
+                @if(in_array($emp_job_role, [1]))
                 <li class="nav-item">
                     <a href="{{ url('/admin/assign-agents-to-team-leader') }}" class="nav-link w-100 {{ request()->is('admin/assign-agents-to-team-leader') ? 'active' : '' }}">
                         <i class="nav-icon fas fa-users" style="color: #0062CC;"></i>
-                        <p>Assign Agents to Team Leader</p>
+                        <p>Assign Agents</p>
                     </a>
                 </li>
                 @endif
 
                 <!-- Show New Join Panel for Admin (1) -->
-                @if($emp_job_role === 1)
+                @if(in_array($emp_job_role, [1]))
                 <li class="nav-item">
                     <a href="{{ url('/admin/new-join-panel') }}" class="nav-link w-100 {{ request()->is('admin/new-join-panel') ? 'active' : '' }}">
                         <i class="nav-icon fas fa-user-plus" style="color: #117A8B;"></i>
@@ -106,7 +106,7 @@
                 @endif
 
                 <!-- Show All Login Access for Admin (1) -->
-                @if($emp_job_role === 1)
+                @if(in_array($emp_job_role, [1]))
                 <li class="nav-item">
                     <a href="{{ url('/admin/all-login-access') }}" class="nav-link w-100 {{ request()->is('admin/all-login-access') ? 'active' : '' }}">
                         <i class="nav-icon fas fa-briefcase"></i>
@@ -126,7 +126,7 @@
                 @endif
 
                 <!-- Show How to Use for Agent (2), Admin (1) -->
-                @if(in_array($emp_job_role, [1, 2]))
+                @if(in_array($emp_job_role, [1, 2, 4, 5, 6]))
                 <li class="nav-item">
                     <a href="{{ route('how-to-use') }}" class="nav-link w-100 {{ request()->is('how-to-use') ? 'active' : '' }}">
                         <i class="nav-icon fas fa-question-circle"></i>
