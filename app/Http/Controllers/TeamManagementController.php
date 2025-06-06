@@ -512,24 +512,34 @@ class TeamManagementController extends Controller
 
         $currentUser = Auth::user();
         
-        // If admin, show all agents, otherwise show only the current user's referrals
-        $query = Employee::where('emp_job_role', 2); // Only agents
+        // Get all agents in the system with their referrals preloaded
+        $allAgents = Employee::where('emp_job_role', 2)
+            ->with(['referrals' => function($query) {
+                $query->where('emp_job_role', 2);
+            }])
+            ->get()
+            ->keyBy('id');
         
-        if ($currentUser->emp_job_role != 1) { // If not admin
-            $query->where('referrer_id', $currentUser->id);
+        // Add direct referrals count to each agent
+        foreach ($allAgents as $agent) {
+            $agent->direct_referrals_count = $agent->referrals->count();
         }
         
-        $agents = $query->withCount(['referrals as direct_referrals_count'])
-            ->with(['referrals' => function($query) {
-                $query->where('emp_job_role', 2); // Only count agent referrals
-            }])
-            ->get();
-
         // Build the referral tree
         $referralTree = [];
-        foreach ($agents as $agent) {
-            if ($agent->referrer_id === null || $agent->referrer_id == $currentUser->id) {
-                $referralTree[] = $this->buildReferralTree($agent, $agents);
+        $processedAgents = [];
+        
+        if ($currentUser->emp_job_role == 1) { // If admin, show all agents
+            $rootAgents = $allAgents->whereNull('referrer_id');
+        } else {
+            // Only show direct reports for non-admin users
+            $rootAgents = $allAgents->where('referrer_id', $currentUser->id);
+        }
+        
+        foreach ($rootAgents as $agent) {
+            if (!in_array($agent->id, $processedAgents)) {
+                $referralTree[] = $this->buildReferralTree($agent, $allAgents, $processedAgents);
+                $processedAgents[] = $agent->id;
             }
         }
 
@@ -542,20 +552,28 @@ class TeamManagementController extends Controller
     /**
      * Recursively build the referral tree
      */
-    private function buildReferralTree($agent, $allAgents, $level = 0)
+    private function buildReferralTree($agent, $allAgents, &$processedAgents, $level = 0)
     {
         // Limit the depth to prevent infinite recursion
         if ($level > 10) {
             $agent->referrals = collect();
             return $agent;
         }
-
-        $referrals = $allAgents->where('referrer_id', $agent->id);
         
-        $agent->referrals = $referrals->map(function($referral) use ($allAgents, $level) {
-            return $this->buildReferralTree($referral, $allAgents, $level + 1);
-        });
+        // Mark this agent as processed
+        if (!in_array($agent->id, $processedAgents)) {
+            $processedAgents[] = $agent->id;
+        }
 
+        // Process referrals
+        $processedReferrals = collect();
+        foreach ($agent->referrals as $referral) {
+            if (!in_array($referral->id, $processedAgents)) {
+                $processedReferrals->push($this->buildReferralTree($referral, $allAgents, $processedAgents, $level + 1));
+            }
+        }
+        
+        $agent->setRelation('referrals', $processedReferrals);
         return $agent;
     }
 
