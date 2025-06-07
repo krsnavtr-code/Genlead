@@ -390,7 +390,7 @@ public function showAllEmployees()
 
      $request->validate([
          'employee_id' => 'required|exists:employees,id',
-         'new_role' => 'required|in:1,2,4,5,6', // Validate against existing role IDs
+         'new_role' => 'required|in:1,2,4,5,6,7', // Validate against existing role IDs
      ]);
 
      try {
@@ -437,12 +437,13 @@ public function showAllEmployees()
  private function getRoleName($roleId)
  {
      $roles = [
-         1 => 'SuperAdmin',
-         2 => 'Agent',
-         4 => 'HR',
-         5 => 'Accountant',
-         6 => 'Team Leader'
-     ];
+        1 => 'SuperAdmin',
+        2 => 'Agent',
+        4 => 'HR',
+        5 => 'Accountant',
+        6 => 'Team Leader',
+        7 => 'Referral Agent'
+    ];
      
      return $roles[$roleId] ?? 'Unknown Role';
  }
