@@ -19,8 +19,14 @@ use App\Models\Document;
 use App\Models\Employee;
 use Carbon\Carbon;
 use App\Http\Controllers\TeamManagementController;
+use App\Http\Controllers\AdminController;
 
 Route::get('/send-reminder',  [CronJobController::class, 'SendLeadReminders']);
+
+// Dashboard route
+Route::middleware(['auth'])->group(function () {
+    Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('dashboard');
+});
 
 // Test route for debugging
 Route::get('/test-js', function() {

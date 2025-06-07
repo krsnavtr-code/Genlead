@@ -51,104 +51,50 @@ class TeamManagementController extends Controller
         $isAdmin = session('emp_job_role') == 1;
         $teamLeaderId = Auth::id();
 
+        // For both admins and team leaders, show all agents
+        $query = Employee::whereIn('emp_job_role', [2, 7]); // Both regular agents (2) and chain team agents (7)
+        
+        // If not admin, filter by team if needed
         if (!$isAdmin) {
-            // For team leaders, only show their direct reports
-            $query = Employee::where('emp_job_role', 2) // Agents
-                ->where('reports_to', $teamLeaderId);
-                
-            $teamMembers = $query->withCount(['leads as total_leads'])
-                ->withCount(['leads as converted_leads' => function($query) {
-                    $convertedStatus = LeadStatus::where('name', 'Converted')->first();
-                    $query->when($convertedStatus, function($q) use ($convertedStatus) {
-                        $q->where('status_id', $convertedStatus->id);
-                    }, function($q) {
-                        $q->where('status', 'converted');
-                    });
-                }])
-                ->withCount(['leads as pending_leads' => function($query) {
-                    $pendingStatus = LeadStatus::where('name', 'Pending')->first();
-                    $query->when($pendingStatus, function($q) use ($pendingStatus) {
-                        $q->where('status_id', $pendingStatus->id);
-                    }, function($q) {
-                        $q->where('status', 'pending');
-                    });
-                }])
-                ->withCount(['leads as rejected_leads' => function($query) {
-                    $rejectedStatus = LeadStatus::where('name', 'Rejected')->first();
-                    $query->when($rejectedStatus, function($q) use ($rejectedStatus) {
-                        $q->where('status_id', $rejectedStatus->id);
-                    }, function($q) {
-                        $q->where('status', 'rejected');
-                    });
-                }])
-                ->get();
-                
-            return view('team_management.index', compact('teamMembers', 'leadStatuses'));
-        } else {
-            // For admins, separate agents into with team and without team
-            $agentsWithTeam = Employee::where('emp_job_role', 2)
-                ->whereNotNull('reports_to')
-                ->with(['reportsTo' => function($q) {
-                    $q->select('id', 'emp_name');
-                }])
-                ->withCount(['leads as total_leads'])
-                ->withCount(['leads as converted_leads' => function($query) {
-                    $convertedStatus = LeadStatus::where('name', 'Converted')->first();
-                    $query->when($convertedStatus, function($q) use ($convertedStatus) {
-                        $q->where('status_id', $convertedStatus->id);
-                    }, function($q) {
-                        $q->where('status', 'converted');
-                    });
-                }])
-                ->withCount(['leads as pending_leads' => function($query) {
-                    $pendingStatus = LeadStatus::where('name', 'Pending')->first();
-                    $query->when($pendingStatus, function($q) use ($pendingStatus) {
-                        $q->where('status_id', $pendingStatus->id);
-                    }, function($q) {
-                        $q->where('status', 'pending');
-                    });
-                }])
-                ->withCount(['leads as rejected_leads' => function($query) {
-                    $rejectedStatus = LeadStatus::where('name', 'Rejected')->first();
-                    $query->when($rejectedStatus, function($q) use ($rejectedStatus) {
-                        $q->where('status_id', $rejectedStatus->id);
-                    }, function($q) {
-                        $q->where('status', 'rejected');
-                    });
-                }])
-                ->get();
-
-            $agentsWithoutTeam = Employee::where('emp_job_role', 2)
-                ->whereNull('reports_to')
-                ->withCount(['leads as total_leads'])
-                ->withCount(['leads as converted_leads' => function($query) {
-                    $convertedStatus = LeadStatus::where('name', 'Converted')->first();
-                    $query->when($convertedStatus, function($q) use ($convertedStatus) {
-                        $q->where('status_id', $convertedStatus->id);
-                    }, function($q) {
-                        $q->where('status', 'converted');
-                    });
-                }])
-                ->withCount(['leads as pending_leads' => function($query) {
-                    $pendingStatus = LeadStatus::where('name', 'Pending')->first();
-                    $query->when($pendingStatus, function($q) use ($pendingStatus) {
-                        $q->where('status_id', $pendingStatus->id);
-                    }, function($q) {
-                        $q->where('status', 'pending');
-                    });
-                }])
-                ->withCount(['leads as rejected_leads' => function($query) {
-                    $rejectedStatus = LeadStatus::where('name', 'Rejected')->first();
-                    $query->when($rejectedStatus, function($q) use ($rejectedStatus) {
-                        $q->where('status_id', $rejectedStatus->id);
-                    }, function($q) {
-                        $q->where('status', 'rejected');
-                    });
-                }])
-                ->get();
-                
-            return view('team_management.index', compact('agentsWithTeam', 'agentsWithoutTeam', 'leadStatuses'));
+            $query->where(function($q) use ($teamLeaderId) {
+                $q->where('reports_to', $teamLeaderId)
+                  ->orWhere('id', $teamLeaderId); // Include team leader in their own team view
+            });
         }
+        
+        $teamMembers = $query->with(['reportsTo' => function($q) {
+                $q->select('id', 'emp_name');
+            }])
+            ->withCount(['leads as total_leads'])
+            ->withCount(['leads as converted_leads' => function($query) {
+                $convertedStatus = LeadStatus::where('name', 'Converted')->first();
+                $query->when($convertedStatus, function($q) use ($convertedStatus) {
+                    $q->where('status_id', $convertedStatus->id);
+                }, function($q) {
+                    $q->where('status', 'converted');
+                });
+            }])
+            ->withCount(['leads as pending_leads' => function($query) {
+                $pendingStatus = LeadStatus::where('name', 'Pending')->first();
+                $query->when($pendingStatus, function($q) use ($pendingStatus) {
+                    $q->where('status_id', $pendingStatus->id);
+                }, function($q) {
+                    $q->where('status', 'pending');
+                });
+            }])
+            ->withCount(['leads as rejected_leads' => function($query) {
+                $rejectedStatus = LeadStatus::where('name', 'Rejected')->first();
+                $query->when($rejectedStatus, function($q) use ($rejectedStatus) {
+                    $q->where('status_id', $rejectedStatus->id);
+                }, function($q) {
+                    $q->where('status', 'rejected');
+                });
+            }])
+            ->orderBy('emp_job_role') // Group by role
+            ->orderBy('emp_name')     // Then sort by name
+            ->get();
+            
+        return view('team_management.index', compact('teamMembers', 'leadStatuses', 'isAdmin'));
     }
 
     /**
@@ -579,39 +525,64 @@ class TeamManagementController extends Controller
      */
     public function agentReferralChain()
     {
-        // Only allow admins (1) and team leaders (2) to access
-        if (!in_array(session('emp_job_role'), [1, 2])) {
+        // Only allow admins (1), team leaders (2), and chain team agents (7) to access
+        if (!in_array(session('emp_job_role'), [1, 2, 7])) {
             abort(403, 'Unauthorized access.');
         }
 
         $currentUser = Auth::user();
         
         // Get all agents in the system with their referrals preloaded
-        $allAgents = Employee::where('emp_job_role', 2)
-            ->with(['referrals' => function($query) {
-                $query->where('emp_job_role', 2);
+        // Separate regular agents (2) and chain team agents (7)
+        $isChainTeamAgent = $currentUser->emp_job_role == 7;
+        $roleToShow = $isChainTeamAgent ? 7 : 2;
+        
+        // Get all agents of the same role type (2 or 7)
+        $allAgents = Employee::where('emp_job_role', $roleToShow)
+            ->with(['referrals' => function($query) use ($roleToShow) {
+                $query->where('emp_job_role', $roleToShow);
             }])
             ->get()
             ->keyBy('id');
         
-        // Add direct referrals count to each agent
+        // Build a map of referrer_id to their direct referrals
+        $referralMap = [];
         foreach ($allAgents as $agent) {
-            $agent->direct_referrals_count = $agent->referrals->count();
+            if (!isset($referralMap[$agent->referrer_id])) {
+                $referralMap[$agent->referrer_id] = [];
+            }
+            $referralMap[$agent->referrer_id][] = $agent;
+            $agent->direct_referrals_count = 0; // Initialize count
         }
         
-        // Build the referral tree
+        // Update direct referrals count
+        foreach ($allAgents as $agent) {
+            if (isset($referralMap[$agent->id])) {
+                $agent->direct_referrals_count = count($referralMap[$agent->id]);
+                $agent->setRelation('referrals', collect($referralMap[$agent->id]));
+            } else {
+                $agent->direct_referrals_count = 0;
+                $agent->setRelation('referrals', collect());
+            }
+        }
+        
+        // Build the full referral tree
         $referralTree = [];
         $processedAgents = [];
         
         if ($currentUser->emp_job_role == 1) { // If admin, show all agents
-            $rootAgents = $allAgents->whereNull('referrer_id');
+            // For admin, show all agents who don't have a referrer or whose referrer is not in the system
+            $rootAgents = $allAgents->filter(function($agent) use ($allAgents) {
+                return !$agent->referrer_id || !$allAgents->has($agent->referrer_id);
+            });
         } else {
-            // Only show direct reports for non-admin users
-            $rootAgents = $allAgents->where('referrer_id', $currentUser->id);
+            // For non-admin users, start with the current user as the root
+            $rootAgents = collect([$allAgents->get($currentUser->id) ?? $currentUser]);
         }
         
+        // Build the tree starting from root agents
         foreach ($rootAgents as $agent) {
-            if (!in_array($agent->id, $processedAgents)) {
+            if ($agent && !in_array($agent->id, $processedAgents)) {
                 $referralTree[] = $this->buildReferralTree($agent, $allAgents, $processedAgents);
                 $processedAgents[] = $agent->id;
             }
@@ -619,7 +590,8 @@ class TeamManagementController extends Controller
 
         return view('team.referral-chain', [
             'referralTree' => $referralTree,
-            'currentUser' => $currentUser
+            'currentUser' => $currentUser,
+            'isChainTeam' => $isChainTeamAgent
         ]);
     }
 
@@ -628,26 +600,38 @@ class TeamManagementController extends Controller
      */
     private function buildReferralTree($agent, $allAgents, &$processedAgents, $level = 0)
     {
-        // Limit the depth to prevent infinite recursion
-        if ($level > 10) {
-            $agent->referrals = collect();
+        // Safety check - prevent infinite recursion
+        if ($level > 20) {
+            $agent->setRelation('referrals', collect());
             return $agent;
         }
         
-        // Mark this agent as processed
+        // Mark this agent as processed if not already
         if (!in_array($agent->id, $processedAgents)) {
             $processedAgents[] = $agent->id;
         }
 
-        // Process referrals
+        // Process all direct referrals
         $processedReferrals = collect();
         foreach ($agent->referrals as $referral) {
             if (!in_array($referral->id, $processedAgents)) {
-                $processedReferrals->push($this->buildReferralTree($referral, $allAgents, $processedAgents, $level + 1));
+                // Make sure we have the full agent object
+                $fullReferral = $allAgents->get($referral->id) ?? $referral;
+                $processedReferrals->push($this->buildReferralTree(
+                    $fullReferral, 
+                    $allAgents, 
+                    $processedAgents, 
+                    $level + 1
+                ));
             }
         }
         
+        // Set the processed referrals relationship
         $agent->setRelation('referrals', $processedReferrals);
+        
+        // Calculate total team size (direct + indirect referrals)
+        $agent->team_size = $processedReferrals->sum('team_size') + $processedReferrals->count();
+        
         return $agent;
     }
 

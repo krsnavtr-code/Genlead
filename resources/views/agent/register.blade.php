@@ -209,6 +209,15 @@
             color: #6c757d;
             font-size: 0.9rem;
         }
+
+        @media (max-width: 425px) {
+            .form-side {
+                padding: 1rem;
+            }
+            .register-container {
+                margin: 1rem;
+            }
+        }
     </style>
 </head>
 <body>
@@ -294,7 +303,7 @@
 
                 <div class="form-group w-50 mx-auto">
                     <button type="submit" class="btn btn-primary btn-submit w-100">
-                        Register as Agent
+                        Register
                     </button>
                 </div>
             </form>

@@ -54,7 +54,7 @@ class AgentApiController extends Controller
         'emp_location' => $request->emp_location,        
         'emp_username' => $username,
         'emp_password' => $password,
-        'emp_job_role' => $request->emp_job_role === 'Agent' ? 2 : 'null', // Save 2 if designation is 'Agent', otherwise save 1
+        'emp_job_role' => $request->emp_job_role === 'Agent' ? 2 : ($request->emp_job_role === 'Chain Team Agent' ? 7 : 1), // Map role names to their respective IDs
         'referrer_id' => $referrer_id,
         'referral_code' => $username,
         'emp_join_date' => now()->format('Y-m-d'),

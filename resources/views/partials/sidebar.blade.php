@@ -46,7 +46,7 @@
                 </li>
 
                 <!-- Show My Account for All Roles -->
-                @if(in_array($emp_job_role, [1, 2, 4, 5, 6]))
+                @if(in_array($emp_job_role, [1, 2, 4, 5, 6, 7]))
                 <li class="nav-item">
                     <a href="{{ url('/admin/my-account') }}" class="nav-link w-100 {{ request()->is('admin/my-account') ? 'active' : '' }}">
                         <i class="nav-icon fas fa-user"></i>
@@ -66,7 +66,7 @@
                 @endif
 
                 <!-- Show Leads for Agent (2), Admin (1) -->
-                @if(in_array($emp_job_role, [1, 2]))
+                @if(in_array($emp_job_role, [1, 2, 7]))
                 <li class="nav-item">
                     <a href="{{ url('/i-admin/show-leads') }}" class="nav-link w-100 {{ request()->is('i-admin/leads/add-lead*') ? 'active' : '' }}">
                         <i class="nav-icon fas fa-plus-circle" style="color: #1E7E34;"></i>
@@ -86,7 +86,7 @@
                 @endif
 
                 <!-- Agent referral team chain view -->
-                @if(in_array($emp_job_role, [1, 2]))
+                @if(in_array($emp_job_role, [1, 7]))
                 <li class="nav-item">
                     <a href="{{ url('/admin/agent-referral-chain') }}" class="nav-link w-100 {{ request()->is('admin/agent-referral-chain') ? 'active' : '' }}">
                         <i class="nav-icon fas fa-users" style="color: #0062CC;"></i>
@@ -126,7 +126,7 @@
                 @endif
 
                 <!-- Show How to Use for Agent (2), Admin (1) -->
-                @if(in_array($emp_job_role, [1, 2, 4, 5, 6]))
+                @if(in_array($emp_job_role, [1, 2, 4, 5, 6, 7]))
                 <li class="nav-item">
                     <a href="{{ route('how-to-use') }}" class="nav-link w-100 {{ request()->is('how-to-use') ? 'active' : '' }}">
                         <i class="nav-icon fas fa-question-circle"></i>

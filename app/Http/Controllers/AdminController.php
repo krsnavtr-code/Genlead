@@ -25,9 +25,65 @@ use Carbon\Carbon;
 class AdminController extends Controller
 {
     public function login(){
-
         return view('login');
+    }
 
+    /**
+     * Show the admin dashboard.
+     *
+     * @return \Illuminate\View\View|\Illuminate\Http\RedirectResponse
+     */
+    public function dashboard()
+    {
+        try {
+            // Get the authenticated user
+            $user = auth()->guard('agent')->user();
+            
+            if (!$user) {
+                return redirect()->route('login')->with('error', 'Please login to access the dashboard.');
+            }
+            
+            // Get data for the dashboard
+            $totalLeads = \App\Models\Lead::count();
+            $convertedLeads = \App\Models\Lead::where('status', 3)->count();
+            $pendingLeads = \App\Models\Lead::where('status', 1)->count();
+            $inProgressLeads = \App\Models\Lead::where('status', 2)->count();
+            
+            // Initialize recent activities as empty collection
+            $recentActivities = collect();
+            
+            // Check if Activity model exists and has user relationship
+            if (class_exists('\App\Models\Activity')) {
+                $recentActivities = \App\Models\Activity::query();
+                
+                if (method_exists('\App\Models\Activity', 'user')) {
+                    $recentActivities->with('user');
+                }
+                
+                $recentActivities = $recentActivities->latest()
+                    ->take(10)
+                    ->get();
+            }
+            
+            // Get leads by status for chart
+            $leadsByStatus = \App\Models\Lead::selectRaw('status, count(*) as count')
+                ->groupBy('status')
+                ->pluck('count', 'status');
+            
+            return view('admin.dashboard', [
+                'totalLeads' => $totalLeads,
+                'convertedLeads' => $convertedLeads,
+                'pendingLeads' => $pendingLeads,
+                'inProgressLeads' => $inProgressLeads,
+                'recentActivities' => $recentActivities,
+                'leadsByStatus' => $leadsByStatus,
+                'user' => $user
+            ]);
+            
+        } catch (\Exception $e) {
+            Log::error('Dashboard error: ' . $e->getMessage());
+            return redirect()->route('login')->with('error', 'Please login to access the dashboard.');
+        }
     }
 
     public function store(Request $request)

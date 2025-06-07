@@ -81,7 +81,14 @@ class Employee extends Model
 
     public function referrals()
     {
-        return $this->hasMany(Employee::class, 'referrer_id');
+        return $this->hasMany(Employee::class, 'referrer_id')
+            ->when($this->emp_job_role == 7, function($query) {
+                // If this is a Chain Team Agent, only show Chain Team Agent referrals
+                return $query->where('emp_job_role', 7);
+            }, function($query) {
+                // Otherwise, only show regular Agent referrals
+                return $query->where('emp_job_role', 2);
+            });
     }
 
     public function getAllDescendants()
@@ -126,6 +133,14 @@ class Employee extends Model
     {
         return $query->where('emp_job_role', 2); // Role ID for Agent
     }
+    
+    /**
+     * Scope a query to only include chain team agents
+     */
+    public function scopeChainTeamAgents($query)
+    {
+        return $query->where('emp_job_role', 7); // Role ID for Chain Team Agent
+    }
 
     /**
      * Check if the employee is a team leader
@@ -141,5 +156,13 @@ class Employee extends Model
     public function isTeamMember()
     {
         return $this->emp_job_role === 2;
+    }
+    
+    /**
+     * Check if the employee is a chain team agent
+     */
+    public function isChainTeamAgent()
+    {
+        return $this->emp_job_role === 7;
     }
 }

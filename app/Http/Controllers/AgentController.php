@@ -134,6 +134,9 @@ class AgentController extends Controller
             session(['agent_otp' => $otp]);
 
             // Prepare agent data for session
+            // Set role based on whether a referral code was used
+            // If joining with a referral code, set role to 7 (Chain Team Agent)
+            // Otherwise, set to 2 (Regular Agent)
             $agentData = [
                 'emp_name' => $validatedData['name'],
                 'emp_email' => $validatedData['email'],
@@ -141,7 +144,7 @@ class AgentController extends Controller
                 'emp_location' => $validatedData['address'],
                 'emp_password' => $validatedData['password'], // Storing password in plain text for authentication
                 'emp_password_hash' => Hash::make($validatedData['password']), // Also store hashed version for security
-                'emp_job_role' => 2,
+                'emp_job_role' => !empty($validatedData['referral_code']) ? 7 : 2, // Chain Team Agent (7) if using referral code, else Regular Agent (2)
                 'emp_username' => $validatedData['emp_username'],
                 'emp_join_date' => now(),
             ];
