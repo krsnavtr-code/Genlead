@@ -1,18 +1,10 @@
 @extends('main')
 
 @section('content')
-<div class="content-wrapper">
+<div class="content-wrapper mt-5">
     <div class="content-header">
         <div class="container-fluid">
-            <div class="row mb-2">
-                <div class="col-sm-6">
-                    <h1 class="m-0">Agent Referral Chain</h1>
-                </div>
-                <div class="col-sm-6">
-                    <ol class="breadcrumb float-sm-right">
-                    </ol>
-                </div>
-            </div>
+            <h5 class="m-0">Agent Network</h5>
         </div>
     </div>
 
@@ -22,18 +14,12 @@
                 <div class="col-12">
                     <div class="card">
                         <div class="card-header">
-                            <h3 class="card-title">Agent Network</h3>
-                            <div class="card-tools">
-                                <button type="button" class="btn btn-tool" data-card-widget="collapse">
-                                    <i class="fas fa-minus"></i>
-                                </button>
-                            </div>
+                            <h5 class="card-title m-0 text-sm">My Team</h5>
                         </div>
                         <div class="card-body d-flex flex-column justify-content-center align-items-center position-relative">
                             <div class="d-flex justify-content-between w-100 mb-3">
-                                <h3 class="m-0">My Team</h3>
                                 @if(count($referralTree) > 0)
-                                <div class="orgchart-ctrls">
+                                <div class="orgchart-ctrls ">
                                     <button id="zoom-in" title="Zoom In"><i class="fas fa-search-plus"></i></button>
                                     <button id="zoom-out" title="Zoom Out"><i class="fas fa-search-minus"></i></button>
                                     <button id="zoom-reset" title="Reset Zoom"><i class="fas fa-sync-alt"></i></button>
@@ -142,18 +128,34 @@
     height: 30px;
 }
 /* Zoom controls */
-.orgchart-ctrls {
+/* .orgchart-ctrls {
     position: absolute;
     top: 10px;
     right: 20px;
     z-index: 10;
+} */
+
+.orgchart-ctrls {
+    flex-direction: column;
+    position: fixed; /* fixed instead of absolute */
+    top: 60px; /* distance from top, adjust as needed */
+    right: 10px; /* distance from right */
+    z-index: 999;
+    background: #fff;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    padding: 5px 4px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 11px;
 }
 .orgchart-ctrls button {
     background: #fff;
     border: 1px solid #dee2e6;
     border-radius: 4px;
     padding: 5px 10px;
-    margin-left: 5px;
     cursor: pointer;
     transition: all 0.3s;
 }

@@ -234,9 +234,9 @@
                 <div class="referral-code">{{ $employee->referral_code }}</div>
                 <button class="btn btn-sm btn-primary copy-btn" onclick="copyReferralCode()">Copy Code</button>
                 <div id="copy-message">Copied!</div>
-                <a href="https://genlead.in/agent/join?refid={{ $employee->referral_code }}" class="d-block mt-2 text-decoration-none text-info" target="_blank">
+                <!-- <a href="https://genlead.in/agent/join?refid={{ $employee->referral_code }}" class="d-block mt-2 text-decoration-none text-info" target="_blank">
                     https://genlead.in/agent/join?refid={{ $employee->referral_code }}
-                </a>
+                </a> -->
                 <script>
                     function copyReferralCode() {
                         navigator.clipboard.writeText('{{ $employee->referral_code }}');
