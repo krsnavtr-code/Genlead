@@ -144,7 +144,7 @@ class AgentController extends Controller
                 'emp_location' => $validatedData['address'],
                 'emp_password' => $validatedData['password'], // Storing password in plain text for authentication
                 'emp_password_hash' => Hash::make($validatedData['password']), // Also store hashed version for security
-                'emp_job_role' => !empty($validatedData['referral_code']) ? 7 : 2, // Chain Team Agent (7) if using referral code, else Regular Agent (2)
+                'emp_job_role' => 7, // Always set to Chain Team Agent (7) for all registrations
                 'emp_username' => $validatedData['emp_username'],
                 'emp_join_date' => now(),
             ];
