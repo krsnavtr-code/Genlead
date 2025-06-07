@@ -72,6 +72,14 @@ Route::middleware(['auth'])
         // Team Member Followups
         Route::get('/team/member/{id}/followups', [\App\Http\Controllers\TeamManagementController::class, 'memberFollowups'])
             ->name('team.member.followups');
+            
+        // Agent Referral Leads Details
+        Route::get('/agent-referral-leads-details', [\App\Http\Controllers\TeamManagementController::class, 'agentReferralLeadsDetails'])
+            ->name('admin.agent.referral.leads.details');
+            
+        // Agent Lead Details
+        Route::get('/team/member/{id}/leads-details', [\App\Http\Controllers\TeamManagementController::class, 'memberLeadsDetails'])
+            ->name('team.member.leads-details');
     });
 
 // Agent Routes

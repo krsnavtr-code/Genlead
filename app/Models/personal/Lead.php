@@ -92,7 +92,7 @@ class Lead extends Model
      */
     public function followUps()
     {
-        return $this->hasMany(FollowUp::class)->latest('follow_up_date');
+        return $this->hasMany(FollowUp::class)->latest('follow_up_time');
     }
     
     /**

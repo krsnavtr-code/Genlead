@@ -18,6 +18,205 @@ class TeamManagementController extends Controller
     {
         $this->middleware('auth');
     }
+    
+    /**
+     * Display lead details for a specific team member
+     *
+     * @param int $id The ID of the team member
+     * @return \Illuminate\View\View
+     */
+    public function memberLeadsDetails($id)
+    {
+        // Check if user is authenticated
+        if (!Auth::check()) {
+            return redirect()->route('login');
+        }
+
+        $user = Auth::user();
+        $emp_job_role = session('emp_job_role');
+        
+        // Check if user is admin (role 1) or chain team agent (role 7)
+        if ($emp_job_role != 1 && $emp_job_role != 7) {
+            abort(403, 'Unauthorized access.');
+        }
+        
+        // Get the agent
+        $agent = Employee::findOrFail($id);
+        
+        // If user is a chain team agent, verify they have access to this agent's data
+        if ($emp_job_role == 7 && $agent->referrer_id != $user->id && $agent->id != $user->id) {
+            abort(403, 'Unauthorized access to this agent\'s data.');
+        }
+        
+        // Get leads for this agent with their status counts
+        try {
+            // First, let's check if the agent exists
+            if (!$agent) {
+                throw new \Exception('Agent not found');
+            }
+            
+            // Try with different column names that might be used for assignment
+            $leads = Lead::where(function($query) use ($agent) {
+                    $query->where('agent_id', $agent->id)
+                          ->orWhere('assigned_to', $agent->id);
+                })
+                ->withCount(['followUps as total_followups'])
+                ->with(['statusRecord'])
+                ->orderBy('created_at', 'desc')
+                ->paginate(20);
+                
+            // Log the query for debugging
+            Log::info('Leads query executed', [
+                'agent_id' => $agent->id,
+                'leads_count' => $leads->total(),
+                'query' => $leads->toSql()
+            ]);
+                
+        } catch (\Exception $e) {
+            Log::error('Error fetching leads: ' . $e->getMessage());
+            // Return the view with an empty collection and paginate manually
+            $leads = new \Illuminate\Pagination\LengthAwarePaginator(
+                collect([]), // items
+                0, // total
+                20, // per page
+                \Illuminate\Pagination\Paginator::resolveCurrentPage() // current page
+            );
+            session()->flash('error', 'Error fetching leads: ' . $e->getMessage());
+        }
+        
+        // Get lead statuses for filter
+        $statuses = LeadStatus::all();
+        
+        return view('team_management.member_leads_details', [
+            'agent' => $agent,
+            'leads' => $leads,
+            'statuses' => $statuses,
+        ]);
+    }
+    
+    /**
+     * Display agent referral leads details
+     */
+    public function agentReferralLeadsDetails()
+    {
+        // Check if user is authenticated
+        if (!Auth::check()) {
+            return redirect()->route('login');
+        }
+
+        $user = Auth::user();
+        $emp_job_role = session('emp_job_role');
+        
+        // Check if user is admin (role 1) or chain team agent (role 7)
+        if ($emp_job_role != 1 && $emp_job_role != 7) {
+            abort(403, 'Unauthorized access.');
+        }
+        
+        // For admin, get all chain team agents (role 7)
+        // For chain team agent, get their referrals
+        if ($emp_job_role == 1) {
+            $agents = Employee::where('emp_job_role', 7)
+                ->withCount(['leads as total_leads'])
+                ->withCount(['leads as converted_leads_count' => function($query) {
+                    $query->where('status', 'converted');
+                }])
+                ->withCount(['leads as pending_leads_count' => function($query) {
+                    $query->where('status', 'pending');
+                }])
+                ->withCount(['leads as rejected_leads_count' => function($query) {
+                    $query->where('status', 'rejected');
+                }])
+                ->get();
+        } else {
+            // Get the agent's direct referrals that are chain team agents (role 7)
+            $agents = Employee::where('referrer_id', $user->id)
+                ->where('emp_job_role', 7) // Only get chain team agent referrals
+                ->withCount(['leads as total_leads'])
+                ->withCount(['leads as converted_leads_count' => function($query) {
+                    $query->where('status', 'converted');
+                }])
+                ->withCount(['leads as pending_leads_count' => function($query) {
+                    $query->where('status', 'pending');
+                }])
+                ->withCount(['leads as rejected_leads_count' => function($query) {
+                    $query->where('status', 'rejected');
+                }])
+                ->get();
+            
+            // Include the current agent in the results if they are a chain team agent
+            if ($user->emp_job_role == 7) {
+                $currentAgent = Employee::where('id', $user->id)
+                    ->withCount(['leads as total_leads'])
+                    ->withCount(['leads as converted_leads_count' => function($query) {
+                        $query->where('status', 'converted');
+                    }])
+                    ->withCount(['leads as pending_leads_count' => function($query) {
+                        $query->where('status', 'pending');
+                    }])
+                    ->withCount(['leads as rejected_leads_count' => function($query) {
+                        $query->where('status', 'rejected');
+                    }])
+                    ->first();
+                
+                if ($currentAgent) {
+                    $agents->prepend($currentAgent);
+                }
+            }
+        }
+        
+        // Prepare data for the view
+        $agents = $agents->map(function($agent) {
+            $converted = $agent->converted_leads_count ?? 0;
+            $pending = $agent->pending_leads_count ?? 0;
+            $rejected = $agent->rejected_leads_count ?? 0;
+            $total = $converted + $pending + $rejected;
+            
+            $conversionRate = $total > 0 ? round(($converted / $total) * 100, 2) : 0;
+            
+            return (object)[
+                'id' => $agent->id,
+                'emp_name' => $agent->emp_name,
+                'emp_email' => $agent->emp_email,
+                'emp_phone' => $agent->emp_phone,
+                'total_leads' => $total,
+                'converted' => $converted,
+                'pending' => $pending,
+                'rejected' => $rejected,
+                'conversion_rate' => $conversionRate
+            ];
+        });
+        
+        // Prepare data for charts
+        $chartData = [
+            'labels' => $agents->pluck('emp_name')->toArray(),
+            'conversionRates' => $agents->pluck('conversion_rate')->toArray(),
+            'converted' => $agents->pluck('converted')->toArray(),
+            'pending' => $agents->pluck('pending')->toArray(),
+            'rejected' => $agents->pluck('rejected')->toArray(),
+        ];
+        
+        return view('team_management.agent_referral_leads', [
+            'agents' => $agents,
+            'chartData' => $chartData,
+        ]);
+    }
+    
+    /**
+     * Get the display name for a role ID
+     */
+    private function getRoleName($roleId)
+    {
+        $roles = [
+            1 => 'SuperAdmin',
+            2 => 'Agent',
+            4 => 'HR',
+            5 => 'Accountant',
+            6 => 'Team Leader',
+            7 => 'Referral Agent'
+        ];
+        
+        return $roles[$roleId] ?? 'Unknown Role';
+    }
 
     /**
      * Display the team management dashboard
@@ -672,7 +871,6 @@ class TeamManagementController extends Controller
         if ($updated > 0) {
             // Log the transfer
             foreach ($request->lead_ids as $leadId) {
-                // Add to lead history
                 \App\Models\personal\LeadHistory::create([
                     'lead_id' => $leadId,
                     'action' => 'transferred',

@@ -189,7 +189,7 @@
                     @endif
 
                     
-                    <div class="dropdown">
+                    <div class="dropdown" style="display: inline-block;">
                         <button class="btn btn-info dropdown-toggle px-3" type="button"
                             id="followupDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                             Follow-ups
