@@ -4,103 +4,165 @@
 
 @section('content')
 <style>
-    .account-card {
-        background: #fff;
-        padding: 30px;
-        border-radius: 16px;
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.07);
-        margin-top: 30px;
+    body {
+        background-color: #f3f6fd;
     }
 
-    .account-section-title {
-        font-size: 20px;
-        font-weight: 600;
-        margin-top: 30px;
-        margin-bottom: 20px;
-        border-left: 5px solid #007bff;
-        padding-left: 10px;
-        color: #007bff;
+    .profile-container {
+        margin-top: 40px;
     }
 
-    .profile-pic {
-        width: 150px;
-        height: 150px;
+    .profile-card {
+        border-radius: 20px;
+        overflow: hidden;
+        box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+        display: flex;
+        flex-wrap: wrap;
+        background-color: #fff;
+    }
+
+    .profile-sidebar {
+        background: linear-gradient(135deg, #007bff, #0056b3);
+        color: white;
+        flex: 1 1 300px;
+        padding: 40px 20px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .profile-sidebar img {
+        width: 140px;
+        height: 140px;
         border-radius: 50%;
         object-fit: cover;
-        border: 4px solid #007bff;
+        border: 4px solid #fff;
+        box-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
     }
 
-    .info-item {
-        margin-bottom: 15px;
+    .profile-sidebar h4 {
+        margin-top: 20px;
+        font-weight: 600;
+    }
+
+    .profile-sidebar small {
+        font-size: 14px;
+        opacity: 0.9;
+    }
+
+    .profile-content {
+        flex: 2 1 600px;
+        padding: 40px;
+    }
+
+    .section-title {
+        font-size: 20px;
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 20px;
+        border-left: 4px solid #007bff;
+        padding-left: 10px;
+    }
+
+    .info-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+        gap: 15px;
+    }
+
+    .info-box {
+        background: #f9fafe;
+        padding: 15px 20px;
+        border-radius: 12px;
+        border: 1px solid #e0e5f1;
         display: flex;
         align-items: center;
+        gap: 10px;
     }
 
-    .info-item i {
-        width: 25px;
+    .info-box i {
+        font-size: 18px;
         color: #007bff;
+        min-width: 20px;
     }
 
-    .info-label {
+    .info-box span.label {
         font-weight: 600;
-        margin-right: 5px;
         color: #555;
     }
 
-    .info-value {
+    .info-box span.value {
         color: #222;
     }
 
-    .download-button {
+    .btn-group-download {
         margin-top: 25px;
     }
 
-    .referral-link {
-        word-break: break-all;
-        background: #f8f9fa;
-        padding: 10px;
-        border-radius: 8px;
-        display: inline-block;
-        font-weight: 500;
-        color: #007bff;
+    .referral-section {
+        margin-top: 30px;
     }
 
-    .referral-link:hover {
-        text-decoration: underline;
+    .referral-code {
+        font-weight: 600;
+        color: #007bff;
+        font-size: 16px;
+        word-break: break-word;
+        background-color: #e9f5ff;
+        padding: 10px 15px;
+        border-radius: 8px;
+        display: inline-block;
+    }
+
+    .copy-btn {
+        margin-top: 10px;
+    }
+
+    #copy-message {
+        display: none;
+        font-weight: bold;
+        margin-top: 8px;
+        color: green;
     }
 </style>
 
-<div class="container">
-    <div class="account-card">
-        <div class="row">
-            <div class="col-md-4 text-center mb-4">
-                <p class="info-label">Profile Photo</p>
-                @if ($employee->emp_pic)
-                    <img src="{{ asset($employee->emp_pic) }}" alt="Employee Photo" class="profile-pic mb-2">
-                @else
-                    <p class="text-muted">No photo uploaded.</p>
-                @endif
-                <p class="text-secondary mt-2"><i class="fas fa-id-badge"></i> ID: {{ $employee->id }}</p>
-            </div>
+<div class="container profile-container">
+    <div class="profile-card">
+        <!-- Sidebar -->
+        <div class="profile-sidebar text-center">
+            @if ($employee->emp_pic)
+                <img src="{{ asset($employee->emp_pic) }}" alt="Profile Picture">
+            @else
+                <i class="fas fa-user-circle" style="font-size: 140px;"></i>
+            @endif
+            <h4>{{ $employee->emp_name ?? 'N/A' }}</h4>
+            <small>ID: {{ $employee->id }}</small>
+        </div>
 
-            <div class="col-md-8">
-                <div class="account-section-title"><i class="fas fa-user-circle"></i> Account Information</div>
-
-                <div class="row">
-                    <div class="col-sm-6 info-item">
-                        <i class="fas fa-user"></i>
-                        <span class="info-label">Name:</span>
-                        <span class="info-value">{{ $employee->emp_name ?? 'N/A' }}</span>
+        <!-- Content -->
+        <div class="profile-content">
+            <div class="section-title">Account Information</div>
+            <div class="info-grid">
+                <div class="info-box">
+                    <i class="fas fa-user"></i>
+                    <div>
+                        <span class="label">Name:</span><br>
+                        <span class="value">{{ $employee->emp_name ?? 'N/A' }}</span>
                     </div>
-                    <div class="col-sm-6 info-item">
-                        <i class="fas fa-user-tag"></i>
-                        <span class="info-label">Username:</span>
-                        <span class="info-value">{{ $employee->emp_username ?? 'N/A' }}</span>
+                </div>
+                <div class="info-box">
+                    <i class="fas fa-user-tag"></i>
+                    <div>
+                        <span class="label">Username:</span><br>
+                        <span class="value">{{ $employee->emp_username ?? 'N/A' }}</span>
                     </div>
-                    <div class="col-sm-6 info-item">
-                        <i class="fas fa-user-shield"></i>
-                        <span class="info-label">Role:</span>
-                        <span class="info-value">
+                </div>
+                <div class="info-box">
+                    <i class="fas fa-user-shield"></i>
+                    <div>
+                        <span class="label">Role:</span><br>
+                        <span class="value">
                             @if ($employee->emp_job_role == 1)
                                 Superadmin
                             @elseif ($employee->emp_job_role == 2)
@@ -113,86 +175,78 @@
                         </span>
                     </div>
                 </div>
+            </div>
 
-                <div class="account-section-title"><i class="fas fa-address-card"></i> Personal Information</div>
-                <div class="row">
-                    <div class="col-sm-6 info-item">
-                        <i class="fas fa-envelope"></i>
-                        <span class="info-label">Email:</span>
-                        <span class="info-value">{{ $employee->emp_email ?? 'N/A' }}</span>
-                    </div>
-                    <div class="col-sm-6 info-item">
-                        <i class="fas fa-phone-alt"></i>
-                        <span class="info-label">Phone:</span>
-                        <span class="info-value">{{ $employee->emp_phone ?? 'N/A' }}</span>
-                    </div>
-                    <div class="col-sm-6 info-item">
-                        <i class="fas fa-building"></i>
-                        <span class="info-label">Branch:</span>
-                        <span class="info-value">{{ $employee->emp_branch ?? 'N/A' }}</span>
-                    </div>
-                    <div class="col-sm-6 info-item">
-                        <i class="fas fa-map-marker-alt"></i>
-                        <span class="info-label">Location:</span>
-                        <span class="info-value">{{ $employee->emp_location ?? 'N/A' }}</span>
-                    </div>
-                    <div class="col-sm-6 info-item">
-                        <i class="fas fa-calendar-alt"></i>
-                        <span class="info-label">Join Date:</span>
-                        <span class="info-value">{{ $employee->emp_join_date ?? 'N/A' }}</span>
+            <div class="section-title">Personal Information</div>
+            <div class="info-grid">
+                <div class="info-box">
+                    <i class="fas fa-envelope"></i>
+                    <div>
+                        <span class="label">Email:</span><br>
+                        <span class="value">{{ $employee->emp_email ?? 'N/A' }}</span>
                     </div>
                 </div>
-
-                <!-- Download Offer Letter -->
-                @if ($employee->emp_job_role == 2)
-                    <div class="download-button">
-                        <a href="/admin/employee/download-offer-letter/{{ $employee->id }}" class="btn btn-success" target="_blank">
-                            <i class="fas fa-file-download"></i> Download Offer Letter
-                        </a>
+                <div class="info-box">
+                    <i class="fas fa-phone-alt"></i>
+                    <div>
+                        <span class="label">Phone:</span><br>
+                        <span class="value">{{ $employee->emp_phone ?? 'N/A' }}</span>
                     </div>
-                @endif
-                <!-- Download Id Card -->
-                @if ($employee->emp_job_role == 2)
-                    <div class="download-button">
-                        <a href="/admin/employee/download-id-card/{{ $employee->id }}" class="btn btn-success">
-                            <i class="fas fa-file-download"></i> Download ID Card
-                        </a>
+                </div>
+                <div class="info-box">
+                    <i class="fas fa-building"></i>
+                    <div>
+                        <span class="label">Branch:</span><br>
+                        <span class="value">{{ $employee->emp_branch ?? 'N/A' }}</span>
                     </div>
-                @endif
-
-                @if ($employee->referral_code)
-                    <div class="account-section-title"><i class="fas fa-user-friends"></i> Referral Program</div>
-                    <div class="row">
-                        <div class="col-sm-6 info-item">
-                            <i class="fas fa-user-friends"></i>
-                            <span class="info-label">Referral Code:</span>
-                            <span style="color: var(--primary-color);">{{ $employee->referral_code }}</span>
-                        </div>
-                        <!-- <div class="col-sm-6 info-item">
-                            <i class="fas fa-user-friends"></i>
-                            <span class="info-label">Referral Link:</span>
-                            <a href="https://genlead.in/agent/join?refid={{ $employee->referral_code }}" target="_blank" style="color: var(--primary-color);">https://genlead.in/agent/join?refid={{ $employee->referral_code }}</a>
-                        </div> -->
+                </div>
+                <div class="info-box">
+                    <i class="fas fa-map-marker-alt"></i>
+                    <div>
+                        <span class="label">Location:</span><br>
+                        <span class="value">{{ $employee->emp_location ?? 'N/A' }}</span>
                     </div>
-                    <!-- Copy referral code -->
-                    <button class="btn btn-primary btn-sm" onclick="copyReferralCode()">Copy Referral Code</button>
-                    <span id="copy-message" style="display: none; color: var(--primary-color); font-weight: bold; margin-top: 10px;">Copied!</span>
-                    <script>
-                        function copyReferralCode() {
-                            navigator.clipboard.writeText('{{ $employee->referral_code }}');
-                            // text message
-                            document.getElementById('copy-message').style.display = 'block';
-                            setTimeout(() => {
-                                document.getElementById('copy-message').style.display = 'none';
-                            }, 3000);
-                        }
-                    </script>
-                    <!-- <a href="https://collegevihar.com/agent/join?refid={{ $employee->referral_code }}"
-                       class="referral-link" target="_blank">
-                       https://collegevihar.com/agent/join?refid={{ $employee->referral_code }}
-                    </a> -->
-                @endif
+                </div>
+                <div class="info-box">
+                    <i class="fas fa-calendar-alt"></i>
+                    <div>
+                        <span class="label">Join Date:</span><br>
+                        <span class="value">{{ $employee->emp_join_date ?? 'N/A' }}</span>
+                    </div>
+                </div>
             </div>
+
+            <!-- Downloads -->
+            @if ($employee->emp_job_role == 2)
+                <div class="btn-group-download">
+                    <a href="/admin/employee/download-offer-letter/{{ $employee->id }}" class="btn btn-outline-primary me-2" target="_blank">
+                        <i class="fas fa-file-download"></i> Offer Letter
+                    </a>
+                    <a href="/admin/employee/download-id-card/{{ $employee->id }}" class="btn btn-outline-secondary">
+                        <i class="fas fa-file-download"></i> ID Card
+                    </a>
+                </div>
+            @endif
+
+            <!-- Referral Program -->
+            @if ($employee->referral_code)
+                <div class="section-title referral-section"><i class="fas fa-user-friends"></i> Referral Program</div>
+                <div class="referral-code">{{ $employee->referral_code }}</div>
+                <button class="btn btn-sm btn-primary copy-btn" onclick="copyReferralCode()">Copy Code</button>
+                <div id="copy-message">Copied!</div>
+                <a href="https://genlead.in/agent/join?refid={{ $employee->referral_code }}" class="d-block mt-2 text-decoration-none text-info" target="_blank">
+                    https://genlead.in/agent/join?refid={{ $employee->referral_code }}
+                </a>
+                <script>
+                    function copyReferralCode() {
+                        navigator.clipboard.writeText('{{ $employee->referral_code }}');
+                        document.getElementById('copy-message').style.display = 'block';
+                        setTimeout(() => {
+                            document.getElementById('copy-message').style.display = 'none';
+                        }, 2000);
+                    }
+                </script>
+            @endif
         </div>
     </div>
 </div>
