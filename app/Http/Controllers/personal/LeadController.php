@@ -195,7 +195,7 @@ class LeadController extends Controller
         $userId = session()->get('user_id');
         $userRole = session()->get('emp_job_role');
 
-        if ($userRole == 2) {  // Agent role
+        if (in_array($userRole, [2, 7])) {  // Agent or Chain Team Agent role
             $leads = Lead::where('agent_id', $userId)->paginate(50);
         } elseif ($userRole == 1) {  // Admin role
             $leads = Lead::paginate(15);

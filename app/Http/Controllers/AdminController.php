@@ -29,6 +29,44 @@ class AdminController extends Controller
     }
 
     /**
+     * Show the user's account page.
+     *
+     * @return \Illuminate\View\View|\Illuminate\Http\RedirectResponse
+     */
+    public function myAccount()
+    {
+        try {
+            // First try to get user from auth guard
+            $user = auth()->guard('agent')->user();
+            $userId = $user ? $user->id : session('user_id');
+            
+            if (!$userId) {
+                return redirect()->route('login')->with('error', 'Please log in to access your account.');
+            }
+            
+            // Get the employee data
+            $employee = Employee::find($userId);
+            
+            if (!$employee) {
+                return redirect()->route('login')->with('error', 'User not found.');
+            }
+            
+            // Get job roles for the form (if needed)
+            $jobRoles = JobRole::all();
+            
+            return view('admin.my-account', [
+                'employee' => $employee,
+                'jobRoles' => $jobRoles,
+                'user' => $user ?: $employee
+            ]);
+            
+        } catch (\Exception $e) {
+            Log::error('My Account Error: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'An error occurred while loading your account page.');
+        }
+    }
+
+    /**
      * Show the admin dashboard.
      *
      * @return \Illuminate\View\View|\Illuminate\Http\RedirectResponse
@@ -161,26 +199,7 @@ class AdminController extends Controller
         }
     }
 
-    public function myAccount()
-    {
-        // Retrieve the user ID from the session
-    $userId = session('user_id');
 
-    if (!$userId) {
-        return redirect()->route('login')->with('error', 'Please log in.');
-    }
-
-    // Find the employee by the user ID
-    $employee = Employee::find($userId);
-
-    if (!$employee) {
-        return redirect()->route('login')->with('error', 'User not found.');
-    }
-
-    // Pass the employee data to the view
-    return view('admin.my-account', compact('employee'));
-
-    }
 
 
     // public function changePassword(Request $request)
