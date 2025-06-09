@@ -29,6 +29,12 @@ class Kernel extends ConsoleKernel
         $schedule->command('followups:send-notifications')
                  ->everyMinute()
                  ->withoutOverlapping();
+                 
+        // Update agent levels daily at midnight
+        $schedule->command('agent:levels:update')
+                 ->dailyAt('00:00')
+                 ->withoutOverlapping()
+                 ->runInBackground();
     }
 
     /**

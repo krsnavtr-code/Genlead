@@ -21,6 +21,9 @@ use Carbon\Carbon;
 use App\Http\Controllers\TeamManagementController;
 use App\Http\Controllers\AdminController;
 
+// Include test routes
+require __DIR__.'/test.php';
+
 Route::get('/send-reminder',  [CronJobController::class, 'SendLeadReminders']);
 
 // Dashboard route
