@@ -47,6 +47,17 @@ class Employee extends Model
         'emp_password',
     ];
 
+    /**
+     * Check if the user is an admin
+     *
+     * @return bool
+     */
+    public function isAdmin()
+    {
+        // Assuming admin has emp_job_role = 1 (adjust according to your role structure)
+        return $this->emp_job_role === 1;
+    }
+    
     public function jobRole()
     {
         return $this->belongsTo(JobRole::class, 'emp_job_role');
@@ -123,30 +134,18 @@ class Employee extends Model
     }
 
     /**
-     * Get the total number of team members in the agent's downline
-     * This counts all agents who were referred by this agent or by someone in their downline
+     * Get the total number of bottom-level team members in the agent's downline
+     * This counts only agents who don't have any referrals themselves
      */
     public function getTeamSize()
     {
-        // First, try to use a more efficient query if possible
         try {
-            // Get all direct and indirect referrals (team members)
+            // Count all direct referrals who are chain team agents
             $result = DB::select("
-                WITH RECURSIVE agent_tree AS (
-                    -- Base case: direct referrals
-                    SELECT id, referrer_id, 1 as level 
-                    FROM employees 
-                    WHERE referrer_id = ?
-                    
-                    UNION ALL
-                    
-                    -- Recursive case: team members of team members
-                    SELECT e.id, e.referrer_id, at.level + 1
-                    FROM employees e
-                    INNER JOIN agent_tree at ON e.referrer_id = at.id
-                    WHERE e.emp_job_role = 7  -- Only count chain team agents
-                )
-                SELECT COUNT(*) as total FROM agent_tree
+                SELECT COUNT(*) as total 
+                FROM employees
+                WHERE referrer_id = ?
+                AND emp_job_role = 7  -- Only chain team agents
             ", [$this->id]);
             
             return (int)($result[0]->total ?? 0);
@@ -161,23 +160,16 @@ class Employee extends Model
     }
 
     /**
-     * Fallback recursive method to count team members
-     * This is used when the database doesn't support recursive CTE
+     * Recursive fallback method to calculate bottom-level team size
+     * This is used if the CTE query fails
      */
     protected function getTeamSizeRecursive()
     {
-        $count = 0;
-        // Only count direct referrals that are chain team agents (role 7)
-        $directReferrals = $this->directReferrals()
-            ->where('emp_job_role', 7)  // Only count chain team agents
-            ->get();
-        
-        foreach ($directReferrals as $referral) {
-            $count++; // Count the direct referral
-            $count += $referral->getTeamSizeRecursive(); // Recursively count their team
-        }
-        
-        return $count;
+        // Simple count of direct referrals who are chain team agents
+        return DB::table('employees')
+            ->where('referrer_id', $this->id)
+            ->where('emp_job_role', 7)
+            ->count();
     }
 
     /**

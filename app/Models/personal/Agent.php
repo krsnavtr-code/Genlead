@@ -47,6 +47,17 @@ class Agent extends Authenticatable
         return $this->hasMany(Lead::class);
     }
     
+    /**
+     * Check if the user is an admin
+     *
+     * @return bool
+     */
+    public function isAdmin()
+    {
+        // Assuming admin has emp_job_role = 1 (adjust according to your role structure)
+        return $this->emp_job_role === 1;
+    }
+
     // Referrer relationship
     public function referrer()
     {

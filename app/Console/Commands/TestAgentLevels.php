@@ -51,9 +51,13 @@ class TestAgentLevels extends Command
         $this->line("Current Commission: ₹{$agent->commission_rate}");
         $this->line("Current Team Size: {$agent->team_size}");
 
+        // Display team hierarchy
+        $this->info("\nTeam Hierarchy:");
+        $this->displayTeamHierarchy($agent->id);
+
         // Calculate team size
         $teamSize = $agent->getTeamSize();
-        $this->info("\nCalculated Team Size: {$teamSize}");
+        $this->info("\nCalculated Bottom-Level Team Size: {$teamSize}");
 
         // Get agent level info
         $levelInfo = $agent->getAgentLevel();
@@ -83,6 +87,44 @@ class TestAgentLevels extends Command
         $this->line("Level: {$agent->agent_level}");
         $this->line("Commission: ₹{$agent->commission_rate}");
         $this->line("Team Size: {$agent->team_size}");
+    }
+    
+    /**
+     * Display the team hierarchy for an agent
+     */
+    protected function displayTeamHierarchy($agentId, $level = 0, &$displayed = [])
+    {
+        // Prevent infinite recursion
+        if (in_array($agentId, $displayed)) {
+            return;
+        }
+        
+        $displayed[] = $agentId;
+        
+        // Get the agent
+        $agent = Employee::find($agentId);
+        if (!$agent) {
+            return;
+        }
+        
+        // Display the agent
+        $prefix = str_repeat('  ', $level * 2);
+        $hasReferrals = Employee::where('referrer_id', $agentId)
+            ->where('emp_job_role', 7)
+            ->exists();
+            
+        $status = $hasReferrals ? '' : ' (Bottom Level)';
+        $this->line("{$prefix}- {$agent->emp_name} [ID: {$agent->id}]{$status}");
+        
+        // Get and display direct referrals
+        $referrals = Employee::where('referrer_id', $agentId)
+            ->where('emp_job_role', 7)
+            ->orderBy('id')
+            ->get();
+            
+        foreach ($referrals as $referral) {
+            $this->displayTeamHierarchy($referral->id, $level + 1, $displayed);
+        }
     }
 
     protected function testAllAgents()

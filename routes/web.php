@@ -36,6 +36,14 @@ Route::get('/test-js', function() {
     return view('test-js');
 });
 
+// Agent Earnings Routes
+Route::middleware(['auth:agent'])->prefix('agent')->name('agent.')->group(function () {
+    Route::get('/earnings', [\App\Http\Controllers\AgentEarningController::class, 'index'])->name('earnings.index');
+    Route::get('/earnings/{earning}', [\App\Http\Controllers\AgentEarningController::class, 'show'])->name('earnings.show');
+    Route::patch('/earnings/{earning}/payout', [\App\Http\Controllers\AgentEarningController::class, 'payout'])->name('earnings.payout');
+    Route::post('/earnings/payout-all', [\App\Http\Controllers\AgentEarningController::class, 'payoutAll'])->name('earnings.payout-all');
+});
+
 // Admin Routes
 Route::middleware(['auth'])
     ->prefix('admin')

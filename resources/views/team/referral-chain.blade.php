@@ -27,6 +27,12 @@
                     <i class="nav-icon fas fa-users" style="color: #fff;"></i>
                     Team Leads Details
                 </a>
+                @if(auth()->user()->emp_job_role === 7 || auth()->user()->isAdmin())
+                <a href="{{ route('agent.earnings.index') }}" class="btn btn-sm btn-success d-flex align-items-baseline gap-2">
+                    <i class="fas fa-wallet"></i>
+                    My Earnings
+                </a>
+                @endif
             </div>
 
             <div class="row">
