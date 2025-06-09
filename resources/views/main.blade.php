@@ -115,108 +115,57 @@
         </div>
     </div>
 
-<!-- jQuery -->
-<script src="{{ asset('plugins/jquery/jquery.min.js') }}"></script>
-
-<!-- Custom script for sidebar toggle responsiveness -->
-<script>
-    $(document).ready(function() {
-        // Fix nested content-wrapper divs on page load
-        fixNestedContentWrappers();
-        
-        // Handle sidebar toggle button click
-        $('[data-widget="pushmenu"]').on('click', function() {
-            setTimeout(function() {
-                // Force layout recalculation
-                $('.content-wrapper').css('transition', 'none');
-                $('.content-wrapper')[0].offsetHeight; // Force reflow
-                $('.content-wrapper').css('transition', 'margin-left 0.3s ease-in-out');
-                
-                // Adjust any containers inside
-                $('.container, .card, .account-card, .form-container').css('width', '100%');
-                
-                // Fix nested content-wrapper divs again after toggle
-                fixNestedContentWrappers();
-            }, 50);
-        });
-        
-        // Function to fix nested content-wrapper divs
-        function fixNestedContentWrappers() {
-            // Find all content-wrapper divs inside the main content-wrapper
-            $('.content-wrapper .content-wrapper').each(function() {
-                // Replace the class with container-fluid to prevent nesting issues
-                $(this).removeClass('content-wrapper').addClass('container-fluid');
-            });
-            
-            // Ensure all tables are responsive
-            $('.table').addClass('table-responsive');
-            
-            // Fix any right-shifted content
-            $('.content-wrapper > div').css('max-width', '100%');
-        }
-    });
-    
-</script>
-<!-- jQuery UI 1.11.4 -->
-<script src="{{ asset('plugins/jquery-ui/jquery-ui.min.js')}}"></script>
-<!-- Resolve conflict in jQuery UI tooltip with Bootstrap tooltip -->
-<script>
-  $.widget.bridge('uibutton', $.ui.button)
-</script>
-<!-- Bootstrap 4 -->
-<script src="{{ asset('plugins/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
-<!-- ChartJS -->
-<script src="{{  asset('plugins/chart.js/Chart.min.js') }}"></script>
-<!-- Sparkline -->
-<script src="{{  asset('plugins/sparklines/sparkline.js') }}"></script>
-<!-- JQVMap -->
-<script src="{{  asset('plugins/jqvmap/jquery.vmap.min.js') }}"></script>
-<script src="{{  asset('plugins/jqvmap/maps/jquery.vmap.usa.js') }}"></script>
-<!-- jQuery Knob Chart -->
-<script src="{{  asset('plugins/jquery-knob/jquery.knob.min.js') }}"></script>
-<!-- daterangepicker -->
-<script src="{{  asset('plugins/moment/moment.min.js') }}"></script>
-<script src="{{  asset('plugins/daterangepicker/daterangepicker.js') }}"></script>
-<!-- Tempusdominus Bootstrap 4 -->
-<script src="{{  asset('plugins/tempusdominus-bootstrap-4/js/tempusdominus-bootstrap-4.min.js') }}"></script>
-<!-- Summernote -->
-<script src="{{  asset('plugins/summernote/summernote-bs4.min.js') }}"></script>
-<!-- overlayScrollbars -->
-<script src="{{  asset('plugins/overlayScrollbars/js/jquery.overlayScrollbars.min.js') }}"></script>
-<!-- AdminLTE App -->
-<script src="{{ asset('dist/js/adminlte.js') }}"></script>
-<!-- AdminLTE for demo purposes -->
-<script src="{{  asset('dist/js/demo.js') }}"></script>
-<!-- AdminLTE dashboard demo (This is only for demo purposes) -->
-<script src="{{ asset('dist/js/pages/dashboard.js') }}"></script>
-
-
-
-<!-- <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script> -->
-
-<!-- Popper.js (required for dropdowns, tooltips, popovers) -->
-<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
-
-<!-- Bootstrap 4 JS -->
-<!-- <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script> -->
-
-
-
-<!-- Bootstrap JS (must be after jQuery) -->
-
-
-<!-- Bootstrap live local miss match -->
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-
-
-
-
     <!-- jQuery -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    
     <!-- Bootstrap 4 JS Bundle with Popper -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- AdminLTE App -->
+    <script src="{{ asset('dist/js/adminlte.min.js') }}"></script>
+    
+    <!-- Custom script for sidebar toggle responsiveness -->
+    <script>
+        $(document).ready(function() {
+            // Fix nested content-wrapper divs on page load
+            function fixNestedContentWrappers() {
+                // Find all content-wrapper divs inside the main content-wrapper
+                $('.content-wrapper .content-wrapper').each(function() {
+                    // Replace the class with container-fluid to prevent nesting issues
+                    $(this).removeClass('content-wrapper').addClass('container-fluid');
+                });
+                
+                // Ensure all tables are responsive
+                $('.table').addClass('table-responsive');
+                
+                // Fix any right-shifted content
+                $('.content-wrapper > div').css('max-width', '100%');
+            }
+            
+            fixNestedContentWrappers();
+            
+            // Handle sidebar toggle button click
+            $('[data-widget="pushmenu"]').on('click', function() {
+                setTimeout(function() {
+                    // Force layout recalculation
+                    $('.content-wrapper').css('transition', 'none');
+                    $('.content-wrapper')[0].offsetHeight; // Force reflow
+                    $('.content-wrapper').css('transition', 'margin-left 0.3s ease-in-out');
+                    
+                    // Adjust any containers inside
+                    $('.container, .card, .account-card, .form-container').css('width', '100%');
+                    
+                    // Fix nested content-wrapper divs again after toggle
+                    fixNestedContentWrappers();
+                }, 50);
+            });
+            
+            // Initialize all tooltips
+            $('[data-toggle="tooltip"]').tooltip();
+            
+            // Initialize all popovers
+            $('[data-toggle="popover"]').popover();
+        });
+    </script>
     
     <!-- SweetAlert2 for notifications -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>

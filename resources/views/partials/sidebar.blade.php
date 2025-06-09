@@ -68,7 +68,7 @@
                 <!-- Show Leads for Agent (2), Admin (1) -->
                 @if(in_array($emp_job_role, [1, 2, 7]))
                 <li class="nav-item">
-                    <a href="{{ url('/i-admin/show-leads') }}" class="nav-link w-100 {{ request()->is('i-admin/show-leads*') || request()->is('admin/activities*') || request()->is('admin/tasks*') ? 'active' : '' }}">
+                    <a href="{{ url('/i-admin/show-leads') }}" class="nav-link w-100 {{ request()->is('i-admin/show-leads*') || request()->is('admin/activities*') || request()->is('admin/tasks*') || request()->is('i-admin/followups*') ? 'active' : '' }}">
                         <i class="nav-icon fas fa-plus-circle" style="color: #1E7E34;"></i>
                         <p>Leads</p>
                     </a>
