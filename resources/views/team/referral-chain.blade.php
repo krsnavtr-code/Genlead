@@ -1,5 +1,7 @@
 @extends('main')
 
+@section('title', 'Manage Leads Agent Network')
+
 @section('content')
 <div class="content-wrapper">
     <div class="content-header">
@@ -20,6 +22,13 @@
 
     <section class="content">
         <div class="container-fluid">
+            <div class="manage-leads-nav my-3 d-flex gap-2">
+                <a href="{{ url('/admin/agent-referral-leads-details') }}" class="btn btn-sm d-flex align-items-baseline gap-2" style="background-color: var(--logo-color); color: #fff;">
+                    <i class="nav-icon fas fa-users" style="color: #fff;"></i>
+                    Team Leads Details
+                </a>
+            </div>
+
             <div class="row">
                 <div class="col-12">
                     <div class="card">

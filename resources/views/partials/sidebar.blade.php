@@ -90,17 +90,7 @@
                 <li class="nav-item">
                     <a href="{{ url('/admin/agent-referral-chain') }}" class="nav-link w-100 {{ request()->is('admin/agent-referral-chain') ? 'active' : '' }}">
                         <i class="nav-icon fas fa-users" style="color: #0062CC;"></i>
-                        <p>My Team View</p>
-                    </a>
-                </li>
-                @endif
-
-                <!-- Agent referral team leads detailes view -->
-                @if(in_array($emp_job_role, [1, 7]))
-                <li class="nav-item">
-                    <a href="{{ url('/admin/agent-referral-leads-details') }}" class="nav-link w-100 {{ request()->is('admin/agent-referral-leads-details') ? 'active' : '' }}">
-                        <i class="nav-icon fas fa-users" style="color: #0062CC;"></i>
-                        <p>Team Leads Details</p>
+                        <p>Manage Team</p>
                     </a>
                 </li>
                 @endif
