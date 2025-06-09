@@ -10,7 +10,7 @@
                 <div class="card-header">
                     <h3 class="card-title">Lead Details for {{ $agent->emp_name }}</h3>
                     <div class="card-tools">
-                        <a href="{{ route('admin.agent.referral.leads.details') }}" class="btn btn-sm btn-primary">
+                        <a href="{{ route('admin.team.member.leads-details', $agent->id) }}" class="btn btn-sm btn-primary">
                             <i class="fas fa-arrow-left"></i> Back to Agent List
                         </a>
                     </div>

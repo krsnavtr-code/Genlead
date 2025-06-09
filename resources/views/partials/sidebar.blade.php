@@ -58,7 +58,7 @@
                 <!-- Show HRMS for HR (4), Admin (1) -->
                 @if(in_array($emp_job_role, [1, 4]))
                 <li class="nav-item">
-                    <a href="{{ route('hrms.manage_employees') }}" class="nav-link w-100 {{ request()->is('hrms/manage_employees*') ? 'active' : '' }}">
+                    <a href="{{ route('hrms.manage_employees') }}" class="nav-link w-100 {{ request()->is('hrms/manage_employees*') || request()->is('hrms/employee*') ? 'active' : '' }}">
                         <i class="nav-icon fas fa-user-tie" style="color: #0062CC;"></i>
                         <p>HRMS</p>
                     </a>
@@ -68,7 +68,7 @@
                 <!-- Show Leads for Agent (2), Admin (1) -->
                 @if(in_array($emp_job_role, [1, 2, 7]))
                 <li class="nav-item">
-                    <a href="{{ url('/i-admin/show-leads') }}" class="nav-link w-100 {{ request()->is('i-admin/leads/add-lead*') ? 'active' : '' }}">
+                    <a href="{{ url('/i-admin/show-leads') }}" class="nav-link w-100 {{ request()->is('i-admin/show-leads*') || request()->is('admin/activities*') || request()->is('admin/tasks*') ? 'active' : '' }}">
                         <i class="nav-icon fas fa-plus-circle" style="color: #1E7E34;"></i>
                         <p>Leads</p>
                     </a>
@@ -78,7 +78,7 @@
                 <!-- Team management for Team Leader (6) -->
                 @if(in_array($emp_job_role, [1, 6]))
                 <li class="nav-item">
-                    <a href="{{ url('/admin/team-management') }}" class="nav-link w-100 {{ request()->is('admin/team-management') ? 'active' : '' }}">
+                    <a href="{{ url('/admin/team-management') }}" class="nav-link w-100 {{ request()->is('admin/team-management*') ? 'active' : '' }}">
                         <i class="nav-icon fas fa-user-friends" style="color: #0062CC;"></i>
                         <p>Team Management</p>
                     </a>
@@ -88,7 +88,12 @@
                 <!-- Agent referral team chain view -->
                 @if(in_array($emp_job_role, [1, 7]))
                 <li class="nav-item">
-                    <a href="{{ url('/admin/agent-referral-chain') }}" class="nav-link w-100 {{ request()->is('admin/agent-referral-chain') ? 'active' : '' }}">
+                    <a href="{{ url('/admin/agent-referral-chain') }}" class="nav-link w-100 {{ 
+                        request()->is('admin/agent-referral-chain*') || 
+                        request()->is('team/referral-chain*') || 
+                        request()->is('admin/agent-referral-leads-details*') ||
+                        request()->is('admin/team/member/*/leads-details*')
+                        ? 'active' : '' }}">
                         <i class="nav-icon fas fa-users" style="color: #0062CC;"></i>
                         <p>Manage Team</p>
                     </a>
@@ -118,7 +123,7 @@
                 <!-- Show Payment Verification for Accountant (5), Admin (1) -->
                 @if(in_array($emp_job_role, [1, 5]))
                 <li class="nav-item">
-                    <a href="{{ route('payment.verify') }}" class="nav-link w-100 {{ request()->routeIs('payment.verify') ? 'active' : '' }}">
+                    <a href="{{ route('payment.verify') }}" class="nav-link w-100 {{ request()->is('payment/verify*') ? 'active' : '' }}">
                         <i class="nav-icon fas fa-check-circle"></i>
                         <p>Payment Verification</p>
                     </a>
