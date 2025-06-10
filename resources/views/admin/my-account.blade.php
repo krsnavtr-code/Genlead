@@ -22,7 +22,7 @@
     }
 
     .profile-sidebar {
-        background: linear-gradient(135deg, #007bff, #0056b3);
+        background: linear-gradient(135deg, #FA5508, #FA5508);
         color: white;
         flex: 1 1 300px;
         padding: 40px 20px;
@@ -61,7 +61,7 @@
         font-weight: 600;
         color: #333;
         margin-bottom: 20px;
-        border-left: 4px solid #007bff;
+        border-left: 4px solid #FA5508;
         padding-left: 10px;
     }
 
@@ -83,7 +83,7 @@
 
     .info-box i {
         font-size: 18px;
-        color: #007bff;
+        color: #FA5508;
         min-width: 20px;
     }
 
@@ -106,7 +106,7 @@
 
     .referral-code {
         font-weight: 600;
-        color: #007bff;
+        color: #FA5508;
         font-size: 16px;
         word-break: break-word;
         background-color: #e9f5ff;
@@ -116,7 +116,13 @@
     }
 
     .copy-btn {
-        margin-top: 10px;
+        font-weight: 600;
+        color: black;
+        font-size: 16px;
+        word-break: break-word;
+        background-color: #e9f5ff;
+        padding: 10px 15px;
+        border-radius: 8px;
     }
 
     #copy-message {
@@ -127,7 +133,7 @@
     }
 </style>
 
-<div class="container profile-container">
+<div class="container profile-container mt-5">
     <div class="profile-card">
         <!-- Sidebar -->
         <div class="profile-sidebar text-center">
@@ -234,9 +240,6 @@
                 <div class="referral-code">{{ $employee->referral_code }}</div>
                 <button class="btn btn-sm btn-primary copy-btn" onclick="copyReferralCode()">Copy Code</button>
                 <div id="copy-message">Copied!</div>
-                <!-- <a href="https://genlead.in/agent/join?refid={{ $employee->referral_code }}" class="d-block mt-2 text-decoration-none text-info" target="_blank">
-                    https://genlead.in/agent/join?refid={{ $employee->referral_code }}
-                </a> -->
                 <script>
                     function copyReferralCode() {
                         navigator.clipboard.writeText('{{ $employee->referral_code }}');

@@ -68,11 +68,11 @@ class AgentEarningController extends Controller
                 'paid_date' => now(),
             ]);
             
-            return redirect()->route('agent.earnings.index')
+            return redirect()->route('admin.referr-agent-earning.index')
                 ->with('success', 'Earning marked as paid successfully.');
         }
         
-        return redirect()->route('agent.earnings.index')
+        return redirect()->route('admin.referr-agent-earning.index')
             ->with('error', 'Earning is already marked as paid.');
     }
     
@@ -95,7 +95,7 @@ class AgentEarningController extends Controller
                 'paid_date' => now(),
             ]);
             
-        return redirect()->route('agent.earnings.index')
+        return redirect()->route('admin.referr-agent-earning.index')
             ->with('success', "Marked {$count} earnings as paid successfully.");
     }
 }

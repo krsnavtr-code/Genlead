@@ -13,7 +13,7 @@
                 <div class="col-sm-6">
                     <ol class="breadcrumb float-sm-right">
                         <li class="breadcrumb-item"><a href="{{ route('dashboard') }}">Home</a></li>
-                        <li class="breadcrumb-item"><a href="{{ route('agent.earnings.index') }}">My Earnings</a></li>
+                        <li class="breadcrumb-item"><a href="{{ route('admin.referr-agent-earning.index') }}">My Earnings</a></li>
                         <li class="breadcrumb-item active">Earning Details</li>
                     </ol>
                 </div>
@@ -98,7 +98,8 @@
                             <h3 class="card-title">Payment Actions</h3>
                         </div>
                         <div class="card-body">
-                            <form action="{{ route('agent.earnings.payout', $earning) }}" method="POST" class="mb-3">
+                            <a href="{{ route('admin.referr-agent-earning.index') }}" class="btn btn-default">Back to List</a>
+                            <form action="{{ route('admin.referr-agent-earning.payout', $earning->id) }}" method="POST" class="mb-3">
                                 @csrf
                                 @method('PATCH')
                                 <button type="submit" class="btn btn-success btn-block" onclick="return confirm('Mark this payment as paid?')">

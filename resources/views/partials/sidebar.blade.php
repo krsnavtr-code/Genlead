@@ -55,16 +55,6 @@
                 </li>
                 @endif
 
-                <!-- Show HRMS for HR (4), Admin (1) -->
-                @if(in_array($emp_job_role, [1, 4]))
-                <li class="nav-item">
-                    <a href="{{ route('hrms.manage_employees') }}" class="nav-link w-100 {{ request()->is('hrms/manage_employees*') || request()->is('hrms/employee*') ? 'active' : '' }}">
-                        <i class="nav-icon fas fa-user-tie" style="color: #0062CC;"></i>
-                        <p>HRMS</p>
-                    </a>
-                </li>
-                @endif
-
                 <!-- Show Leads for Agent (2), Admin (1) -->
                 @if(in_array($emp_job_role, [1, 2, 7]))
                 <li class="nav-item">
@@ -80,7 +70,7 @@
                 <li class="nav-item">
                     <a href="{{ url('/admin/team-management') }}" class="nav-link w-100 {{ request()->is('admin/team-management*') ? 'active' : '' }}">
                         <i class="nav-icon fas fa-user-friends" style="color: #0062CC;"></i>
-                        <p>Team Management</p>
+                        <p>Team Leader (Office)</p>
                     </a>
                 </li>
                 @endif
@@ -96,6 +86,16 @@
                         ? 'active' : '' }}">
                         <i class="nav-icon fas fa-users" style="color: #0062CC;"></i>
                         <p>Manage Team</p>
+                    </a>
+                </li>
+                @endif
+
+                <!-- Show HRMS for HR (4), Admin (1) -->
+                @if(in_array($emp_job_role, [1, 4]))
+                <li class="nav-item">
+                    <a href="{{ route('hrms.manage_employees') }}" class="nav-link w-100 {{ request()->is('admin/hrms*') || request()->is('hrms/employee*') ? 'active' : '' }}">
+                        <i class="nav-icon fas fa-user-tie" style="color: #0062CC;"></i>
+                        <p>HRMS</p>
                     </a>
                 </li>
                 @endif

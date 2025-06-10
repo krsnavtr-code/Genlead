@@ -102,11 +102,11 @@
                                         @endif
                                     </td>
                                     <td class="text-center">
-                                        <a href="{{ route('agent.earnings.show', $earning) }}" class="btn btn-sm btn-info" title="View Details">
+                                        <a href="{{ route('admin.referr-agent-earning.show', $earning->id) }}" class="btn btn-sm btn-info" title="View Details">
                                             <i class="fas fa-eye"></i>
                                         </a>
                                         @if(!$earning->is_paid && (auth()->user()->isAdmin() || auth()->id() === $earning->agent_id))
-                                        <form action="{{ route('agent.earnings.payout', $earning) }}" method="POST" class="d-inline" onsubmit="return confirm('Mark this payment as paid?')">
+                                        <form action="{{ route('admin.referr-agent-earning.payout', $earning->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Are you sure you want to mark this as paid?');">
                                             @csrf
                                             @method('PATCH')
                                             <button type="submit" class="btn btn-sm btn-success" title="Mark as Paid">
@@ -138,7 +138,7 @@
                     <h3 class="card-title">Payout Tools</h3>
                 </div>
                 <div class="card-body">
-                    <form action="{{ route('agent.earnings.payout-all') }}" method="POST" onsubmit="return confirm('Mark all pending earnings as paid?')">
+                    <form action="{{ route('admin.referr-agent-earning.payout-all') }}" method="POST" class="d-inline" onsubmit="return confirm('Are you sure you want to mark all pending earnings as paid?');">
                         @csrf
                         <div class="form-group">
                             <label>Select Agent</label>

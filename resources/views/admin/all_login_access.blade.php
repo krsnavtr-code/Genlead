@@ -26,8 +26,7 @@
         <div class="col-md-6 col-lg-4 mb-4">
             <div class="card shadow-sm h-100 border-start border-4 border-primary">
                 <div class="card-body">
-                    <h5 class="card-title mb-2 text-primary fw-bold">{{ $employee->emp_name }}</h5>
-                    <br>
+                    <h5 class="mb-2 text-primary fw-bold">{{ $employee->emp_name }}</h5>
                     <p class="mb-1"><strong>Email:</strong> {{ $employee->emp_email }}</p>
                     <p class="mb-1"><strong>Username:</strong> {{ $employee->emp_username }}</p>
                     <p class="mb-1"><strong>Password:</strong> {{ $employee->emp_password }}</p>

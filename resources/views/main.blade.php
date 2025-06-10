@@ -49,8 +49,27 @@
         }
         
         @media (max-width: 991.98px) {
+            .sidebar {
+                margin-left: -250px;
+            }
+            .sidebar-open .sidebar {
+                margin-left: 0;
+            }
             .content-wrapper {
                 margin-left: 0 !important;
+            }
+            .main-sidebar, .main-sidebar:before {
+                box-shadow: none !important;
+                margin-left: 0;
+                transform: translate(-250px, 0);
+            }
+            .sidebar-open .main-sidebar, 
+            .sidebar-open .main-sidebar:before {
+                transform: translate(0, 0);
+            }
+            .main-sidebar {
+                transition: transform 0.3s ease-in-out;
+                z-index: 1038;
             }
         }
 
@@ -108,7 +127,7 @@
         <!-- Content Wrapper. Contains page content -->
         <div class="content-wrapper">
             <!-- Main content -->
-            <section class="content" style="margin-top: 50px;">
+            <section class="content" style="margin-top: 70px; padding-bottom: 20px;">
                 @yield('content') <!-- This is where the child content will be loaded -->
             </section>
             <!-- /.content -->
@@ -126,28 +145,44 @@
     <!-- Custom script for sidebar toggle responsiveness -->
     <script>
         $(document).ready(function() {
-            // Fix nested content-wrapper divs on page load
+            // Fix for nested content-wrapper divs
             function fixNestedContentWrappers() {
-                // Find all content-wrapper divs inside the main content-wrapper
                 $('.content-wrapper .content-wrapper').each(function() {
-                    // Replace the class with container-fluid to prevent nesting issues
-                    $(this).removeClass('content-wrapper').addClass('container-fluid');
+                    var $this = $(this);
+                    var parentContent = $this.parent();
+                    $this.children().appendTo(parentContent);
+                    $this.remove();
                 });
-                
-                // Ensure all tables are responsive
-                $('.table').addClass('table-responsive');
-                
-                // Fix any right-shifted content
-                $('.content-wrapper > div').css('max-width', '100%');
             }
             
+            // Handle window resize
+            function handleResize() {
+                if ($(window).width() > 991.98) {
+                    $('body').removeClass('sidebar-open');
+                    $('.main-sidebar').css('transform', 'none');
+                } else {
+                    $('.main-sidebar').css('transform', 'translate(-250px, 0)');
+                }
+            }
+            
+            // Initial fix
             fixNestedContentWrappers();
             
-            // Handle sidebar toggle button click
-            $('[data-widget="pushmenu"]').on('click', function() {
+            // Handle sidebar toggle
+            $('[data-widget="pushmenu"]').on('click', function(e) {
+                e.preventDefault();
+                $('body').toggleClass('sidebar-open');
+                
+                if ($(window).width() <= 991.98) {
+                    if ($('body').hasClass('sidebar-open')) {
+                        $('.main-sidebar').css('transform', 'translate(0, 0)');
+                    } else {
+                        $('.main-sidebar').css('transform', 'translate(-250px, 0)');
+                    }
+                }
+                
+                // Force reflow
                 setTimeout(function() {
-                    // Force layout recalculation
-                    $('.content-wrapper').css('transition', 'none');
                     $('.content-wrapper')[0].offsetHeight; // Force reflow
                     $('.content-wrapper').css('transition', 'margin-left 0.3s ease-in-out');
                     
@@ -158,6 +193,25 @@
                     fixNestedContentWrappers();
                 }, 50);
             });
+            
+            // Close sidebar when clicking outside on mobile
+            $(document).on('click', function(e) {
+                if ($(window).width() <= 991.98) {
+                    if (!$(e.target).closest('.main-sidebar').length && 
+                        !$(e.target).closest('[data-widget="pushmenu"]').length) {
+                        $('body').removeClass('sidebar-open');
+                        $('.main-sidebar').css('transform', 'translate(-250px, 0)');
+                    }
+                }
+            });
+            
+            // Prevent closing when clicking inside the sidebar
+            $('.main-sidebar').on('click', function(e) {
+                e.stopPropagation();
+            });
+            
+            // Handle window resize
+            $(window).on('resize', handleResize);
             
             // Initialize all tooltips
             $('[data-toggle="tooltip"]').tooltip();
@@ -178,10 +232,17 @@
     
     <!-- Debug script -->
     <script>
-        console.log('Main layout scripts loaded');
-        console.log('jQuery version:', $.fn.jquery);
-        console.log('Bootstrap version:', $.fn.tooltip ? 'Loaded' : 'Not loaded');
-        console.log('SweetAlert2 version:', typeof Swal !== 'undefined' ? 'Loaded' : 'Not loaded');
+        $(document).ready(function() {
+            console.log('Main layout scripts loaded');
+            console.log('jQuery version:', $.fn.jquery);
+            console.log('Bootstrap version:', $.fn.tooltip ? 'Loaded' : 'Not loaded');
+            console.log('AdminLTE version:', typeof $.AdminLTE !== 'undefined' ? 'Loaded' : 'Not loaded');
+            
+            // Initialize push menu
+            $('[data-widget="pushmenu"]').on('click', function() {
+                $('body').toggleClass('sidebar-collapse');
+            });
+        });
     </script>
 </body>
 </html>

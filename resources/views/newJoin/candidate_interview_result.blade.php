@@ -18,8 +18,7 @@
                     <div class="col-md-6 col-lg-4 mb-4">
                         <div class="card h-100 border-start border-4 border-info shadow-sm" style="background-color: #f8f9fa;">
                             <div class="card-body">
-                                <h5 class="card-title fw-bold text-info">{{ $candidate->name }}</h5>
-                                <br>
+                                <h5 class="fw-bold text-info">{{ $candidate->name }}</h5>
                                 <p class="mb-1"><strong>Email:</strong> {{ $candidate->email }}</p>
                                 <p class="mb-1"><strong>Branch:</strong> {{ $candidate->branch }}</p>
                                 <p class="mb-1"><strong>Location:</strong> {{ $candidate->location }}</p>
@@ -39,6 +38,9 @@
                                             {{ $candidate->interview_result }}
                                         </span>
                                     @endif
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center mt-3">
+                                    resend document upload mail
                                 </div>
                             </div>
                         </div>

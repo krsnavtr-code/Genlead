@@ -36,12 +36,12 @@ Route::get('/test-js', function() {
     return view('test-js');
 });
 
-// Agent Earnings Routes
-Route::middleware(['auth:agent'])->prefix('agent')->name('agent.')->group(function () {
-    Route::get('/earnings', [\App\Http\Controllers\AgentEarningController::class, 'index'])->name('earnings.index');
-    Route::get('/earnings/{earning}', [\App\Http\Controllers\AgentEarningController::class, 'show'])->name('earnings.show');
-    Route::patch('/earnings/{earning}/payout', [\App\Http\Controllers\AgentEarningController::class, 'payout'])->name('earnings.payout');
-    Route::post('/earnings/payout-all', [\App\Http\Controllers\AgentEarningController::class, 'payoutAll'])->name('earnings.payout-all');
+// Agent Earnings Routes (Admin)
+Route::middleware(['auth:agent'])->prefix('admin')->name('admin.')->group(function () {
+    Route::get('/referr-agent-earning', [\App\Http\Controllers\AgentEarningController::class, 'index'])->name('referr-agent-earning.index');
+    Route::get('/referr-agent-earning/{earning}', [\App\Http\Controllers\AgentEarningController::class, 'show'])->name('referr-agent-earning.show');
+    Route::patch('/referr-agent-earning/{earning}/payout', [\App\Http\Controllers\AgentEarningController::class, 'payout'])->name('referr-agent-earning.payout');
+    Route::post('/referr-agent-earning/payout-all', [\App\Http\Controllers\AgentEarningController::class, 'payoutAll'])->name('referr-agent-earning.payout-all');
 });
 
 // Admin Routes

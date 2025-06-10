@@ -22,17 +22,15 @@
 
     <section class="content">
         <div class="container-fluid">
-            <div class="manage-leads-nav my-3 d-flex gap-2">
-                <a href="{{ url('/admin/agent-referral-leads-details') }}" class="btn btn-sm d-flex align-items-baseline gap-2" style="background-color: var(--logo-color); color: #fff;">
-                    <i class="nav-icon fas fa-users" style="color: #fff;"></i>
-                    Team Leads Details
+            <div class="manage-leads-nav my-3 d-flex">
+                <a href="{{ url('/admin/agent-referral-leads-details') }}" class="btn btn-sm d-flex align-items-baseline gap-2 rounded" style="background-color: var(--logo-color); color: #fff;">
+                    <i class="nav-icon fas fa-users mr-1" style="color: #fff;"></i>
+                    My Leads Details
                 </a>
-                @if(auth()->user()->emp_job_role === 7 || auth()->user()->isAdmin())
-                <a href="{{ route('agent.earnings.index') }}" class="btn btn-sm btn-success d-flex align-items-baseline gap-2">
-                    <i class="fas fa-wallet"></i>
+                <a href="{{ route('admin.referr-agent-earning.index') }}" class="ml-2 btn btn-sm btn-success d-flex align-items-baseline gap-2 rounded">
+                    <i class="fas fa-wallet mr-1"></i>
                     My Earnings
                 </a>
-                @endif
             </div>
 
             <div class="row">

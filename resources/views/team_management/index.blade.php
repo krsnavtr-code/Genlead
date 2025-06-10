@@ -25,20 +25,20 @@ $emp_job_role = session('emp_job_role');
         </div>
     </div>
 
-    <!-- Assign Agents to Team Leader for Admin (1) -->
-    @if(in_array($emp_job_role, [1]))
-    <div class="card">
-        <div class="card-header">
-            <a href="{{ url('/admin/assign-agents-to-team-leader') }}" class="nav-link w-100 {{ request()->is('admin/assign-agents-to-team-leader') ? 'active' : '' }}">
-                <i class="nav-icon fas fa-user-plus" style="color: #0062CC;"></i>
-                <span>Assign Agents to Team Leader</span>
-            </a>
-        </div>
-    </div>
-    @endif
-
+    
     <section class="content">
         <div class="container-fluid">
+            <!-- Assign Agents to Team Leader for Admin (1) -->
+            @if(in_array($emp_job_role, [1]))
+            <div class="card">
+                <div class="card-header">
+                    <a href="{{ url('/admin/assign-agents-to-team-leader') }}" class="nav-link w-100 {{ request()->is('admin/assign-agents-to-team-leader') ? 'active' : '' }}">
+                        <i class="nav-icon fas fa-user-plus" style="color: #0062CC;"></i>
+                        <span>Assign Agents to Team Leader</span>
+                    </a>
+                </div>
+            </div>
+            @endif
             @if(session('success'))
                 <div class="alert alert-success alert-dismissible">
                     <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>

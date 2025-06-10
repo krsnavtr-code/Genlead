@@ -37,8 +37,7 @@
                     <div class="col-md-6 col-lg-4 mb-4">
                         <div class="card h-100 border-start border-4 border-primary shadow-sm bg-light">
                             <div class="card-body">
-                                <h5 class="card-title text-primary fw-bold">{{ $employee->name }}</h5>
-                                <br>
+                                <h5 class="text-primary fw-bold">{{ $employee->name }}</h5>
                                 <p class="mb-1"><strong>Employee ID:</strong> {{ $employee->id }}</p>
                                 <p class="mb-1"><strong>Email:</strong> {{ $employee->email }}</p>
                                 <p class="mb-1"><strong>Phone:</strong> {{ $employee->phone }}</p>

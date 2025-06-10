@@ -24,8 +24,7 @@
                     <div class="col-md-6 col-lg-4" style="margin-bottom: 15px;">
                         <div class="card h-100 shadow-sm border-start border-primary border-4" style="background-color: #e9ecef;">
                             <div class="card-body">
-                                <h5 class="card-title text-primary fw-bold">{{ $candidate->name }}</h5>
-                                <br>
+                                <h5 class="text-primary fw-bold">{{ $candidate->name }}</h5>
                                 <p class="mb-1"><strong>Email:</strong> {{ $candidate->email }}</p>
                                 <p class="mb-2"><strong>Phone:</strong> {{ $candidate->phone }}</p>
 
