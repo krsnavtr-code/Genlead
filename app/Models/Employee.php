@@ -25,6 +25,7 @@ class Employee extends Model
         'emp_username',
         'emp_password',
         'emp_job_role',
+        'is_active',
         'reports_to',
         'referrer_id',
         'referral_code',

@@ -17,12 +17,10 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Response;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Carbon\Carbon;
 use Illuminate\Support\MessageBag;
-use Illuminate\Support\Facades\Log;
-
-
 
 class ManageController extends Controller
 {
@@ -315,24 +313,140 @@ public function resetPassword(Request $request)
     return redirect()->route('login')->with('success', 'Password successfully updated.');
 }
 
-public function showAllEmployees()
-{
-    // Ensure only superadmin can access this page
-    if (session('emp_job_role') !== 1) {
-        return redirect()->back()->with('error', 'Unauthorized access.');
+    /**
+     * Display all employees' login access
+     *
+     * @return \Illuminate\View\View|\Illuminate\Http\RedirectResponse
+     */
+    public function showAllEmployees()
+    {
+        // Ensure only superadmin can access this page
+        if (session('emp_job_role') != 1) {
+            return redirect()->back()->with('error', 'Unauthorized access.');
+        }
+
+        // Fetch all employees with is_active set (default to true if null)
+        $employees = Employee::all()->map(function($employee) {
+            // Ensure is_active is set (for existing records before migration)
+            if ($employee->is_active === null) {
+                $employee->is_active = true;
+                $employee->save();
+            }
+            return $employee;
+        });
+
+        return view('admin.all_login_access', compact('employees'));
     }
 
-    // Fetch all employees
-    $employees = Employee::all();
+    /**
+     * Toggle login access for an employee
+     *
+     * @param Request $request
+            $employee->save();
+        }
+        return $employee;
+    });
 
     return view('admin.all_login_access', compact('employees'));
 }
 
- // Handle password change for an employee
- public function changeEmployeePassword(Request $request)
- {
-     // Define validation rules and messages
-     $rules = [
+/**
+ * Toggle login access for an employee
+ * 
+ * @param Request $request
+ * @param int $id
+ * @return \Illuminate\Http\JsonResponse
+ */
+public function toggleLoginAccess(Request $request, $id)
+{
+    Log::info('Toggle login access request received', [
+        'employee_id' => $id,
+        'ip' => $request->ip(),
+        'user_agent' => $request->userAgent()
+    ]);
+
+    try {
+        // For now, we'll allow any request to toggle the status
+        // In production, you might want to add some other form of verification
+        // like an API token or IP whitelisting
+
+        $employee = Employee::find($id);
+        
+        if (!$employee) {
+            $message = 'Employee not found with ID: ' . $id;
+            Log::error($message);
+            return response()->json([
+                'success' => false,
+                'message' => $message
+            ], 404);
+        }
+
+        // Toggle the is_active status
+        $employee->is_active = !$employee->is_active;
+        
+        if (!$employee->save()) {
+            $message = 'Failed to save employee record';
+            Log::error($message, ['employee_id' => $employee->id]);
+            return response()->json([
+                'success' => false,
+                'message' => $message
+            ], 500);
+        }
+
+        // Log successful update
+        Log::info('Login access toggled successfully', [
+            'employee_id' => $employee->id,
+            'new_is_active' => $employee->is_active
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'is_active' => $employee->is_active,
+            'message' => 'Login access ' . ($employee->is_active ? 'enabled' : 'disabled') . ' successfully.'
+        ]);
+
+    } catch (\Exception $e) {
+        $errorMessage = 'Error toggling login access: ' . $e->getMessage();
+        Log::error($errorMessage, [
+            'exception' => $e->getMessage(),
+            'trace' => $e->getTraceAsString(),
+            'employee_id' => $id
+        ]);
+        
+        return response()->json([
+            'success' => false,
+            'message' => 'An error occurred while updating login access. Please try again.'
+        ], 500);
+    }
+}
+
+/**
+            'success' => true,
+            'is_active' => $employee->is_active,
+            'message' => 'Login access ' . ($employee->is_active ? 'enabled' : 'disabled') . ' successfully.'
+        ]);
+
+    } catch (\Exception $e) {
+        $errorMessage = 'Error toggling login access: ' . $e->getMessage();
+        Log::error($errorMessage, [
+            'exception' => $e->getMessage(),
+            'trace' => $e->getTraceAsString(),
+            'employee_id' => $id,
+            'user_id' => session('user_id')
+        ]);
+        
+        return response()->json([
+            'success' => false,
+            'message' => 'An error occurred while updating login access. Please try again.'
+        ], 500);
+    }
+}
+
+// Handle password change for an employee
+public function changeEmployeePassword(Request $request)
+{
+    // Define validation rules and messages
+    $rules = [
         'employee_id' => 'required|exists:employees,id',
         'new_password' => [
             'required',

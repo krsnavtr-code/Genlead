@@ -163,6 +163,11 @@ Route::prefix('admin')->middleware(['checkrole'])->group(function () {
     Route::delete('/leads/delete/{id}', [AdminController::class, 'destroy'])->name('leads.destroy');
 
 
+    // Employee login access management - No auth middleware for AJAX
+    Route::post('/employees/{id}/toggle-login-access', [ManageController::class, 'toggleLoginAccess'])
+        ->withoutMiddleware(['auth', 'checkrole'])
+        ->name('admin.employees.toggle_login_access');
+
     // View Leads Routes
 
     Route::get('/leads/view/{id}', [AdminController::class, 'viewLead'])->name('leads.view');

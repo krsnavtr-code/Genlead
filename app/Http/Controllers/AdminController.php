@@ -193,15 +193,25 @@ class AdminController extends Controller
                 'username' => $validatedData['emp_username'],
                 'agent_found' => $agent ? 'yes' : 'no',
                 'agent_id' => $agent ? $agent->id : null,
+                'is_active' => $agent ? ($agent->is_active ? 'yes' : 'no') : 'n/a',
                 'stored_password' => $agent ? substr($agent->emp_password, 0, 5) . '...' : 'not found',
                 'input_password' => substr($validatedData['emp_password'], 0, 1) . '...' . substr($validatedData['emp_password'], -1),
                 'password_length' => strlen($validatedData['emp_password'])
             ]);
 
-            // Check if agent exists and password matches
+            // Check if agent exists
             if (!$agent) {
                 Log::warning('Agent not found', ['username' => $validatedData['emp_username']]);
                 return back()->with('error', 'Invalid credentials. Please check your username and password.');
+            }
+
+            // Check if agent is active
+            if (isset($agent->is_active) && $agent->is_active == 0) {
+                Log::warning('Login attempt for inactive account', [
+                    'agent_id' => $agent->id,
+                    'username' => $validatedData['emp_username']
+                ]);
+                return back()->with('error', 'Your account is inactive. Please contact HR for assistance.');
             }
 
             if ($agent->emp_password !== $validatedData['emp_password']) {

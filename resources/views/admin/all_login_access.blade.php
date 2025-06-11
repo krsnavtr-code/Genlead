@@ -63,7 +63,21 @@
                         </span>
                     </p>
 
-                    <div class="d-flex justify-content-between align-items-center">
+                    <div class="d-flex justify-content-between align-items-center mt-3">
+                        <div class="d-flex align-items-center">
+                            <div class="form-check form-switch me-2">
+                                <input type="checkbox" class="form-check-input toggle-login-access" 
+                                       data-employee-id="{{ $employee->id }}" 
+                                       id="toggle-{{ $employee->id }}"
+                                       {{ $employee->is_active ? 'checked' : '' }}>
+                                <label class="form-check-label" for="toggle-{{ $employee->id }}">
+                                    {{ $employee->is_active ? 'Active' : 'Inactive' }}
+                                </label>
+                            </div>
+                            <div class="spinner-border spinner-border-sm text-primary d-none" id="spinner-{{ $employee->id }}" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                        </div>
                         <!-- Trigger Modal -->
                         <button class="btn btn-sm btn-outline-primary" data-toggle="modal" data-target="#changePasswordModal{{ $employee->id }}">
                             Change Password
@@ -106,9 +120,120 @@
     </div>
 </div>
 @push('scripts')
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
 $(document).ready(function() {
     console.log('Role management script loaded');
+    
+    // Toggle login access
+    $('.toggle-login-access').on('change', function() {
+        const employeeId = $(this).data('employee-id');
+        const isActive = $(this).is(':checked');
+        const toggleSwitch = $(this);
+        const label = toggleSwitch.siblings('label');
+        const spinner = $(`#spinner-${employeeId}`);
+        
+        // Show loading state
+        toggleSwitch.prop('disabled', true);
+        spinner.removeClass('d-none');
+        
+        // Get CSRF token from meta tag
+        const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+        
+        // Build the URL directly to avoid Blade syntax issues
+        const baseUrl = '/admin/employees';
+        const url = `${baseUrl}/${employeeId}/toggle-login-access`;
+        
+        console.log('Sending request to:', url);
+        console.log('CSRF Token:', token);
+        
+        // Send AJAX request to toggle login access
+        $.ajax({
+            url: url,
+            type: 'POST',
+            headers: {
+                'X-CSRF-TOKEN': token,
+                'X-Requested-With': 'XMLHttpRequest',
+                'Accept': 'application/json'
+            },
+            data: {
+                _token: token
+            },
+            xhrFields: {
+                withCredentials: true
+            },
+            success: function(response) {
+                console.log('Success response:', response);
+                if (response.success) {
+                    // Update UI
+                    label.text(response.is_active ? 'Active' : 'Inactive');
+                    
+                    // Show success message
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Success',
+                        text: response.message,
+                        timer: 2000,
+                        showConfirmButton: false,
+                        toast: true,
+                        position: 'top-end'
+                    });
+                } else {
+                    // Revert the toggle if there was an error
+                    toggleSwitch.prop('checked', !isActive);
+                    
+                    // Log the error
+                    console.error('Error updating login access:', response);
+                    
+                    // Show error message
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: response.message || 'Failed to update login access. Check console for details.',
+                        timer: 3000,
+                        showConfirmButton: true
+                    });
+                }
+            },
+            error: function(xhr, status, error) {
+                // Revert the toggle on error
+                toggleSwitch.prop('checked', !isActive);
+                
+                // Log the error
+                console.error('AJAX Error:', {
+                    status: xhr.status,
+                    statusText: xhr.statusText,
+                    responseText: xhr.responseText,
+                    error: error
+                });
+                
+                // Show error message
+                let errorMessage = 'An error occurred while updating login access. Please try again.';
+                if (xhr.responseJSON && xhr.responseJSON.message) {
+                    errorMessage = xhr.responseJSON.message;
+                } else if (xhr.status === 403) {
+                    errorMessage = 'You do not have permission to perform this action.';
+                } else if (xhr.status === 404) {
+                    errorMessage = 'Employee not found.';
+                } else if (xhr.status >= 500) {
+                    errorMessage = 'A server error occurred. Please try again later.';
+                }
+                
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: errorMessage,
+                    timer: 4000,
+                    showConfirmButton: true
+                });
+            },
+            complete: function() {
+                // Re-enable the toggle switch and hide spinner
+                toggleSwitch.prop('disabled', false);
+                spinner.addClass('d-none');
+            }
+        });
+    });
     
     // Function to show toast notifications
     function showToast(type, message) {
