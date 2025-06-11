@@ -185,8 +185,8 @@ $emp_job_role = session('emp_job_role');
                                 @forelse($teamMembers as $member)
                                     <tr>
                                         <td>{{ $member->emp_name }}</td>
-                                        <td>{{ substr($member->emp_email, 0, 2) . '****' . substr($member->emp_email, -2) }}</td>
-                                        <td>{{ substr($member->emp_phone, 0, 2) . '****' . substr($member->emp_phone, -2) }}</td>
+                                        <td>{{ $member->emp_email}}</td>
+                                        <td>{{ $member->emp_phone }}</td>
                                         <td>{{ $member->total_leads }}</td>
                                         <!-- <td>{{ $member->converted_leads }}</td> -->
                                         <!-- <td>{{ $member->pending_leads }}</td> -->
@@ -202,6 +202,9 @@ $emp_job_role = session('emp_job_role');
                                             </a>
                                             <a href="{{ route('admin.team.member.followups', $member->id) }}" class="btn btn-sm btn-info">
                                                 <i class="fas fa-eye"></i> View Followups
+                                            </a>
+                                            <a href="{{ route('admin.team.member.leads-details', $member->id) }}" class="btn btn-sm btn-info">
+                                                <i class="fas fa-eye"></i> View Leads Details
                                             </a>
                                         </td>
                                     </tr>

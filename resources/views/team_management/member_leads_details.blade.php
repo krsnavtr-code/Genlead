@@ -10,8 +10,8 @@
                 <div class="card-header">
                     <h3 class="card-title">Lead Details for {{ $agent->emp_name }}</h3>
                     <div class="card-tools">
-                        <a href="{{ route('admin.team.member.leads-details', $agent->id) }}" class="btn btn-sm btn-primary">
-                            <i class="fas fa-arrow-left"></i> Back to Agent List
+                        <a href="{{ route('admin.team.management') }}" class="btn btn-sm btn-primary">
+                            <i class="fas fa-arrow-left"></i> Back to Team Management
                         </a>
                     </div>
                 </div>
@@ -91,13 +91,20 @@
                                             <td>{{ $lead->email }}</td>
                                             <td>{{ $lead->phone }}</td>
                                             <td>
-                                                @if($lead->statusRecord)
-                                                    <span class="badge bg-{{ $lead->statusRecord->color }}">
-                                                        {{ $lead->statusRecord->name }}
-                                                    </span>
-                                                @else
-                                                    <span class="badge bg-secondary">N/A</span>
-                                                @endif
+                                                @php
+                                                    $statusColor = 'secondary';
+                                                    $statusName = 'N/A';
+                                                    
+                                                    if (is_object($lead->status) && isset($lead->status->color)) {
+                                                        $statusColor = $lead->status->color;
+                                                        $statusName = $lead->status->name;
+                                                    } elseif (is_string($lead->status)) {
+                                                        $statusName = $lead->status;
+                                                    }
+                                                @endphp
+                                                <span class="badge bg-{{ $statusColor }}">
+                                                    {{ $statusName }}
+                                                </span>
                                             </td>
                                             <td>{{ $lead->total_followups }}</td>
                                             <td>{{ $lead->created_at->format('M d, Y h:i A') }}</td>

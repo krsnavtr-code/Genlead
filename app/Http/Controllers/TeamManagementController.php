@@ -35,17 +35,25 @@ class TeamManagementController extends Controller
         $user = Auth::user();
         $emp_job_role = session('emp_job_role');
         
-        // Check if user is admin (role 1) or chain team agent (role 7)
-        if ($emp_job_role != 1 && $emp_job_role != 7) {
-            abort(403, 'Unauthorized access.');
-        }
-        
         // Get the agent
         $agent = Employee::findOrFail($id);
         
-        // If user is a chain team agent, verify they have access to this agent's data
-        if ($emp_job_role == 7 && $agent->referrer_id != $user->id && $agent->id != $user->id) {
-            abort(403, 'Unauthorized access to this agent\'s data.');
+        // Check access based on role
+        if ($emp_job_role == 1) {
+            // Admin has full access
+        } elseif ($emp_job_role == 6) {
+            // Team Leader - check if this agent is in their team
+            $teamMemberIds = Employee::where('reports_to', $user->id)->pluck('id')->toArray();
+            if (!in_array($agent->id, $teamMemberIds) && $agent->id != $user->id) {
+                abort(403, 'You can only view leads of your team members.');
+            }
+        } elseif ($emp_job_role == 7) {
+            // Chain team agent - verify they have access to this agent's data
+            if ($agent->referrer_id != $user->id && $agent->id != $user->id) {
+                abort(403, 'Unauthorized access to this agent\'s data.');
+            }
+        } else {
+            abort(403, 'Unauthorized access.');
         }
         
         // Get leads for this agent with their status counts
@@ -55,21 +63,42 @@ class TeamManagementController extends Controller
                 throw new \Exception('Agent not found');
             }
             
-            // Try with different column names that might be used for assignment
-            $leads = Lead::where(function($query) use ($agent) {
-                    $query->where('agent_id', $agent->id)
-                          ->orWhere('assigned_to', $agent->id);
-                })
+            // Log the agent details for debugging
+            Log::info('Fetching leads for agent', [
+                'agent_id' => $agent->id,
+                'agent_name' => $agent->emp_name,
+                'agent_email' => $agent->emp_email
+            ]);
+            
+            // Get leads where agent_id matches the agent's ID with eager loading
+            $leadsQuery = Lead::where('agent_id', $agent->id)
+                ->with([
+                    'status' => function($query) {
+                        $query->select('id', 'name', 'color');
+                    }
+                ])
                 ->withCount(['followUps as total_followups'])
-                ->with(['statusRecord'])
-                ->orderBy('created_at', 'desc')
-                ->paginate(20);
-                
-            // Log the query for debugging
+                ->orderBy('created_at', 'desc');
+            
+            // Execute the query with pagination
+            $leads = $leadsQuery->paginate(20);
+            
+            // Transform the leads collection to ensure status is properly loaded
+            $leads->getCollection()->transform(function ($lead) {
+                // Make sure status is properly loaded
+                if ($lead->relationLoaded('status') && !$lead->status) {
+                    $lead->unsetRelation('status');
+                }
+                return $lead;
+            });
+            
+            // Log the results summary (not the full leads array to avoid log bloat)
             Log::info('Leads query executed', [
                 'agent_id' => $agent->id,
                 'leads_count' => $leads->total(),
-                'query' => $leads->toSql()
+                'current_page' => $leads->currentPage(),
+                'per_page' => $leads->perPage(),
+                'has_more_pages' => $leads->hasMorePages()
             ]);
                 
         } catch (\Exception $e) {
@@ -84,13 +113,31 @@ class TeamManagementController extends Controller
             session()->flash('error', 'Error fetching leads: ' . $e->getMessage());
         }
         
-        // Get lead statuses for filter
-        $statuses = LeadStatus::all();
+        // Get lead statuses for filter with only necessary fields
+        $statuses = LeadStatus::select('id', 'name', 'color', 'is_active')
+            ->where('is_active', true)
+            ->get()
+            ->keyBy('id')
+            ->toArray();
+            
+        // Determine which view to use based on role
+        $isTeamLeader = ($emp_job_role == 6);
+        $view = $isTeamLeader ? 'team_management.tl_member_leads' : 'team_management.member_leads_details';
         
-        return view('team_management.member_leads_details', [
+        // Log view rendering details
+        Log::info('Rendering leads view', [
+            'view' => $view,
+            'agent_id' => $agent->id,
+            'leads_count' => $leads->count(),
+            'statuses_count' => count($statuses),
+            'is_team_leader_view' => $isTeamLeader
+        ]);
+        
+        return view($view, [
             'agent' => $agent,
             'leads' => $leads,
             'statuses' => $statuses,
+            'isTeamLeaderView' => $isTeamLeader
         ]);
     }
     
