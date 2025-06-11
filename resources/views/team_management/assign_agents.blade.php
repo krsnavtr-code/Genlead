@@ -1,6 +1,58 @@
 @extends('main')
 
+@push('styles')
+<style>
+    /* Style for assigned agents in the dropdown */
+    .select2-results__option[aria-selected="true"],
+    .select2-results__option[data-assigned="true"] {
+        color: #28a745 !important;
+        font-weight: 500;
+    }
+    
+    /* Style for the checkmark */
+    .select2-results__option[data-assigned="true"]::before {
+        content: '✓ ';
+        font-weight: bold;
+    }
+</style>
+<link rel="stylesheet" href="{{ asset('plugins/select2/css/select2.min.css') }}">
+<link rel="stylesheet" href="{{ asset('plugins/select2-bootstrap4-theme/select2-bootstrap4.min.css') }}">
+@endpush
+
 @section('content')
+@push('scripts')
+<script>
+    $(document).ready(function() {
+        // Initialize Select2
+        $('.select2').select2({
+            templateResult: formatAgent,
+            templateSelection: formatAgentSelection
+        });
+        
+        // Format the display of agents in the dropdown
+        function formatAgent(agent) {
+            if (!agent.id) {
+                return agent.text;
+            }
+            
+            var $agent = $(
+                '<span>' + agent.text + '</span>'
+            );
+            
+            if ($(agent.element).data('assigned')) {
+                $agent.addClass('text-success font-weight-bold');
+            }
+            
+            return $agent;
+        }
+        
+        // Format the display of selected agents
+        function formatAgentSelection(agent) {
+            return agent.text.split('✓')[0].trim();
+        }
+    });
+</script>
+@endpush
 <div class="content-wrapper">
     <div class="content-header">
         <div class="container-fluid">
@@ -49,10 +101,13 @@
 
                         <div class="form-group">
                             <label>Select Agents</label>
-                            <select name="agent_ids[]" id="agent_ids" style="height: 200px; width: 100%; overflow-y: auto; overflow-x: hidden;" class="form-control select2" multiple="multiple" required>
+                            <select name="agent_ids[]" id="agent_ids" style="height: 50vh; width: 100%" class="form-control select2" multiple="multiple" required>
                                 @foreach($agents as $agent)
-                                    <option value="{{ $agent->id }}">
+                                    <option value="{{ $agent->id }}" {{ $agent->reports_to ? 'data-assigned="true"' : '' }}>
                                         {{ $loop->iteration }} - {{ $agent->emp_name }} ({{ $agent->emp_email }})
+                                        @if($agent->reports_to)
+                                            <span> -> ✓ Assigned to: {{ $agent->reportsTo->emp_name ?? 'N/A' }}</span>
+                                        @endif
                                     </option>
                                 @endforeach
                             </select>

@@ -385,8 +385,11 @@ class TeamManagementController extends Controller
             ->orderBy('emp_name')
             ->get();
 
-        // Get all agents (role 2)
+        // Get all agents (role 2) with their team leader info
         $agents = Employee::where('emp_job_role', 2)
+            ->with(['reportsTo' => function($query) {
+                $query->select('id', 'emp_name');
+            }])
             ->orderBy('emp_name')
             ->get();
 
