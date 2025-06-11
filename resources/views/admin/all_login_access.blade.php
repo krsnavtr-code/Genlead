@@ -39,7 +39,7 @@
                                     2 => 'Agent',
                                     4 => 'HR',
                                     5 => 'Accountant',
-                                    6 => 'Team Lead',
+                                    6 => 'Team Leader',
                                     7 => 'Chain Team Agent',
                                 ];
                                 $currentRole = $roles[$employee->emp_job_role] ?? 'Unknown Role';
