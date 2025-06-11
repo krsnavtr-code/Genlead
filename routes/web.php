@@ -105,6 +105,16 @@ Route::post('/agent/resend-otp', [AgentController::class, 'resendOtp'])->name('a
 Route::get('/agent/login', [NewJoinController::class, 'agentLoginForm'])->name('agent.login');
 Route::post('/agent/login', [NewJoinController::class, 'agentlogin'])->name('agent.login.submit');
 
+// Team Management Routes
+Route::middleware(['auth'])->prefix('admin/team')->name('admin.team.')->group(function () {
+    Route::get('/', [TeamManagementController::class, 'index'])->name('management');
+    Route::get('/member-leads/{id}', [TeamManagementController::class, 'memberLeadsDetails'])->name('member.leads');
+    Route::get('/member/lead-details/{id}', [TeamManagementController::class, 'viewLeadDetails'])->name('member.lead-details');
+    Route::get('/assign-agents', [TeamManagementController::class, 'assignAgents'])->name('assign.agents');
+    Route::post('/assign-agents', [TeamManagementController::class, 'storeAssignAgents'])->name('store.assign.agents');
+    Route::get('/assign-leads', [TeamManagementController::class, 'assignLeads'])->name('assign.leads');
+    Route::post('/assign-leads', [TeamManagementController::class, 'storeAssignLeads'])->name('store.assign.leads');
+});
 
 Route::prefix('i-admin')->group(function () {
     // Add Leads Routes

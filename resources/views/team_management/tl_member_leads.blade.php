@@ -118,6 +118,12 @@
                                             </td>
                                             <td>{{ $lead->total_followups ?? 0 }}</td>
                                             <td>{{ $lead->created_at->format('M d, Y h:i A') }}</td>
+                                            <td>
+                                                <a href="{{ route('admin.team.member.lead-details', $lead->id) }}" class="btn btn-sm btn-primary">
+                                                    <i class="fas fa-eye"></i>
+                                                    View
+                                                </a>
+                                            </td>
                                         </tr>
                                     @empty
                                         <tr>

@@ -25,6 +25,66 @@ class TeamManagementController extends Controller
      * @param int $id The ID of the team member
      * @return \Illuminate\View\View
      */
+    /**
+     * Display lead details for a specific lead
+     *
+     * @param int $id The ID of the lead
+     * @return \Illuminate\View\View|\Illuminate\Http\RedirectResponse
+     */
+    public function viewLeadDetails($id)
+    {
+        // Check if user is authenticated
+        if (!Auth::check()) {
+            return redirect()->route('login');
+        }
+
+        $user = Auth::user();
+        $emp_job_role = session('emp_job_role');
+        
+        // Get the lead with relationships
+        $lead = Lead::with([
+            'status',
+            'agent',
+            'followUps' => function($query) {
+                $query->orderBy('follow_up_time', 'desc');
+            },
+            'followUps.createdBy'
+        ])->findOrFail($id);
+        
+        // Check access based on role
+        if ($emp_job_role == 1) {
+            // Admin has full access
+        } elseif ($emp_job_role == 6) {
+            // Team Leader - check if this lead belongs to their team
+            $teamMemberIds = Employee::where('reports_to', $user->id)->pluck('id')->toArray();
+            if (!in_array($lead->agent_id, $teamMemberIds) && $lead->agent_id != $user->id) {
+                abort(403, 'You can only view leads of your team members.');
+            }
+        } elseif ($emp_job_role == 7) {
+            // Chain team agent - verify they have access to this lead
+            $agent = Employee::find($lead->agent_id);
+            if ($agent->referrer_id != $user->id && $lead->agent_id != $user->id) {
+                abort(403, 'Unauthorized access to this lead.');
+            }
+        } else {
+            // Regular agent - can only view their own leads
+            if ($lead->agent_id != $user->id) {
+                abort(403, 'You can only view your own leads.');
+            }
+        }
+        
+        // Get all statuses for the status dropdown
+        $statuses = LeadStatus::where('is_active', 1)->get();
+        
+        return view('team_management.lead_details', compact('lead', 'statuses'));
+    }
+    
+    /**
+     * Display lead details for a specific team member
+     *
+     * @param int $id The ID of the team member
+     * @return \Illuminate\View\View|\Illuminate\Http\RedirectResponse
+     */
     public function memberLeadsDetails($id)
     {
         // Check if user is authenticated
