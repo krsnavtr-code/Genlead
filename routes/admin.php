@@ -8,6 +8,8 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Storage;
 use App\Models\Registration;
+
+// Public routes that don't require authentication
 use App\Models\Lead;
 use App\Models\ManageList;
 use App\Models\NewEmployee;
@@ -15,6 +17,8 @@ use App\Models\Deal;
 use App\Models\Document;
 
 
+Route::post('/hrms/update-candidate-email', [NewJoinController::class, 'updateCandidateEmail'])
+    ->name('hrms.update_candidate_email');
 
 Route::get('/', function () {
     return view('login');

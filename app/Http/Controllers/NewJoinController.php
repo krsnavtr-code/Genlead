@@ -728,6 +728,79 @@ class NewJoinController extends Controller
             return redirect()->back()->with('error', 'Error generating ID card. Please try again.');
         }
     }
+
+    /**
+     * Update candidate's email
+     *
+     * @param \Illuminate\Http\Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function updateCandidateEmail(Request $request)
+    {
+        try {
+            // Log the incoming request data
+            Log::info('Update candidate email request:', $request->all());
+            
+            // Validate the request
+            $validated = $request->validate([
+                'candidate_id' => 'required|exists:new_joinee,id',
+                'email' => 'required|email|unique:new_joinee,email,' . $request->candidate_id,
+            ]);
+            
+            Log::info('Validation passed', $validated);
+
+            // Find the candidate
+            $candidate = NewEmployee::find($validated['candidate_id']);
+            
+            if (!$candidate) {
+                throw new \Exception('Candidate not found with ID: ' . $validated['candidate_id']);
+            }
+            
+            $oldEmail = $candidate->email;
+            $candidate->email = $validated['email'];
+            
+            // Save the changes
+            if ($candidate->save()) {
+                // Log the successful update
+                Log::info('Candidate email updated', [
+                    'candidate_id' => $candidate->id,
+                    'old_email' => $oldEmail,
+                    'new_email' => $candidate->email,
+                    'updated_by' => 'public_access',
+                    'ip_address' => $request->ip()
+                ]);
+
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Email updated successfully',
+                    'new_email' => $candidate->email
+                ]);
+            } else {
+                throw new \Exception('Failed to save candidate record');
+            }
+
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            $errors = $e->errors();
+            Log::error('Validation error updating candidate email:', $errors);
+            
+            return response()->json([
+                'success' => false,
+                'message' => 'Validation error',
+                'errors' => $errors
+            ], 422);
+            
+        } catch (\Exception $e) {
+            $errorMessage = 'Error updating candidate email: ' . $e->getMessage();
+            Log::error($errorMessage);
+            Log::error($e->getTraceAsString());
+            
+            return response()->json([
+                'success' => false,
+                'message' => $errorMessage,
+                'exception' => get_class($e)
+            ], 500);
+        }
+    }
 }
 
 //     // Prepare the email data
