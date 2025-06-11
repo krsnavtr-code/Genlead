@@ -26,6 +26,7 @@ Route::prefix('admin')->group(function () {
 
     // New joinee related routes
     Route::get('/new-joinee/upload-documents/{username}', [NewJoinController::class, 'joineeLoginForm'])->name('new_joinee.login_form');
+    Route::post('/new-joinee/resend-document-email/{id}', [NewJoinController::class, 'resendDocumentEmail'])->name('new_joinee.resend_document_email');
     Route::post('/new-joinee/login', [NewJoinController::class, 'joineelogin'])->name('new_joinee.login');
     Route::get('/add-documents', [NewJoinController::class, 'uploadEmployeeForm']);
     Route::post('/upload-documents', [NewJoinController::class, 'store'])->name('documents.store');

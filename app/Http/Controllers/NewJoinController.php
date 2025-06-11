@@ -224,6 +224,43 @@ class NewJoinController extends Controller
         return view('newJoin.upload_documents', compact('candidate'));
     }
 
+    /**
+     * Resend document upload email to candidate
+     *
+     * @param int $id Candidate ID
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function resendDocumentEmail($id)
+    {
+        $candidate = NewEmployee::findOrFail($id);
+        
+        // Generate new credentials if not exists
+        if (empty($candidate->username) || empty($candidate->password)) {
+            $candidate->username = strtolower(str_replace(' ', '_', $candidate->name)) . rand(1000, 9999);
+            $candidate->password = Str::random(8);
+        }
+        
+        // Update link expiry (48 hours from now)
+        $candidate->link_expiry = Carbon::now()->addHours(48);
+        $candidate->save();
+
+        // Send email with document upload link
+        Mail::send('emails.selected', [
+            'candidate' => $candidate,
+            'username' => $candidate->username,
+            'password' => $candidate->password
+        ], function ($message) use ($candidate) {
+            $message->to($candidate->email)
+                  ->cc('info@firstvite.com')  // Add CC email here
+                  ->subject('Document Upload Link - ' . config('app.name'));
+        });
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Document upload email has been resent successfully.'
+        ]);
+    }
+
     public function showNewJoinPanel()
     {
         // Fetch candidates whose documents have been fully verified by HR

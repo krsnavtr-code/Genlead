@@ -39,9 +39,15 @@
                                         </span>
                                     @endif
                                 </div>
+                                @if($candidate->interview_result === 'Selected')
                                 <div class="d-flex justify-content-between align-items-center mt-3">
-                                    resend document upload mail
+                                    <button class="btn btn-sm btn-outline-primary resend-email-btn" 
+                                            data-candidate-id="{{ $candidate->id }}">
+                                        <i class="fas fa-paper-plane me-1"></i> Resend Document Upload Email
+                                    </button>
+                                    <small class="text-muted" id="resend-status-{{ $candidate->id }}"></small>
                                 </div>
+                                @endif
                             </div>
                         </div>
                     </div>
@@ -71,6 +77,58 @@
 </div>
 
 <script>
+    // Add CSRF token for AJAX requests
+    $.ajaxSetup({
+        headers: {
+            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+        }
+    });
+
+    // Handle resend email button click
+    $(document).on('click', '.resend-email-btn', function() {
+        const candidateId = $(this).data('candidate-id');
+        const $btn = $(this);
+        const $status = $('#resend-status-' + candidateId);
+        
+        // Disable button and show loading state
+        $btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin me-1"></i> Sending...');
+        $status.removeClass('text-danger').addClass('text-muted').text('Sending email...');
+        
+        // Send AJAX request
+        $.ajax({
+            url: '{{ route("new_joinee.resend_document_email", "") }}/' + candidateId,
+            type: 'POST',
+            dataType: 'json',
+            success: function(response) {
+                if (response.success) {
+                    $status.removeClass('text-danger').addClass('text-success')
+                        .text('Email sent successfully!');
+                } else {
+                    $status.removeClass('text-success').addClass('text-danger')
+                        .text('Failed to send email.');
+                }
+            },
+            error: function(xhr) {
+                const errorMsg = xhr.responseJSON && xhr.responseJSON.message 
+                    ? xhr.responseJSON.message 
+                    : 'An error occurred while sending the email.';
+                $status.removeClass('text-success').addClass('text-danger').text(errorMsg);
+            },
+            complete: function() {
+                // Re-enable button after 3 seconds
+                setTimeout(function() {
+                    $btn.prop('disabled', false).html(
+                        '<i class="fas fa-paper-plane me-1"></i> Resend Document Upload Email'
+                    );
+                    // Clear status message after 5 seconds
+                    setTimeout(function() {
+                        $status.text('');
+                    }, 5000);
+                }, 3000);
+            }
+        });
+    });
+
     // JS to handle modal and AJAX
     document.querySelectorAll('.interview-result-checkbox').forEach(checkbox => {
         checkbox.addEventListener('click', function () {
