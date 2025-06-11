@@ -197,9 +197,9 @@ $emp_job_role = session('emp_job_role');
                                             </span>
                                         </td> -->
                                         <td>
-                                            <a href="{{ route('admin.team.member.edit', $member->id) }}" class="btn btn-sm btn-primary">
+                                            <!-- <a href="{{ route('admin.team.member.edit', $member->id) }}" class="btn btn-sm btn-primary">
                                                 <i class="fas fa-edit"></i> Edit
-                                            </a>
+                                            </a> -->
                                             <a href="{{ route('admin.team.member.followups', $member->id) }}" class="btn btn-sm btn-info">
                                                 <i class="fas fa-eye"></i> View Followups
                                             </a>
