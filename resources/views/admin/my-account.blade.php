@@ -22,7 +22,7 @@
     }
 
     .profile-sidebar {
-        background: linear-gradient(135deg, #FA5508, #FA5508);
+        background: linear-gradient(135deg, #4C70EF, #53C1F1);
         color: white;
         flex: 1 1 300px;
         padding: 40px 20px;
@@ -61,7 +61,7 @@
         font-weight: 600;
         color: #333;
         margin-bottom: 20px;
-        border-left: 4px solid #FA5508;
+        border-left: 4px solid #53C1F1;
         padding-left: 10px;
     }
 
@@ -83,7 +83,7 @@
 
     .info-box i {
         font-size: 18px;
-        color: #FA5508;
+        color: #4C70EF;
         min-width: 20px;
     }
 
@@ -106,7 +106,7 @@
 
     .referral-code {
         font-weight: 600;
-        color: #FA5508;
+        color: #53C1F1;
         font-size: 16px;
         word-break: break-word;
         background-color: #e9f5ff;
@@ -175,6 +175,10 @@
                                 Agent
                             @elseif ($employee->emp_job_role == 4)
                                 HR
+                            @elseif ($employee->emp_job_role == 6)
+                                Team Leader
+                            @elseif ($employee->emp_job_role == 7)
+                                Referral Team Leader
                             @else
                                 Other
                             @endif
