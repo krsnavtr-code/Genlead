@@ -381,8 +381,11 @@ public function toggleLoginAccess(Request $request, $id)
             ], 404);
         }
 
+        // Store old status for logging
+        $oldStatus = (bool)$employee->is_active;
+        
         // Toggle the is_active status
-        $employee->is_active = !$employee->is_active;
+        $employee->is_active = !$oldStatus;
         
         if (!$employee->save()) {
             $message = 'Failed to save employee record';
@@ -396,8 +399,38 @@ public function toggleLoginAccess(Request $request, $id)
         // Log successful update
         Log::info('Login access toggled successfully', [
             'employee_id' => $employee->id,
-            'new_is_active' => $employee->is_active
+            'old_status' => $oldStatus ? 'active' : 'inactive',
+            'new_status' => $employee->is_active ? 'active' : 'inactive',
+            'changed_by' => session('user_id')
         ]);
+        
+        // If user was deactivated, log them out immediately
+        if ($oldStatus && !$employee->is_active) {
+            // Find all active sessions for this user and delete them
+            $sessions = \Illuminate\Support\Facades\DB::table('sessions')
+                ->where('user_id', $employee->id)
+                ->get();
+                
+            foreach ($sessions as $session) {
+                try {
+                    $sessionData = unserialize(base64_decode($session->payload));
+                    if (isset($sessionData['_token'])) {
+                        // Invalidate the session
+                        \Illuminate\Support\Facades\Session::getHandler()->destroy($session->id);
+                    }
+                } catch (\Exception $e) {
+                    Log::error('Error destroying session: ' . $e->getMessage(), [
+                        'session_id' => $session->id,
+                        'employee_id' => $employee->id
+                    ]);
+                }
+            }
+            
+            Log::info('User sessions terminated after deactivation', [
+                'employee_id' => $employee->id,
+                'sessions_terminated' => count($sessions)
+            ]);
+        }
 
         return response()->json([
             'success' => true,
