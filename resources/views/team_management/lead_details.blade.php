@@ -26,11 +26,11 @@
                                 </tr>
                                 <tr>
                                     <th>Email:</th>
-                                    <td>{{ $lead->email }}</td>
+                                    <td>{{ substr($lead->email, 0, 3) . '*****' . substr($lead->email, strpos($lead->email, '@') - 3) }}</td>
                                 </tr>
                                 <tr>
                                     <th>Phone:</th>
-                                    <td>{{ $lead->phone }}</td>
+                                    <td>{{ substr($lead->phone, 0, 2) . '***' . substr($lead->phone, -2) }}</td>
                                 </tr>
                                 <tr>
                                     <th>Status:</th>
