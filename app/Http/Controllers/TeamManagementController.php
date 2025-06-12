@@ -142,15 +142,24 @@ class TeamManagementController extends Controller
                 
             // Add search functionality
             if ($request->has('search') && !empty($request->search)) {
-                $searchTerm = '%' . $request->search . '%';
-                $leadsQuery->where(function($query) use ($searchTerm) {
-                    $query->where('first_name', 'LIKE', $searchTerm)
-                          ->orWhere('last_name', 'LIKE', $searchTerm)
-                          ->orWhere('email', 'LIKE', $searchTerm)
-                          ->orWhere('phone', 'LIKE', $searchTerm)
-                          ->orWhereHas('status', function($q) use ($searchTerm) {
-                              $q->where('name', 'LIKE', $searchTerm);
-                          });
+                $searchTerm = trim($request->search);
+                $searchPattern = '%' . $searchTerm . '%';
+                $searchTermLower = strtolower($searchTerm);
+                
+                $leadsQuery->where(function($query) use ($searchTerm, $searchPattern, $searchTermLower) {
+                    // Search in basic fields with LIKE
+                    $query->where('first_name', 'LIKE', $searchPattern)
+                          ->orWhere('last_name', 'LIKE', $searchPattern)
+                          ->orWhere('email', 'LIKE', $searchPattern)
+                          ->orWhere('phone', 'LIKE', $searchPattern);
+                    
+                    // Search in status name (case-insensitive)
+                    $query->orWhereHas('status', function($q) use ($searchTermLower) {
+                        $q->whereRaw('LOWER(name) LIKE ?', ['%' . $searchTermLower . '%']);
+                    });
+                    
+                    // Also include raw status text search
+                    $query->orWhereRaw('LOWER(status) LIKE ?', ['%' . $searchTermLower . '%']);
                     
                     // Search by date (format: YYYY-MM-DD or M d, Y format)
                     try {

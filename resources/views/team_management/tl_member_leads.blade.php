@@ -75,11 +75,11 @@
                                     <tr>
                                         <th>S.No</th>
                                         <th>Name</th>
-                                        <th>Email</th>
+                                        <!-- <th>Email</th> -->
                                         <th>Phone</th>
                                         <th>Status</th>
                                         <th>Follow-ups</th>
-                                        <th>Created At</th>
+                                        <!-- <th>Created At</th> -->
                                         <th>Actions</th>
                                     </tr>
                                 </thead>
@@ -92,22 +92,23 @@
                                             data-first-name="{{ strtolower($lead->first_name) }}" 
                                             data-last-name="{{ strtolower($lead->last_name) }}"
                                             data-email="{{ strtolower($lead->email) }}"
-                                            data-phone="{{ $lead->phone }}">
+                                            data-phone="{{ $lead->phone }}"
+                                            data-status-text="{{ is_object($lead->status) && isset($lead->status->name) ? strtolower($lead->status->name) : strtolower($lead->status ?? 'not talked') }}">
                                             <td>{{ $serialNumber++ }}</td>
                                             <td class="name-column">{{ $lead->first_name }} {{ $lead->last_name }}</td>
-                                            <td class="email-column">
+                                            <!-- <td class="email-column">
                                                 {{ substr($lead->email, 0, 3) . '*****' . substr($lead->email, strpos($lead->email, '@') - 3) }}
-                                            </td>
+                                            </td> -->
                                             <td class="phone-column">{{ substr($lead->phone, 0, 2) . '***' . substr($lead->phone, -2) }}</td>
                                             <td class="status-column">
                                                 @if(is_object($lead->status) && isset($lead->status->name))
                                                     {{ $lead->status->name }}
                                                 @else
-                                                    {{ $lead->status ?? 'N/A' }}
+                                                    {{ $lead->status ?? 'Not Talked' }}
                                                 @endif
                                             </td>
                                             <td>{{ $lead->total_followups ?? 0 }}</td>
-                                            <td>{{ $lead->created_at->format('M d, Y h:i A') }}</td>
+                                            <!-- <td>{{ $lead->created_at->format('M d, Y h:i A') }}</td> -->
                                             <td>
                                                 <a href="{{ route('admin.team.member.lead-details', $lead->id) }}" class="btn btn-sm btn-primary">
                                                     <i class="fas fa-eye"></i>
