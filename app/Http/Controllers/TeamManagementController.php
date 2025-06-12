@@ -83,9 +83,10 @@ class TeamManagementController extends Controller
      * Display lead details for a specific team member
      *
      * @param int $id The ID of the team member
+     * @param \Illuminate\Http\Request $request
      * @return \Illuminate\View\View|\Illuminate\Http\RedirectResponse
      */
-    public function memberLeadsDetails($id)
+    public function memberLeadsDetails($id, Request $request)
     {
         // Check if user is authenticated
         if (!Auth::check()) {
@@ -137,8 +138,34 @@ class TeamManagementController extends Controller
                         $query->select('id', 'name', 'color');
                     }
                 ])
-                ->withCount(['followUps as total_followups'])
-                ->orderBy('created_at', 'desc');
+                ->withCount(['followUps as total_followups']);
+                
+            // Add search functionality
+            if ($request->has('search') && !empty($request->search)) {
+                $searchTerm = '%' . $request->search . '%';
+                $leadsQuery->where(function($query) use ($searchTerm) {
+                    $query->where('first_name', 'LIKE', $searchTerm)
+                          ->orWhere('last_name', 'LIKE', $searchTerm)
+                          ->orWhere('email', 'LIKE', $searchTerm)
+                          ->orWhere('phone', 'LIKE', $searchTerm)
+                          ->orWhereHas('status', function($q) use ($searchTerm) {
+                              $q->where('name', 'LIKE', $searchTerm);
+                          });
+                    
+                    // Search by date (format: YYYY-MM-DD or M d, Y format)
+                    try {
+                        $date = \Carbon\Carbon::parse($searchTerm);
+                        if ($date) {
+                            $query->orWhereDate('created_at', $date->format('Y-m-d'));
+                        }
+                    } catch (\Exception $e) {
+                        // Ignore date parsing errors
+                    }
+                });
+            }
+            
+            // Order by created_at desc
+            $leadsQuery->orderBy('created_at', 'desc');
             
             // Execute the query with pagination
             $leads = $leadsQuery->paginate(20);

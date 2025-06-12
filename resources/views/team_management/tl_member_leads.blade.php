@@ -16,8 +16,8 @@
                     </div>
                 </div>
                 <div class="card-body">
-                    <div class="row mb-3">
-                        <div class="col-md-3">
+                    <div class="row mb-4">
+                        <div class="col-md-4">
                             <div class="info-box">
                                 <span class="info-box-icon bg-info"><i class="fas fa-user"></i></span>
                                 <div class="info-box-content">
@@ -26,16 +26,7 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="col-md-3">
-                            <div class="info-box">
-                                <span class="info-box-icon bg-success"><i class="fas fa-envelope"></i></span>
-                                <div class="info-box-content">
-                                    <span class="info-box-text">Email</span>
-                                    <span class="info-box-number">{{ $agent->emp_email }}</span>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-3">
+                        <div class="col-md-4">
                             <div class="info-box">
                                 <span class="info-box-icon bg-warning"><i class="fas fa-phone"></i></span>
                                 <div class="info-box-content">
@@ -44,7 +35,7 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="col-md-3">
+                        <div class="col-md-4">
                             <div class="info-box">
                                 <span class="info-box-icon bg-primary"><i class="fas fa-chart-line"></i></span>
                                 <div class="info-box-content">
@@ -57,23 +48,29 @@
 
                     <div class="card">
                         <div class="card-header">
-                            <h3 class="card-title">Leads</h3>
-                            <div class="card-tools">
-                                <div class="input-group input-group-sm" style="width: 250px;">
-                                    <input type="text" id="searchInput" class="form-control float-right" placeholder="Search by name/email/phone" autocomplete="off">
-                                    <div class="input-group-append">
-                                        <button type="button" class="btn btn-outline-secondary" id="clearSearch" style="display: none;">
-                                            <i class="fas fa-times"></i>
-                                        </button>
-                                        <button type="button" class="btn btn-outline-primary" id="searchBtn">
-                                            <i class="fas fa-search"></i> Search
-                                        </button>
-                                    </div>
+                            <div class="row">
+                                <div class="col-4">
+                                    <h3 class="card-title">Leads</h3>
+                                </div>
+                                <div class="col-8">
+                                    <form action="{{ request()->url() }}" method="GET" class="">
+                                        <div class="input-group">
+                                            <input type="text" name="search" class="form-control" placeholder="Search leads by name, email, phone or status" value="{{ request('search') }}">
+                                            @if(request('search'))
+                                                <a href="{{ request()->url() }}" class="btn btn-outline-secondary" type="button">
+                                                    <i class="fas fa-times"></i>
+                                                </a>
+                                            @endif
+                                            <button class="btn btn-outline-primary" type="submit">
+                                                <i class="fas fa-search"></i>
+                                            </button>
+                                        </div>                                            
+                                    </form>
                                 </div>
                             </div>
                         </div>
                         <div class="card-body table-responsive p-0">
-                            <table class="table table-hover text-nowrap table-striped table-bordered table-sm ">
+                            <table class="table table-hover text-nowrap table-striped table-bordered table-sm">
                                 <thead>
                                     <tr>
                                         <th>S.No</th>
@@ -91,13 +88,17 @@
                                         $serialNumber = ($leads->currentPage() - 1) * $leads->perPage() + 1;
                                     @endphp
                                     @forelse($leads as $lead)
-                                        <tr data-lead-id="{{ $lead->id }}">
+                                        <tr data-lead-id="{{ $lead->id }}" 
+                                            data-first-name="{{ strtolower($lead->first_name) }}" 
+                                            data-last-name="{{ strtolower($lead->last_name) }}"
+                                            data-email="{{ strtolower($lead->email) }}"
+                                            data-phone="{{ $lead->phone }}">
                                             <td>{{ $serialNumber++ }}</td>
-                                            <td>{{ $lead->first_name }} {{ $lead->last_name }}</td>
-                                            <td>
+                                            <td class="name-column">{{ $lead->first_name }} {{ $lead->last_name }}</td>
+                                            <td class="email-column">
                                                 {{ substr($lead->email, 0, 3) . '*****' . substr($lead->email, strpos($lead->email, '@') - 3) }}
                                             </td>
-                                            <td>{{ substr($lead->phone, 0, 2) . '***' . substr($lead->phone, -2) }}</td>
+                                            <td class="phone-column">{{ substr($lead->phone, 0, 2) . '***' . substr($lead->phone, -2) }}</td>
                                             <td class="status-column">
                                                 @if(is_object($lead->status) && isset($lead->status->name))
                                                     {{ $lead->status->name }}
@@ -122,41 +123,11 @@
                                 </tbody>
                             </table>
                             
-                            @push('scripts')
-                            <script>
-                                document.addEventListener('DOMContentLoaded', function() {
-                                    const statusSearch = document.getElementById('statusSearch');
-                                    const clearFilterBtn = document.getElementById('clearStatusFilter');
-                                    const rows = document.querySelectorAll('#leadsTable tr');
-                                    const statusColumns = document.querySelectorAll('.status-column');
-
-                                    function filterTable() {
-                                        const searchTerm = statusSearch.value.toLowerCase();
-                                        
-                                        rows.forEach(row => {
-                                            if (row.cells.length > 0) {
-                                                const statusCell = row.querySelector('.status-column');
-                                                if (statusCell) {
-                                                    const statusText = statusCell.textContent.trim().toLowerCase();
-                                                    if (statusText.includes(searchTerm) || searchTerm === '') {
-                                                        row.style.display = '';
-                                                    } else {
-                                                        row.style.display = 'none';
-                                                    }
-                                                }
-                                            }
-                                        });
-                                    }
-
-                                    statusSearch.addEventListener('input', filterTable);
-                                    
-                                    clearFilterBtn.addEventListener('click', function() {
-                                        statusSearch.value = '';
-                                        filterTable();
-                                    });
-                                });
-                            </script>
-                            @endpush
+                            @if($leads->isEmpty() && request('search'))
+                            <div class="alert alert-info m-3">
+                                No results found for "{{ request('search') }}"
+                            </div>
+                            @endif
                         </div>
                         <div class="card-footer clearfix">
                             {{ $leads->links() }}
