@@ -894,58 +894,110 @@ function openModal() {
 
     // Save course changes
     function saveCourse(leadId) {
-        const newCourse = document.getElementById('courseInput').value.trim();
-        const errorElement = document.getElementById('courseError');
-        
-        if (!newCourse) {
-            errorElement.textContent = 'Course cannot be empty';
-            return;
-        }
-
-        // Show loading state
-        const saveBtn = document.querySelector('#courseEdit .btn-success');
-        const originalHtml = saveBtn.innerHTML;
-        saveBtn.disabled = true;
-        saveBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>';
-        
-        // Send AJAX request to update course
-        fetch(`/i-admin/leads/${leadId}/update-course`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-            },
-            body: JSON.stringify({ course: newCourse })
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                // Update display
-                document.getElementById('courseDisplay').textContent = newCourse.charAt(0).toUpperCase() + newCourse.slice(1);
-                cancelCourseEdit();
-                // Show success message
-                const alert = document.createElement('div');
-                alert.className = 'alert alert-success alert-dismissible fade show mt-2';
-                alert.role = 'alert';
-                alert.innerHTML = `
-                    Course updated successfully!
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                `;
-                document.querySelector('.lead-details-container').prepend(alert);
-                // Auto-hide after 3 seconds
-                setTimeout(() => alert.remove(), 3000);
-            } else {
-                throw new Error(data.message || 'Failed to update course');
+        try {
+            const courseInput = document.getElementById('courseInput');
+            const errorElement = document.getElementById('courseError');
+            
+            if (!courseInput) {
+                console.error('Course input element not found');
+                return;
             }
-        })
-        .catch(error => {
-            console.error('Error updating course:', error);
-            errorElement.textContent = error.message || 'An error occurred while updating the course';
-        })
-        .finally(() => {
-            saveBtn.disabled = false;
-            saveBtn.innerHTML = originalHtml;
-        });
+            
+            const newCourse = courseInput.value.trim();
+            
+            if (!newCourse) {
+                if (errorElement) {
+                    errorElement.textContent = 'Course cannot be empty';
+                }
+                return;
+            }
+
+            // Show loading state
+            const saveBtn = document.querySelector('#courseEdit .btn-success');
+            if (!saveBtn) {
+                console.error('Save button not found');
+                return;
+            }
+            
+            const originalHtml = saveBtn.innerHTML;
+            saveBtn.disabled = true;
+            saveBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>';
+            
+            // Get CSRF token from meta tag or fallback to form input
+            const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || 
+                              document.querySelector('input[name="_token"]')?.value;
+            
+            if (!csrfToken) {
+                throw new Error('CSRF token not found');
+            }
+            
+            // Send AJAX request to update course
+            fetch(`/i-admin/leads/${leadId}/update-course`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': csrfToken,
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: JSON.stringify({ course: newCourse })
+            })
+            .then(response => {
+                if (!response.ok) {
+                    return response.text().then(text => {
+                        throw new Error(`HTTP error! status: ${response.status}, body: ${text}`);
+                    });
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data && data.success) {
+                    // Update display
+                    const courseDisplay = document.getElementById('courseDisplay');
+                    if (courseDisplay) {
+                        courseDisplay.textContent = newCourse.charAt(0).toUpperCase() + newCourse.slice(1);
+                    }
+                    
+                    cancelCourseEdit();
+                    
+                    // Show success message
+                    const alert = document.createElement('div');
+                    alert.className = 'alert alert-success alert-dismissible fade show mt-2';
+                    alert.role = 'alert';
+                    alert.innerHTML = `
+                        Course updated successfully!
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    `;
+                    
+                    const container = document.querySelector('.lead-details-container, .card-body');
+                    if (container) {
+                        container.prepend(alert);
+                        // Auto-hide after 3 seconds
+                        setTimeout(() => alert.remove(), 3000);
+                    }
+                } else {
+                    throw new Error(data?.message || 'Failed to update course');
+                }
+            })
+            .catch(error => {
+                console.error('Error updating course:', error);
+                if (errorElement) {
+                    errorElement.textContent = error.message || 'An error occurred while updating the course';
+                }
+            })
+            .finally(() => {
+                if (saveBtn) {
+                    saveBtn.disabled = false;
+                    saveBtn.innerHTML = originalHtml;
+                }
+            });
+            
+        } catch (error) {
+            console.error('Error in saveCourse:', error);
+            const errorElement = document.getElementById('courseError');
+            if (errorElement) {
+                errorElement.textContent = 'An unexpected error occurred. Please try again.';
+            }
+        }
     }
 </script>
 
