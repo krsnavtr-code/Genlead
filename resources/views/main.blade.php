@@ -128,7 +128,7 @@
         <!-- Content Wrapper. Contains page content -->
         <div class="content-wrapper">
             <!-- Main content -->
-            <section class="content" style="margin-top: 70px; padding-bottom: 20px;">
+            <section class="content" style="margin-top: 56px; padding: 5px 0 20px 0;">
                 @yield('content') <!-- This is where the child content will be loaded -->
             </section>
             <!-- /.content -->

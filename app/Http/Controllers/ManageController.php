@@ -318,37 +318,65 @@ public function resetPassword(Request $request)
      *
      * @return \Illuminate\View\View|\Illuminate\Http\RedirectResponse
      */
-    public function showAllEmployees()
+    public function showAllEmployees(Request $request)
     {
         // Ensure only superadmin can access this page
         if (session('emp_job_role') != 1) {
             return redirect()->back()->with('error', 'Unauthorized access.');
         }
 
-        // Fetch all employees with is_active set (default to true if null)
-        $employees = Employee::all()->map(function($employee) {
+        // Log the request parameters for debugging
+        Log::info('showAllEmployees request:', [
+            'role' => $request->role,
+            'status' => $request->status,
+            'all_params' => $request->all()
+        ]);
+
+        // Start building the query
+        $query = Employee::query();
+
+        // Apply role filter if provided
+        if ($request->filled('role')) {
+            $query->where('emp_job_role', $request->role);
+        }
+
+        // Apply status filter if provided
+        if ($request->filled('status') && $request->status !== '') {
+            $status = (int)$request->status;
+            $query->where('is_active', $status);
+        }
+
+        // Log the generated SQL query
+        Log::info('Generated SQL Query:', [
+            'sql' => $query->toSql(),
+            'bindings' => $query->getBindings()
+        ]);
+
+        // Fetch employees with role and status filtering and ensure is_active is set
+        $employees = $query->get()->map(function($employee) {
             // Ensure is_active is set (for existing records before migration)
             if ($employee->is_active === null) {
-                $employee->is_active = true;
+                $employee->is_active = 1;
                 $employee->save();
             }
             return $employee;
         });
 
-        return view('admin.all_login_access', compact('employees'));
-    }
-
-    /**
-     * Toggle login access for an employee
-     *
-     * @param Request $request
-            $employee->save();
+        // For debugging
+        if ($request->has('debug')) {
+            return response()->json([
+                'employees' => $employees,
+                'sql' => $query->toSql(),
+                'bindings' => $query->getBindings()
+            ]);
         }
-        return $employee;
-    });
 
-    return view('admin.all_login_access', compact('employees'));
-}
+        // Return the view with the employees data
+        return view('admin.all_login_access', [
+            'employees' => $employees,
+            'request' => $request,
+        ]);
+    }
 
 /**
  * Toggle login access for an employee

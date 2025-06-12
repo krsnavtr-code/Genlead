@@ -55,7 +55,7 @@
 
         .form-header {
             text-align: center;
-            margin-bottom: 2.5rem;
+            margin-bottom: 1.5rem;
         }
 
         .form-header h1 {
@@ -197,8 +197,8 @@
     <div class="login-container">
         <div class="form-side">
             <div class="form-header">
-                <img src="{{ asset('images/gen-logo.jpeg') }}" alt="GenLead Logo" style="height: 80px; margin-bottom: 1.5rem; border-radius: 10px;">
-                <h1>Welcome Back</h1>
+                <img src="{{ asset('images/gen-logo.jpeg') }}" alt="GenLead Logo" style="height: 80px; border-radius: 10px;">
+                <h1 style="margin-bottom: 0px;">Welcome Back</h1>
                 <p>Sign in to access your account</p>
                 <p class="text-bold display-sm-none" style="color: #FA5508;">New Candidate? Check your email for login credentials</p>
             </div>

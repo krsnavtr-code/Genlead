@@ -4,8 +4,33 @@
 
 @section('content')
 
-<div class="container-fluid mt-4">
-    <h3 class="mb-4 text-center">All Login Access</h3>
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h3 class="mb-0">All Login Access</h3>
+        <div class="d-flex">
+            <form action="{{ url()->current() }}" method="GET" class="d-flex">
+                <select name="role" class="form-select p-2 me-2" style="border-radius: 10px; border-color: blue;" onchange="this.form.submit()">
+                    <option value="">All Roles</option>
+                    <option value="1" {{ request('role') == '1' ? 'selected' : '' }}>SuperAdmin</option>
+                    <option value="2" {{ request('role') == '2' ? 'selected' : '' }}>Agent</option>
+                    <option value="4" {{ request('role') == '4' ? 'selected' : '' }}>HR</option>
+                    <option value="5" {{ request('role') == '5' ? 'selected' : '' }}>Accountant</option>
+                    <option value="6" {{ request('role') == '6' ? 'selected' : '' }}>Team Leader</option>
+                    <option value="7" {{ request('role') == '7' ? 'selected' : '' }}>Chain Team Agent</option>
+                </select>
+                
+                <select name="status" class="form-select p-2 me-2" style="border-radius: 10px; border-color: blue; margin:0px 10px ;" onchange="this.form.submit()">
+                    <option value="">All Status</option>
+                    <option value="1" {{ request('status') === '1' ? 'selected' : '' }}>Active</option>
+                    <option value="0" {{ request('status') === '0' ? 'selected' : '' }}>Inactive</option>
+                </select>
+                
+                @if(request()->has('role') || request()->has('status'))
+                    <a style="border-radius: 10px; border-color: blue;" href="{{ url()->current() }}" class="btn btn-outline-secondary">Clear All</a>
+                @endif
+            </form>
+        </div>
+    </div>
 
     @if (session('errors'))
         <div class="alert alert-danger">
