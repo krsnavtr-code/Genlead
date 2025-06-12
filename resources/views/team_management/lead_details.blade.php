@@ -33,6 +33,10 @@
                                     <td>{{ substr($lead->phone, 0, 2) . '***' . substr($lead->phone, -2) }}</td>
                                 </tr>
                                 <tr>
+                                    <th>Couese:</th>
+                                    <td>{{ $lead->courses }}</td>
+                                </tr>
+                                <tr>
                                     <th>Status:</th>
                                     <td>
                                         @php

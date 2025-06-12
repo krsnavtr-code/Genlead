@@ -424,8 +424,6 @@ margin-bottom: 10px;
             <span id="iconLead" onclick="toggleSection('leadInfo', 'iconLead')" style="cursor: pointer;">&#9650;</span>
         </div>
 
-        <!-- <button class="btn btn-warning btn-sm position-absolute top-0 end-0 m-2" onclick="openModal()">Edit</button> -->
-
         <div id="leadInfo" class="card-body">
             <div class="row mb-3">
                 <div class="col-md-6 mb-2">
@@ -435,7 +433,23 @@ margin-bottom: 10px;
                     <strong>University:</strong> {{ ucfirst($lead->university) }}
                 </div>
                 <div class="col-md-6 mb-2">
-                    <strong>Course:</strong> {{ ucfirst($lead->courses) }}
+                    <div class="d-flex align-items-center">
+                        <strong class="me-2">Course:</strong>
+                        <span id="courseDisplay" class="me-2">{{ ucfirst($lead->courses) }}</span>
+                        <button type="button" class="btn btn-sm btn-outline-primary" onclick="toggleCourseEdit()">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <div id="courseEdit" class="input-group d-none">
+                            <input type="text" id="courseInput" class="form-control form-control-sm" value="{{ $lead->courses }}">
+                            <button class="btn btn-sm btn-success" onclick="saveCourse('{{ $lead->id }}')">
+                                <i class="fas fa-check"></i>
+                            </button>
+                            <button class="btn btn-sm btn-secondary" onclick="cancelCourseEdit()">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div id="courseError" class="text-danger small mt-1"></div>
                 </div>
                 <div class="col-md-6 mb-2">
                     <strong>College:</strong> {{ ucfirst($lead->college) }}
@@ -862,12 +876,77 @@ function openModal() {
         });
     }
 
-    // flatpickr("#followUpTime", {
-    //     enableTime: true,
-    //     dateFormat: "Y-m-d H:i",
-    //     minDate: "today"
-    // });
+    // Toggle course edit mode
+    function toggleCourseEdit() {
+        document.getElementById('courseDisplay').classList.add('d-none');
+        document.querySelector('button[onclick="toggleCourseEdit()"]').classList.add('d-none');
+        document.getElementById('courseEdit').classList.remove('d-none');
+        document.getElementById('courseInput').focus();
+    }
 
+    // Cancel course edit
+    function cancelCourseEdit() {
+        document.getElementById('courseDisplay').classList.remove('d-none');
+        document.querySelector('button[onclick="toggleCourseEdit()"]').classList.remove('d-none');
+        document.getElementById('courseEdit').classList.add('d-none');
+        document.getElementById('courseError').textContent = '';
+    }
+
+    // Save course changes
+    function saveCourse(leadId) {
+        const newCourse = document.getElementById('courseInput').value.trim();
+        const errorElement = document.getElementById('courseError');
+        
+        if (!newCourse) {
+            errorElement.textContent = 'Course cannot be empty';
+            return;
+        }
+
+        // Show loading state
+        const saveBtn = document.querySelector('#courseEdit .btn-success');
+        const originalHtml = saveBtn.innerHTML;
+        saveBtn.disabled = true;
+        saveBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>';
+        
+        // Send AJAX request to update course
+        fetch(`/i-admin/leads/${leadId}/update-course`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+            },
+            body: JSON.stringify({ course: newCourse })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Update display
+                document.getElementById('courseDisplay').textContent = newCourse.charAt(0).toUpperCase() + newCourse.slice(1);
+                cancelCourseEdit();
+                // Show success message
+                const alert = document.createElement('div');
+                alert.className = 'alert alert-success alert-dismissible fade show mt-2';
+                alert.role = 'alert';
+                alert.innerHTML = `
+                    Course updated successfully!
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                `;
+                document.querySelector('.lead-details-container').prepend(alert);
+                // Auto-hide after 3 seconds
+                setTimeout(() => alert.remove(), 3000);
+            } else {
+                throw new Error(data.message || 'Failed to update course');
+            }
+        })
+        .catch(error => {
+            console.error('Error updating course:', error);
+            errorElement.textContent = error.message || 'An error occurred while updating the course';
+        })
+        .finally(() => {
+            saveBtn.disabled = false;
+            saveBtn.innerHTML = originalHtml;
+        });
+    }
 </script>
 
 @endsection

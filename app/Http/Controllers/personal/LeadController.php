@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\personal;
 
 use App\Http\Controllers\Controller;
+
 use App\Models\personal\Agent;
 use App\Models\personal\Attendance;
 use App\Models\personal\FollowUp;
@@ -28,6 +29,62 @@ class LeadController extends Controller
     public function howToUse()
     {
         return view('how-to-use');
+    }
+
+    /**
+     * Update the course of a lead via AJAX
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  \App\Models\personal\Lead  $lead
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function updateCourse(Request $request, Lead $lead)
+    {
+        try {
+            // Validate the request
+            $request->validate([
+                'course' => 'required|string|max:255',
+            ]);
+
+            // Get the authenticated agent's ID
+            $agentId = session()->get('user_id');
+            if (!$agentId) {
+                throw new \Exception('Agent not authenticated');
+            }
+
+            // Verify the agent has access to this lead
+            if ($lead->agent_id != $agentId) {
+                throw new \Exception('You do not have permission to update this lead.');
+            }
+
+            // Update the course
+            $oldCourse = $lead->courses;
+            $newCourse = $request->course;
+            $lead->courses = $newCourse;
+            $lead->save();
+
+            // Log the change
+            $followUp = new FollowUp();
+            $followUp->lead_id = $lead->id;
+            $followUp->agent_id = $agentId;
+            $followUp->comments = "Course changed from \"$oldCourse\" to \"$newCourse\"";
+            $followUp->follow_up_time = now();
+            $followUp->action = 'course-update';
+            $followUp->save();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Course updated successfully.'
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Error updating course: ' . $e->getMessage());
+            
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage()
+            ], 500);
+        }
     }
 
     public function addlead()

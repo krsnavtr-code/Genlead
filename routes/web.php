@@ -181,8 +181,7 @@ Route::prefix('i-admin')->group(function () {
 
     Route::post('/agent-login', [LeadController::class, 'login']);
 
-    // Export Leads Routes
-
-    Route::get('/leads/export', [LeadController::class, 'exportLeads']);
+    // Update lead course
+    Route::post('/leads/{lead}/update-course', [LeadController::class, 'updateCourse'])->name('leads.update-course');
 
 });
