@@ -131,7 +131,11 @@
                             @endif
                         </div>
                         <div class="card-footer clearfix">
-                            {{ $leads->links() }}
+                            @if(request('search'))
+                                {{ $leads->appends(['search' => request('search')])->links() }}
+                            @else
+                                {{ $leads->links() }}
+                            @endif
                         </div>
                     </div>
                 </div>
