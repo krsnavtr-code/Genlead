@@ -146,31 +146,41 @@ class TeamManagementController extends Controller
                 $searchPattern = '%' . $searchTerm . '%';
                 $searchTermLower = strtolower($searchTerm);
                 
-                $leadsQuery->where(function($query) use ($searchTerm, $searchPattern, $searchTermLower) {
-                    // Search in basic fields with LIKE
-                    $query->where('first_name', 'LIKE', $searchPattern)
-                          ->orWhere('last_name', 'LIKE', $searchPattern)
-                          ->orWhere('email', 'LIKE', $searchPattern)
-                          ->orWhere('phone', 'LIKE', $searchPattern);
-                    
-                    // Search in status name (case-insensitive)
-                    $query->orWhereHas('status', function($q) use ($searchTermLower) {
-                        $q->whereRaw('LOWER(name) LIKE ?', ['%' . $searchTermLower . '%']);
-                    });
-                    
-                    // Also include raw status text search
-                    $query->orWhereRaw('LOWER(status) LIKE ?', ['%' . $searchTermLower . '%']);
-                    
-                    // Search by date (format: YYYY-MM-DD or M d, Y format)
-                    try {
-                        $date = \Carbon\Carbon::parse($searchTerm);
-                        if ($date) {
-                            $query->orWhereDate('created_at', $date->format('Y-m-d'));
+                // Special case: search for 'not talk' or 'not talked' to find leads with no status
+                if (strpos($searchTermLower, 'not talk') !== false) {
+                    Log::info('Searching for leads with no status');
+                    $leadsQuery->whereNull('status_id')
+                             ->where(function($query) {
+                                 $query->where('status', '')
+                                       ->orWhereNull('status');
+                             });
+                    Log::info('SQL Query: ' . $leadsQuery->toSql());
+                } else {
+                    // Regular search for all other cases
+                    $leadsQuery->where(function($query) use ($searchPattern, $searchTermLower, $searchTerm) {
+                        // Search in basic fields with LIKE
+                        $query->where('first_name', 'LIKE', $searchPattern)
+                              ->orWhere('last_name', 'LIKE', $searchPattern)
+                              ->orWhere('email', 'LIKE', $searchPattern)
+                              ->orWhere('phone', 'LIKE', $searchPattern)
+                              // Search in status name (case-insensitive)
+                              ->orWhereHas('status', function($q) use ($searchTermLower) {
+                                  $q->whereRaw('LOWER(name) LIKE ?', ['%' . $searchTermLower . '%']);
+                              })
+                              // Also include raw status text search
+                              ->orWhereRaw('LOWER(status) LIKE ?', ['%' . $searchTermLower . '%']);
+                        
+                        // Search by date (format: YYYY-MM-DD or M d, Y format)
+                        try {
+                            $date = \Carbon\Carbon::parse($searchTerm);
+                            if ($date) {
+                                $query->orWhereDate('created_at', $date->format('Y-m-d'));
+                            }
+                        } catch (\Exception $e) {
+                            // Ignore date parsing errors
                         }
-                    } catch (\Exception $e) {
-                        // Ignore date parsing errors
-                    }
-                });
+                    });
+                }
             }
             
             // Order by created_at desc
