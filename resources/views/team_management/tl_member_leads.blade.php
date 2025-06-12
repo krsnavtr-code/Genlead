@@ -98,23 +98,12 @@
                                                 {{ substr($lead->email, 0, 3) . '*****' . substr($lead->email, strpos($lead->email, '@') - 3) }}
                                             </td>
                                             <td>{{ substr($lead->phone, 0, 2) . '***' . substr($lead->phone, -2) }}</td>
-                                            <td>
-                                                @php
-                                                    $statusColor = 'secondary';
-                                                    $statusName = 'N/A';
-                                                    $statusId = null;
-                                                    
-                                                    if (is_object($lead->status) && isset($lead->status->color)) {
-                                                        $statusColor = $lead->status->color;
-                                                        $statusName = $lead->status->name;
-                                                        $statusId = $lead->status->id;
-                                                    } elseif (is_string($lead->status)) {
-                                                        $statusName = $lead->status;
-                                                    }
-                                                @endphp
-                                                <span class="badge bg-{{ $statusColor }} lead-status">
-                                                    {{ $statusName }}
-                                                </span>
+                                            <td class="status-column">
+                                                @if(is_object($lead->status) && isset($lead->status->name))
+                                                    {{ $lead->status->name }}
+                                                @else
+                                                    {{ $lead->status ?? 'N/A' }}
+                                                @endif
                                             </td>
                                             <td>{{ $lead->total_followups ?? 0 }}</td>
                                             <td>{{ $lead->created_at->format('M d, Y h:i A') }}</td>
@@ -132,6 +121,42 @@
                                     @endforelse
                                 </tbody>
                             </table>
+                            
+                            @push('scripts')
+                            <script>
+                                document.addEventListener('DOMContentLoaded', function() {
+                                    const statusSearch = document.getElementById('statusSearch');
+                                    const clearFilterBtn = document.getElementById('clearStatusFilter');
+                                    const rows = document.querySelectorAll('#leadsTable tr');
+                                    const statusColumns = document.querySelectorAll('.status-column');
+
+                                    function filterTable() {
+                                        const searchTerm = statusSearch.value.toLowerCase();
+                                        
+                                        rows.forEach(row => {
+                                            if (row.cells.length > 0) {
+                                                const statusCell = row.querySelector('.status-column');
+                                                if (statusCell) {
+                                                    const statusText = statusCell.textContent.trim().toLowerCase();
+                                                    if (statusText.includes(searchTerm) || searchTerm === '') {
+                                                        row.style.display = '';
+                                                    } else {
+                                                        row.style.display = 'none';
+                                                    }
+                                                }
+                                            }
+                                        });
+                                    }
+
+                                    statusSearch.addEventListener('input', filterTable);
+                                    
+                                    clearFilterBtn.addEventListener('click', function() {
+                                        statusSearch.value = '';
+                                        filterTable();
+                                    });
+                                });
+                            </script>
+                            @endpush
                         </div>
                         <div class="card-footer clearfix">
                             {{ $leads->links() }}
