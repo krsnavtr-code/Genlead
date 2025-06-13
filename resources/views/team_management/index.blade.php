@@ -123,7 +123,7 @@ $emp_job_role = session('emp_job_role');
                                                     {{ ucfirst($lead->status) }}
                                                 </span>
                                             @else
-                                                <span class="badge badge-secondary">No Status</span>
+                                                <span class="badge badge-secondary">Not Talk</span>
                                             @endif
                                         </td>
                                         <td>{{ $lead->follow_ups_count ?? 0 }}</td>

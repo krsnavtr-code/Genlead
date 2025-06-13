@@ -469,10 +469,34 @@ class TeamManagementController extends Controller
             ->withCount('followUps')
             ->when(request('search'), function($query, $search) {
                 $query->where(function($q) use ($search) {
-                    $q->where('first_name', 'like', "%{$search}%")
-                      ->orWhere('last_name', 'like', "%{$search}%")
-                      ->orWhere('email', 'like', "%{$search}%")
-                      ->orWhere('phone', 'like', "%{$search}%");
+                    $searchTerm = "%{$search}%";
+                    $searchTermLower = strtolower($search);
+                    
+                    // Special case: search for 'not talk' or 'not talked' to find leads with no status
+                    if (strpos($searchTermLower, 'not talk') !== false) {
+                        $q->where(function($q) {
+                            $q->where(function($q2) {
+                                $q2->whereNull('status_id')
+                                   ->orWhere('status_id', 0);
+                            })
+                            ->where(function($q2) {
+                                $q2->where('status', '')
+                                   ->orWhereNull('status');
+                            });
+                        });
+                    } else {
+                        // Regular search for all other cases
+                        $q->where('first_name', 'like', $searchTerm)
+                          ->orWhere('last_name', 'like', $searchTerm)
+                          ->orWhere('email', 'like', $searchTerm)
+                          ->orWhere('phone', 'like', $searchTerm)
+                          // Search in status name
+                          ->orWhereHas('status', function($q) use ($searchTermLower) {
+                              $q->whereRaw('LOWER(name) LIKE ?', ["%{$searchTermLower}%"]);
+                          })
+                          // Search in status text
+                          ->orWhereRaw('LOWER(status) LIKE ?', ["%{$searchTermLower}%"]);
+                    }
                 });
             })
             ->when(request('status'), function($query, $status) {
