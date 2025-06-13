@@ -11,7 +11,7 @@
                     <h3 class="card-title">Lead Details for {{ $agent->emp_name }}</h3>
                     <div class="card-tools">
                         <a href="{{ route('admin.team.management') }}" class="btn btn-sm btn-primary">
-                            <i class="fas fa-arrow-left"></i> Back to Team Management
+                            <i class="fas fa-arrow-left"></i> Back
                         </a>
                     </div>
                 </div>

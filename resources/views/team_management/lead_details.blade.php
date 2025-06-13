@@ -17,9 +17,9 @@
                 </div>
                 <div class="card-body">
                     <div class="row">
-                        <div class="col-md-6">
+                        <div class="col-md-12">
                             <h4>Lead Information</h4>
-                            <table class="table table-bordered">
+                            <table class="table table-bordered table-sm">
                                 <tr>
                                     <th style="width: 30%;">Name:</th>
                                     <td>{{ $lead->first_name }} {{ $lead->last_name }}</td>
@@ -65,35 +65,6 @@
                                         @endif
                                     </td>
                                 </tr>
-                                <tr>
-                                    <th>Created At:</th>
-                                    <td>{{ $lead->created_at->format('M d, Y h:i A') }}</td>
-                                </tr>
-                                <tr>
-                                    <th>Last Updated:</th>
-                                    <td>{{ $lead->updated_at->format('M d, Y h:i A') }}</td>
-                                </tr>
-                            </table>
-                        </div>
-                        <div class="col-md-6">
-                            <h4>Additional Information</h4>
-                            <table class="table table-bordered">
-                                @foreach([
-                                    'address' => 'Address',
-                                    'city' => 'City',
-                                    'state' => 'State',
-                                    'zip_code' => 'ZIP Code',
-                                    'country' => 'Country',
-                                    'source' => 'Lead Source',
-                                    'notes' => 'Notes'
-                                ] as $field => $label)
-                                    @if(!empty($lead->$field))
-                                        <tr>
-                                            <th style="width: 30%;">{{ $label }}:</th>
-                                            <td>{{ $lead->$field }}</td>
-                                        </tr>
-                                    @endif
-                                @endforeach
                             </table>
                         </div>
                     </div>

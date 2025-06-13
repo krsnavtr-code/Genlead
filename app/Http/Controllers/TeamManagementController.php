@@ -403,15 +403,24 @@ class TeamManagementController extends Controller
         $isAdmin = session('emp_job_role') == 1;
         $teamLeaderId = Auth::id();
 
+        // Get team member IDs for the current team leader
+        $teamMemberIds = collect([$teamLeaderId]); // Include team leader's own ID
+        
+        if (!$isAdmin) {
+            // Get all agents that report to this team leader
+            $teamMemberIds = $teamMemberIds->merge(
+                Employee::where('reports_to', $teamLeaderId)
+                    ->whereIn('emp_job_role', [2, 7]) // Regular agents (2) and chain team agents (7)
+                    ->pluck('id')
+            );
+        }
+
         // For both admins and team leaders, show all agents
         $query = Employee::whereIn('emp_job_role', [2, 7]); // Both regular agents (2) and chain team agents (7)
         
         // If not admin, filter by team if needed
         if (!$isAdmin) {
-            $query->where(function($q) use ($teamLeaderId) {
-                $q->where('reports_to', $teamLeaderId)
-                  ->orWhere('id', $teamLeaderId); // Include team leader in their own team view
-            });
+            $query->whereIn('id', $teamMemberIds);
         }
         
         $teamMembers = $query->with(['reportsTo' => function($q) {
@@ -446,7 +455,46 @@ class TeamManagementController extends Controller
             ->orderBy('emp_name')     // Then sort by name
             ->get();
             
-        return view('team_management.index', compact('teamMembers', 'leadStatuses', 'isAdmin'));
+        // Get all leads for the team with their relationships and counts
+        $teamLeads = \App\Models\personal\Lead::whereIn('agent_id', $teamMemberIds)
+            ->with([
+                'agent' => function($q) {
+                    $q->select('id', 'emp_name');
+                },
+                'status',
+                'followUps' => function($q) {
+                    $q->orderBy('follow_up_time', 'desc');
+                }
+            ])
+            ->withCount('followUps')
+            ->when(request('search'), function($query, $search) {
+                $query->where(function($q) use ($search) {
+                    $q->where('first_name', 'like', "%{$search}%")
+                      ->orWhere('last_name', 'like', "%{$search}%")
+                      ->orWhere('email', 'like', "%{$search}%")
+                      ->orWhere('phone', 'like', "%{$search}%");
+                });
+            })
+            ->when(request('status'), function($query, $status) {
+                $query->where(function($q) use ($status) {
+                    $q->whereHas('status', function($q) use ($status) {
+                        $q->whereRaw('LOWER(name) = ?', [strtolower($status)]);
+                    })->orWhereRaw('LOWER(status) = ?', [strtolower($status)]);
+                });
+            })
+            ->when(request('agent'), function($query, $agentId) {
+                $query->where('agent_id', $agentId);
+            })
+            ->orderBy('created_at', 'desc')
+            ->paginate(100) // Increased from 20 to 100 items per page
+            ->withQueryString();
+            
+        return view('team_management.index', compact(
+            'teamMembers', 
+            'leadStatuses', 
+            'isAdmin',
+            'teamLeads'
+        ));
     }
 
     /**

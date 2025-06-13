@@ -4,6 +4,10 @@
 
 @section('content')
 
+@php
+    $emp_job_role = session()->get('emp_job_role');
+@endphp
+
 <style>
     /* Adjust the layout for the left and right sections */
     .lead-details-container {
@@ -463,6 +467,14 @@ margin-bottom: 10px;
                 <div class="col-md-6 mb-2">
                     <strong>Phone:</strong> {{ $lead->phone }}
                 </div>
+                @if(in_array($emp_job_role, [1]))
+                <div class="col-md-6 mb-2">
+                    <strong>Lead Owner:</strong> {{ $lead->agent->emp_name ?? 'N/A' }}
+                </div>
+                <div class="col-md-6 mb-2">
+                    <strong>Team Leader:</strong> {{ $lead->agent->teamLeader->emp_name ?? 'N/A' }}
+                </div>
+                @endif
             </div>
         </div>
     </div>
