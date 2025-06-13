@@ -207,7 +207,7 @@ $emp_job_role = session('emp_job_role');
                             </a>
                         </div>
                     </div>
-                    <div class="card-body p-0">
+                    <div class="table-responsive">
                         <table class="table table-striped table-extra-sm table-hover table-bordered">
                             <thead>
                                 <tr>
@@ -272,7 +272,7 @@ $emp_job_role = session('emp_job_role');
                     <div class="card-header bg-success">
                         <h5 class="card-title">Agents with Teams</h5>
                     </div>
-                    <div class="card-body p-0">
+                    <div class="table-responsive">
                         <table class="table table-striped table-extra-sm table-hover table-bordered">
                             <thead>
                                 <tr>
@@ -314,7 +314,7 @@ $emp_job_role = session('emp_job_role');
                     <div class="card-header bg-warning">
                         <h5 class="card-title">Agents Without Team</h5>
                     </div>
-                    <div class="card-body p-0">
+                    <div class="table-responsive">
                         <table class="table table-striped table-extra-sm table-hover table-bordered">
                             <thead>
                                 <tr>
