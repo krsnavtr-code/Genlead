@@ -64,6 +64,7 @@ $emp_job_role = session('emp_job_role');
     <section class="content">
         <div class="container-fluid">
             <!-- Team Leads Section -->
+            @if(in_array($emp_job_role, [6]))
             <div class="card mt-4">
                 <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
                     <p class="m-0">All Leads of My Team Owns</p>
@@ -194,8 +195,60 @@ $emp_job_role = session('emp_job_role');
                     @endif
                 </div>
             </div>
+            @endif
+            @if(in_array($emp_job_role, [6]))
+                {{-- Team Leader View --}}
+                <div class="card">
+                    <div class="card-header bg-primary text-white">
+                        <p class="card-title m-0">All My Team Members</p>
+                        <div class="card-tools">
+                            <a href="{{ route('admin.team.performance') }}" class="btn btn-info btn-sm">
+                                <i class="fas fa-chart-line"></i> View Performance
+                            </a>
+                        </div>
+                    </div>
+                    <div class="card-body p-0">
+                        <table class="table table-striped table-extra-sm table-hover table-bordered">
+                            <thead>
+                                <tr>
+                                    <th>S.No</th>
+                                    <th>Name</th>
+                                    <th>Email</th>
+                                    <th>Phone</th>
+                                    <th>Total Leads</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @forelse($teamMembers as $member)
+                                    <tr>
+                                        <td>{{ $loop->iteration }}</td>
+                                        <td>{{ $member->emp_name }}</td>
+                                        <td>{{ $member->emp_email}}</td>
+                                        <td>{{ $member->emp_phone }}</td>
+                                        <td>{{ $member->total_leads }}</td>
+                                        <td>
+                                            <a href="{{ route('admin.team.member.followups', $member->id) }}" class="btn btn-sm btn-info">
+                                                <i class="fas fa-eye"></i> Followups
+                                            </a>
+                                            <a href="{{ route('admin.team.member.leads-details', $member->id) }}" class="btn btn-sm btn-info">
+                                                <i class="fas fa-eye"></i> Leads Details
+                                            </a>
+                                        </td>
+                                    </tr>
+                                @empty
+                                    <tr>
+                                        <td colspan="9" class="text-center">No team members found.</td>
+                                    </tr>
+                                @endforelse
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            @endif
             <!-- End Team Leads Section -->
-            <!-- Assign Agents to Team Leader for Admin (1) -->
+
+            <!-- Start Admin Section (1) -->
             @if(in_array($emp_job_role, [1]))
             <div class="card">
                 <div class="card-header">
@@ -213,52 +266,39 @@ $emp_job_role = session('emp_job_role');
                 </div>
             @endif
 
-            @if(isset($agentsWithTeam) && isset($agentsWithoutTeam))
+            @if(in_array($emp_job_role, [1]))
                 {{-- Admin View --}}
                 <div class="card">
                     <div class="card-header bg-success">
                         <h5 class="card-title">Agents with Teams</h5>
                     </div>
                     <div class="card-body p-0">
-                        <table class="table table-striped table-extra-sm">
+                        <table class="table table-striped table-extra-sm table-hover table-bordered">
                             <thead>
                                 <tr>
+                                    <th>S.No</th>
                                     <th>Name</th>
                                     <th>Team Leader</th>
                                     <th>Email</th>
                                     <th>Phone</th>
                                     <th>Total Leads</th>
-                                    <!-- <th>Converted</th> -->
-                                    <!-- <th>Pending</th> -->
-                                    <!-- <th>Rejected</th> -->
-                                    <!-- <th>Status</th> -->
-                                    <th>Actions</th>
+                                    <!-- <th>Actions</th> -->
                                 </tr>
                             </thead>
                             <tbody>
                                 @forelse($agentsWithTeam as $member)
                                     <tr>
+                                        <td>{{ $loop->iteration }}</td>
                                         <td>{{ $member->emp_name }}</td>
                                         <td>{{ $member->reportsTo->emp_name ?? 'N/A' }}</td>
                                         <td>{{ $member->emp_email }}</td>
                                         <td>{{ $member->emp_phone }}</td>
                                         <td>{{ $member->total_leads }}</td>
-                                        <!-- <td>{{ $member->converted_leads }}</td> -->
-                                        <!-- <td>{{ $member->pending_leads }}</td> -->
-                                        <!-- <td>{{ $member->rejected_leads }}</td> -->
                                         <!-- <td>
-                                            <span class="badge badge-{{ $member->emp_status === 'active' ? 'success' : 'danger' }}">
-                                                {{ ucfirst($member->emp_status) }}
-                                            </span>
+                                            <a href="{{ route('admin.team.member.leads-details', $member->id) }}" class="btn btn-sm btn-info">
+                                                <i class="fas fa-eye"></i> Leads Details
+                                            </a>
                                         </td> -->
-                                        <td>
-                                            <a href="{{ route('admin.team.member.edit', $member->id) }}" class="btn btn-sm btn-primary">
-                                                <i class="fas fa-edit"></i> Edit
-                                            </a>
-                                            <a href="{{ route('admin.team.member.followups', $member->id) }}" class="btn btn-sm btn-info">
-                                                <i class="fas fa-eye"></i> View Followups
-                                            </a>
-                                        </td>
                                     </tr>
                                 @empty
                                     <tr>
@@ -275,43 +315,33 @@ $emp_job_role = session('emp_job_role');
                         <h5 class="card-title">Agents Without Team</h5>
                     </div>
                     <div class="card-body p-0">
-                        <table class="table table-striped table-extra-sm">
+                        <table class="table table-striped table-extra-sm table-hover table-bordered">
                             <thead>
                                 <tr>
+                                    <th>S.No</th>
                                     <th>Name</th>
                                     <th>Email</th>
                                     <th>Phone</th>
                                     <th>Total Leads</th>
-                                    <!-- <th>Converted</th> -->
-                                    <!-- <th>Pending</th> -->
-                                    <!-- <th>Rejected</th> -->
-                                    <!-- <th>Status</th> -->
-                                    <th>Actions</th>
+                                    <!-- <th>Actions</th> -->
                                 </tr>
                             </thead>
                             <tbody>
                                 @forelse($agentsWithoutTeam as $member)
                                     <tr>
+                                        <td>{{ $loop->iteration }}</td>
                                         <td>{{ $member->emp_name }}</td>
                                         <td>{{ $member->emp_email }}</td>
                                         <td>{{ $member->emp_phone }}</td>
                                         <td>{{ $member->total_leads }}</td>
-                                        <!-- <td>{{ $member->converted_leads }}</td> -->
-                                        <!-- <td>{{ $member->pending_leads }}</td> -->
-                                        <!-- <td>{{ $member->rejected_leads }}</td> -->
                                         <!-- <td>
-                                            <span class="badge badge-{{ $member->emp_status === 'active' ? 'success' : 'danger' }}">
-                                                {{ ucfirst($member->emp_status) }}
-                                            </span>
-                                        </td> -->
-                                        <td>
                                             <a href="{{ route('admin.team.member.edit', $member->id) }}" class="btn btn-sm btn-primary">
                                                 <i class="fas fa-edit"></i> Edit
                                             </a>
                                             <a href="{{ route('admin.team.member.followups', $member->id) }}" class="btn btn-sm btn-info">
                                                 <i class="fas fa-eye"></i> View Followups
                                             </a>
-                                        </td>
+                                        </td> -->
                                     </tr>
                                 @empty
                                     <tr>
@@ -322,69 +352,8 @@ $emp_job_role = session('emp_job_role');
                         </table>
                     </div>
                 </div>
-            @else
-                {{-- Team Leader View --}}
-                <div class="card">
-                    <div class="card-header bg-primary text-white">
-                        <h5 class="card-title">All My Team Members</h5>
-                        <div class="card-tools">
-                            <a href="{{ route('admin.team.performance') }}" class="btn btn-info btn-sm">
-                                <i class="fas fa-chart-line"></i> View Performance
-                            </a>
-                        </div>
-                    </div>
-                    <div class="card-body p-0">
-                        <table class="table table-striped table-extra-sm">
-                            <thead>
-                                <tr>
-                                    <th>Name</th>
-                                    <th>Email</th>
-                                    <th>Phone</th>
-                                    <th>Total Leads</th>
-                                    <!-- <th>Converted</th> -->
-                                    <!-- <th>Pending</th> -->
-                                    <!-- <th>Rejected</th> -->
-                                    <!-- <th>Status</th> -->
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @forelse($teamMembers as $member)
-                                    <tr>
-                                        <td>{{ $member->emp_name }}</td>
-                                        <td>{{ $member->emp_email}}</td>
-                                        <td>{{ $member->emp_phone }}</td>
-                                        <td>{{ $member->total_leads }}</td>
-                                        <!-- <td>{{ $member->converted_leads }}</td> -->
-                                        <!-- <td>{{ $member->pending_leads }}</td> -->
-                                        <!-- <td>{{ $member->rejected_leads }}</td> -->
-                                        <!-- <td>
-                                            <span class="badge badge-{{ $member->emp_status === 'active' ? 'success' : 'danger' }}">
-                                                {{ ucfirst($member->emp_status) }}
-                                            </span>
-                                        </td> -->
-                                        <td>
-                                            <!-- <a href="{{ route('admin.team.member.edit', $member->id) }}" class="btn btn-sm btn-primary">
-                                                <i class="fas fa-edit"></i> Edit
-                                            </a> -->
-                                            <a href="{{ route('admin.team.member.followups', $member->id) }}" class="btn btn-sm btn-info">
-                                                <i class="fas fa-eye"></i> View Followups
-                                            </a>
-                                            <a href="{{ route('admin.team.member.leads-details', $member->id) }}" class="btn btn-sm btn-info">
-                                                <i class="fas fa-eye"></i> View Leads Details
-                                            </a>
-                                        </td>
-                                    </tr>
-                                @empty
-                                    <tr>
-                                        <td colspan="9" class="text-center">No team members found.</td>
-                                    </tr>
-                                @endforelse
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
             @endif
+            <!-- End Admin Section -->
         </div>
     </section>
 </div>

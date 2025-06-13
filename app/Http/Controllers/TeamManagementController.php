@@ -513,11 +513,35 @@ class TeamManagementController extends Controller
             ->paginate(100) // Increased from 20 to 100 items per page
             ->withQueryString();
             
-        return view('team_management.index', compact(
-            'teamMembers', 
-            'leadStatuses', 
-            'isAdmin',
-            'teamLeads'
+        // For admin, get agents with and without teams
+        if ($isAdmin) {
+            $agentsWithTeam = Employee::whereIn('emp_job_role', [2, 7])
+                ->whereNotNull('reports_to')
+                ->with(['reportsTo' => function($q) {
+                    $q->select('id', 'emp_name');
+                }])
+                ->withCount('leads as total_leads')
+                ->orderBy('emp_name')
+                ->get();
+
+            $agentsWithoutTeam = Employee::whereIn('emp_job_role', [2, 7])
+                ->whereNull('reports_to')
+                ->withCount('leads as total_leads')
+                ->orderBy('emp_name')
+                ->get();
+        }
+
+        return view('team_management.index', array_merge(
+            [
+                'teamMembers' => $teamMembers,
+                'leadStatuses' => $leadStatuses,
+                'isAdmin' => $isAdmin,
+                'teamLeads' => $teamLeads,
+            ],
+            $isAdmin ? [
+                'agentsWithTeam' => $agentsWithTeam,
+                'agentsWithoutTeam' => $agentsWithoutTeam
+            ] : [] 
         ));
     }
 
