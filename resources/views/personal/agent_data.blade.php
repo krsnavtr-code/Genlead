@@ -1,5 +1,9 @@
 @extends('main')
 
+@php
+    use App\Models\Employee;
+@endphp
+
 @section('title', 'Agent Leads')
 
 @section('content')
@@ -26,9 +30,13 @@
                         <label for="agent_id">Select Agent:</label>
                         <select name="agent_id" id="agent_id" class="form-control" required>
                             <option value="" disabled {{ !request()->has('agent_id') ? 'selected' : '' }}>Select an agent</option>
-                            @foreach($agents as $agent)
-                                <option value="{{ $agent->id }}" {{ request('agent_id') == $agent->id ? 'selected' : '' }}>
-                                    {{ $agent->emp_name }} ({{ $agent->emp_job_role ?? 'No Role' }})
+                            @foreach($agents->sortBy('emp_name') as $agent)
+                                @php
+                                    $teamLeader = $agent->reports_to ? Employee::find($agent->reports_to) : null;
+                                    $teamLeaderName = $teamLeader ? $teamLeader->emp_name : 'No Team Leader';
+                                @endphp
+                                <option value="{{ $agent->id }}" data-team-leader="{{ $teamLeaderName }}" {{ request('agent_id') == $agent->id ? 'selected' : '' }}>
+                                    {{ $agent->emp_name }} ({{ $agent->emp_job_role ?? 'No Role' }}) - Team Lead: {{ $teamLeaderName }}
                                 </option>
                             @endforeach
                         </select>
@@ -52,6 +60,15 @@
                 <form id="transferForm" action="{{ route('admin.leads.transfer') }}" method="POST">
                     @csrf
                     <input type="hidden" name="agent_id" value="{{ $agentData->id }}">
+
+                    <div class="form-group">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" value="" id="selectAll">
+                            <label class="form-check-label" for="selectAll">
+                                Select All
+                            </label>
+                        </div>
+                    </div>
                     
                     <div class="row mb-3">
                         <div class="col-md-6">
@@ -59,9 +76,10 @@
                                 <label for="target_agent_id">Transfer Selected Leads To:</label>
                                 <select name="target_agent_id" id="target_agent_id" class="form-control" required>
                                     <option value="" disabled selected>Select target agent</option>
-                                    @foreach($agents->where('id', '!=', $agentData->id) as $agent)
+                                    @foreach($agents->where('id', '!=', $agentData->id)->sortBy('emp_name') as $agent)
                                         <option value="{{ $agent->id }}">
                                             {{ $agent->emp_name }} ({{ $agent->emp_job_role ?? 'No Role' }})
+                                            {{ $agent->reports_to ? Employee::find($agent->reports_to)->emp_name : 'No Team Leader' }}
                                         </option>
                                     @endforeach
                                 </select>

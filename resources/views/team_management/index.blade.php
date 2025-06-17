@@ -109,6 +109,7 @@ $emp_job_role = session('emp_job_role');
                                     <th>Status</th>
                                     <th>Follow-ups</th>
                                     <th>Last Contact</th>
+                                    <th>Lead Date/Time</th>
                                     <th>Actions</th>
                                 </tr>
                             </thead>
@@ -134,6 +135,9 @@ $emp_job_role = session('emp_job_role');
                                             @else
                                                 No follow-ups
                                             @endif
+                                        </td>
+                                        <td>
+                                            {{ $lead->created_at }}
                                         </td>
                                         <td>
                                             <a href="{{ route('admin.team.member.lead-details', $lead->id) }}" class="btn btn-sm btn-info">
