@@ -60,15 +60,6 @@
                 <form id="transferForm" action="{{ route('admin.leads.transfer') }}" method="POST">
                     @csrf
                     <input type="hidden" name="agent_id" value="{{ $agentData->id }}">
-
-                    <div class="form-group">
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" value="" id="selectAll">
-                            <label class="form-check-label" for="selectAll">
-                                Select All
-                            </label>
-                        </div>
-                    </div>
                     
                     <div class="row mb-3">
                         <div class="col-md-6">
@@ -160,14 +151,14 @@
         
         // Get all necessary elements
         const selectAll = document.getElementById('selectAll');
-        const checkboxes = document.querySelectorAll('.lead-checkbox');
+        let allCheckboxes = document.querySelectorAll('.lead-checkbox');
         const transferBtn = document.getElementById('transferBtn');
         const transferForm = document.getElementById('transferForm');
         const targetAgentSelect = document.getElementById('target_agent_id');
         
         console.log('Elements found:', {
             selectAll: !!selectAll,
-            checkboxes: checkboxes.length,
+            checkboxes: allCheckboxes.length,
             transferBtn: !!transferBtn,
             transferForm: !!transferForm,
             targetAgentSelect: !!targetAgentSelect
@@ -198,35 +189,76 @@
         // Toggle all checkboxes
         selectAll.addEventListener('change', function() {
             console.log('Select all changed:', this.checked);
-            checkboxes.forEach(checkbox => {
-                checkbox.checked = this.checked;
-                // Manually trigger change event
-                const event = new Event('change');
-                checkbox.dispatchEvent(event);
-            });
-            updateTransferButton();
+            const isChecked = this.checked;
+            
+            try {
+                // Get fresh list of checkboxes in case of dynamic content
+                const freshCheckboxes = document.querySelectorAll('.lead-checkbox');
+                console.log('Found', freshCheckboxes.length, 'checkboxes to update');
+                
+                // First update all checkboxes directly
+                freshCheckboxes.forEach(checkbox => {
+                    if (checkbox.checked !== isChecked) {
+                        checkbox.checked = isChecked;
+                        // Trigger change event on the checkbox
+                        const event = new Event('change', { bubbles: true });
+                        checkbox.dispatchEvent(event);
+                    }
+                });
+                
+                // Then update the UI state
+                updateTransferButton();
+            } catch (error) {
+                console.error('Error in select all:', error);
+            }
         });
         
         // Update select all checkbox when individual checkboxes are toggled
-        checkboxes.forEach(checkbox => {
-            checkbox.addEventListener('change', function() {
-                console.log('Checkbox changed:', this.checked, this.value);
-                if (!this.checked) {
-                    selectAll.checked = false;
-                } else {
-                    // Check if all checkboxes are checked
-                    const allChecked = Array.from(checkboxes).every(cb => cb.checked);
-                    selectAll.checked = allChecked;
-                }
-                updateTransferButton();
+        function setupCheckboxListeners() {
+            const checkboxes = document.querySelectorAll('.lead-checkbox');
+            
+            checkboxes.forEach(checkbox => {
+                // Remove existing listeners to prevent duplicates
+                const newCheckbox = checkbox.cloneNode(true);
+                checkbox.parentNode.replaceChild(newCheckbox, checkbox);
+                
+                newCheckbox.addEventListener('change', function() {
+                    console.log('Checkbox changed:', this.checked, this.value);
+                    // Get fresh list of all checkboxes
+                    const allCheckboxes = document.querySelectorAll('.lead-checkbox');
+                    
+                    if (!this.checked) {
+                        selectAll.checked = false;
+                    } else {
+                        // Check if all checkboxes are checked
+                        const allChecked = Array.from(allCheckboxes).every(cb => cb.checked);
+                        selectAll.checked = allChecked;
+                    }
+                    updateTransferButton();
+                });
+                
+                // Add click event as well to ensure it works
+                newCheckbox.addEventListener('click', function(e) {
+                    // Small timeout to let the checkbox state update
+                    setTimeout(updateTransferButton, 10);
+                });
             });
             
-            // Add click event as well to ensure it works
-            checkbox.addEventListener('click', function() {
-                // Small timeout to let the checkbox state update
-                setTimeout(updateTransferButton, 10);
-            });
-        });
+            return document.querySelectorAll('.lead-checkbox');
+        }
+        
+        // Initial setup of checkbox listeners
+        allCheckboxes = setupCheckboxListeners();
+        
+        // Initial update of the transfer button
+        console.log('Initial update of transfer button');
+        updateTransferButton();
+        
+        // Force update checkboxes after a short delay to ensure DOM is ready
+        setTimeout(() => {
+            allCheckboxes = document.querySelectorAll('.lead-checkbox');
+            console.log('Updated checkboxes after delay:', allCheckboxes.length);
+        }, 500);
         
         // Update transfer button when target agent changes
         targetAgentSelect.addEventListener('change', function() {
