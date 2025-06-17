@@ -1010,12 +1010,16 @@ class LeadController extends Controller
 
             $oldStatus = $lead->status;
             $newStatus = $request->new_status;
+            
+            // Format status for display
+            $oldStatusFormated = ucfirst(str_replace('_', ' ', $oldStatus));
+            $newStatusFormated = ucfirst(str_replace('_', ' ', $newStatus));
+        
+            // Always update the status to ensure any related logic is triggered
+            $lead->status = $newStatus;
+        
+            // Track if status actually changed for notification purposes
             $statusChanged = $oldStatus !== $newStatus;
-
-            // Only update status if it's actually changing
-            if ($statusChanged) {
-                $lead->status = $newStatus;
-            }
             
             // Update next follow-up time if provided
             if ($request->filled('next_follow_up')) {
@@ -1027,9 +1031,7 @@ class LeadController extends Controller
             // Prepare comments for the follow-up
             $comments = $request->comments;
             if ($statusChanged) {
-                $oldStatusFormated = ucfirst(str_replace('_', ' ', $oldStatus));
-                $newStatusFormated = ucfirst(str_replace('_', ' ', $newStatus));
-                $statusComment = "Status changed from " . $oldStatusFormated . " to " . $newStatusFormated;
+                $statusComment = "Status changed from *$oldStatusFormated* to *$newStatusFormated*";
                 $comments = $statusComment . (empty($comments) ? '' : "\n" . $comments);
             }
 
@@ -1041,6 +1043,25 @@ class LeadController extends Controller
             $followUp->follow_up_time = $request->next_follow_up ?: now()->addDay();
             $followUp->action = 'status-update';
             $followUp->save();
+
+            // Send email notification to agent (always send, even if status is the same)
+            $agent = Agent::find($agentId);
+            if ($agent && $agent->emp_email) {
+                $data = [
+                    'leadName' => $lead->first_name . ' ' . $lead->last_name,
+                    'oldStatus' => $oldStatusFormated,
+                    'newStatus' => $newStatusFormated,
+                    'comments' => $request->comments,
+                    'agentName' => $agent->emp_name,
+                    'followUpTime' => $followUp->follow_up_time ? $followUp->follow_up_time->format('Y-m-d H:i') : 'Not set',
+                    'leadUrl' => route('leads.view', ['id' => $lead->id])
+                ];
+
+                Mail::send('emails.lead_status_updated', $data, function($message) use ($agent) {
+                    $message->to($agent->emp_email)
+                            ->subject('Lead Status Updated');
+                });
+            }
 
             // Return JSON response for AJAX
             return response()->json([
