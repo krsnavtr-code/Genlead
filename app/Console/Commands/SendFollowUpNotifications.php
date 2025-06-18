@@ -93,7 +93,7 @@ class SendFollowUpNotifications extends Command
             Mail::raw("Follow-up notification sent to agent {$agent->emp_name} ({$agent->emp_email}) " . 
                      "for lead {$lead->first_name} {$lead->last_name} at " . $followUp->follow_up_time->format('Y-m-d h:i A'), 
                 function($mail) use ($subject) {
-                    $mail->to('admin@genlead.com')
+                    $mail->to('krishnaavtar955@gmail.com')
                          ->subject("📬 Admin: " . $subject);
                 });
 
