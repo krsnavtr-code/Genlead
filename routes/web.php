@@ -24,6 +24,16 @@ use App\Http\Controllers\AdminController;
 // Include test routes
 require __DIR__.'/test.php';
 
+// Test notification route
+Route::get('/send-test-notification', [\App\Http\Controllers\TestNotificationController::class, 'sendTestNotification']);
+
+// Notification Routes
+Route::middleware(['auth'])->prefix('notifications')->name('notifications.')->group(function () {
+    Route::get('/', [\App\Http\Controllers\NotificationController::class, 'index'])->name('index');
+    Route::post('/{id}/mark-as-read', [\App\Http\Controllers\NotificationController::class, 'markAsRead'])->name('markAsRead');
+    Route::post('/mark-all-read', [\App\Http\Controllers\NotificationController::class, 'markAllAsRead'])->name('markAllRead');
+});
+
 Route::get('/send-reminder',  [CronJobController::class, 'SendLeadReminders']);
 
 // Dashboard route

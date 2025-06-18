@@ -34,27 +34,71 @@
             </a>
         </li> -->
         <!-- Notifications Dropdown -->
-        <!-- <li class="nav-item dropdown">
+        @php
+            use Illuminate\Support\Facades\Auth;
+            use Illuminate\Notifications\DatabaseNotification;
+            
+            $user = Auth::user();
+            $unreadNotifications = $user ? DatabaseNotification::where('notifiable_type', get_class($user))
+                ->where('notifiable_id', $user->id)
+                ->whereNull('read_at')
+                ->orderBy('created_at', 'desc')
+                ->take(5)
+                ->get() : collect();
+                
+            $unreadCount = $unreadNotifications->count();
+        @endphp
+        
+        <li class="nav-item dropdown">
             <a class="nav-link" data-toggle="dropdown" href="#">
                 <i class="far fa-bell"></i>
-                <span class="badge badge-warning navbar-badge">15</span>
+                @if($unreadCount > 0)
+                    <span class="badge badge-warning navbar-badge notification-badge">
+                        {{ $unreadCount }}
+                    </span>
+                @endif
             </a>
-            <div class="dropdown-menu dropdown-menu-right">
-                <span class="dropdown-item dropdown-header">15 Product Updates</span>
+            <div class="dropdown-menu dropdown-menu-lg dropdown-menu-right">
+                <span class="dropdown-item dropdown-header">
+                    {{ $unreadCount }} New Notifications
+                    @if($unreadCount > 0)
+                        <a href="{{ route('notifications.markAllRead') }}" class="float-right text-sm">
+                            Mark all as read
+                        </a>
+                    @endif
+                </span>
                 <div class="dropdown-divider"></div>
-                <a href="#" class="dropdown-item">
-                    <i class="fas fa-envelope mr-2"></i> 4 new messages
-                    <span class="float-right text-muted text-sm">3 mins</span>
+                <div id="notification-list">
+                    @forelse($unreadNotifications as $notification)
+                        <a href="{{ route('notifications.index') }}" class="dropdown-item">
+                            <div class="media">
+                                <div class="media-body">
+                                    <p class="text-sm">{{ $notification->data['message'] ?? 'New notification' }}</p>
+                                    <p class="text-sm text-muted">
+                                        <i class="far fa-clock mr-1"></i> 
+                                        {{ $notification->created_at->diffForHumans() }}
+                                    </p>
+                                </div>
+                            </div>
+                        </a>
+                        <div class="dropdown-divider"></div>
+                    @empty
+                        <a href="#" class="dropdown-item text-center">
+                            No new notifications
+                        </a>
+                    @endforelse
+                </div>
+                <div class="dropdown-divider"></div>
+                <a href="{{ route('notifications.index') }}" class="dropdown-item dropdown-footer">
+                    View All Notifications
                 </a>
-                <div class="dropdown-divider"></div>
-                <a href="#" class="dropdown-item">
-                    <i class="fas fa-file mr-2"></i> 3 new reports
-                    <span class="float-right text-muted text-sm">2 days</span>
-                </a>
-                <div class="dropdown-divider"></div>
-                <a href="#" class="dropdown-item dropdown-footer">See All Notifications</a>
             </div>
-        </li> -->
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="{{ route('notifications.index') }}" title="View all notifications">
+                <i class="far fa-bell"></i>
+            </a>
+        </li>
         <!-- Logout -->
         <li class="nav-item">
             <a class="nav-link" style="color: red;" href="{{ route('logout') }}">Logout</a>
