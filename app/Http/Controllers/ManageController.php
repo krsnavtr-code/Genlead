@@ -503,7 +503,9 @@ public function toggleLoginAccess(Request $request, $id)
     }
 }
 
-// Handle password change for an employee
+/**
+ * Handle password change for an employee
+ */
 public function changeEmployeePassword(Request $request)
 {
     // Define validation rules and messages
@@ -553,6 +555,7 @@ public function changeEmployeePassword(Request $request)
      return redirect()->back()->with('success', 'Password successfully changed.');
  }
 
+ 
  /**
   * Update an employee's role
   */
