@@ -277,7 +277,9 @@ class LeadController extends Controller
         // Apply status filter
         if ($request->has('status') && !empty($request->status)) {
             if ($request->status === 'other') {
-                $query->whereNull('status')->orWhere('status', '');
+                $query->where(function($q) {
+                    $q->whereNull('status')->orWhere('status', '');
+                });
             } else {
                 $query->where('status', $request->status);
             }
@@ -286,6 +288,62 @@ class LeadController extends Controller
         // Apply lead source filter
         if ($request->has('lead_source') && $request->lead_source !== 'All') {
             $query->where('lead_source', $request->lead_source);
+        }
+
+        // Apply date range filter
+        if ($request->has('time_frame') && $request->time_frame !== 'All Time') {
+            $now = now();
+            $dateColumn = 'created_at'; // Default column
+            
+            // If date_range is specified, use it to determine the column
+            if ($request->has('date_range') && $request->date_range !== 'All') {
+                $dateColumn = match($request->date_range) {
+                    'Last Activity' => 'updated_at',
+                    'Created On' => 'created_at',
+                    'Modified On' => 'updated_at',
+                    default => 'created_at'
+                };
+            }
+
+            switch ($request->time_frame) {
+                case 'Yesterday':
+                    $query->whereDate($dateColumn, now()->subDay()->toDateString());
+                    break;
+                case 'Today':
+                    $query->whereDate($dateColumn, $now->toDateString());
+                    break;
+                case 'This Week':
+                    $query->whereBetween($dateColumn, [
+                        $now->startOfWeek()->toDateTimeString(),
+                        $now->endOfWeek()->toDateTimeString()
+                    ]);
+                    break;
+                case 'Last Week':
+                    $query->whereBetween($dateColumn, [
+                        $now->subWeek()->startOfWeek()->toDateTimeString(),
+                        $now->endOfWeek()->toDateTimeString()
+                    ]);
+                    break;
+                case 'This Month':
+                    $query->whereBetween($dateColumn, [
+                        $now->startOfMonth()->toDateTimeString(),
+                        $now->endOfMonth()->toDateTimeString()
+                    ]);
+                    break;
+                case 'Last Month':
+                    $query->whereBetween($dateColumn, [
+                        $now->subMonth()->startOfMonth()->toDateTimeString(),
+                        $now->endOfMonth()->toDateTimeString()
+                    ]);
+                    break;
+                case 'Last Year':
+                    $query->whereBetween($dateColumn, [
+                        $now->subYear()->startOfYear()->toDateTimeString(),
+                        $now->endOfYear()->toDateTimeString()
+                    ]);
+                    break;
+                // 'Custom' and other cases can be implemented as needed
+            }
         }
 
         // Get paginated results
