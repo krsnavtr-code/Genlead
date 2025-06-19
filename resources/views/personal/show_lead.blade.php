@@ -174,7 +174,7 @@
                     <!-- Time Frame -->
                     <div class="col-md-3 col-12">
                         <select name="time_frame" class="form-select lead-form-select" onchange="this.form.submit()">
-                            @foreach(['All Time', 'Custom', 'Yesterday', 'Today', 'Last Week', 'This Week', 'Last Month', 'This Month', 'Last Year'] as $frame)
+                            @foreach(['All Time', 'Yesterday', 'Today', 'Last Week', 'This Week', 'Last Month', 'This Month', 'Last Year'] as $frame)
                                 <option value="{{ $frame }}" {{ request()->time_frame == $frame ? 'selected' : '' }}>{{ $frame }}</option>
                             @endforeach
                         </select>
