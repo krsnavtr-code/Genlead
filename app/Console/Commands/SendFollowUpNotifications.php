@@ -34,13 +34,14 @@ class SendFollowUpNotifications extends Command
     public function handle()
     {
         $now = Carbon::now();
-        $timeWindow = $now->copy()->addMinute(); // Check within next minute
+        $timeWindow = $now->copy()->addHour(); // Check within next hour
         
         $this->info("Checking for follow-ups between " . $now->format('Y-m-d H:i:s') . " and " . $timeWindow->format('Y-m-d H:i:s'));
 
-        // Find follow-ups that are due now
+        // Find follow-ups that are due in the next hour
         $followUps = FollowUp::with(['lead', 'agent'])
-            ->whereBetween('follow_up_time', [$now, $timeWindow])
+            ->where('follow_up_time', '>=', $now)
+            ->where('follow_up_time', '<=', $timeWindow)
             ->where('notified', 0)
             ->get()
             ->map(function ($followUp) {
