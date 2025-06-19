@@ -247,20 +247,55 @@ class LeadController extends Controller
 
     // }
 
-    public function show_leads()
+    public function show_leads(Request $request)
     {
         $userId = session()->get('user_id');
         $userRole = session()->get('emp_job_role');
 
+        // Start building the query
+        $query = Lead::query();
+
+        // Apply agent filter for non-admin users
         if (in_array($userRole, [2, 7])) {  // Agent or Chain Team Agent role
-            $leads = Lead::where('agent_id', $userId)->paginate(50);
-        } elseif ($userRole == 1) {  // Admin role
-            $leads = Lead::paginate(15);
+            $query->where('agent_id', $userId);
+        } elseif ($userRole != 1) {  // Not admin
+            return redirect()->back()->with('error', 'Unauthorized access.');
+        }
+
+        // Apply search filter
+        if ($request->has('search') && !empty($request->search)) {
+            $searchTerm = '%' . $request->search . '%';
+            $query->where(function($q) use ($searchTerm) {
+                $q->where('first_name', 'like', $searchTerm)
+                  ->orWhere('last_name', 'like', $searchTerm)
+                  ->orWhereRaw("CONCAT(first_name, ' ', last_name) LIKE ?", [$searchTerm])
+                  ->orWhere('email', 'like', $searchTerm)
+                  ->orWhere('phone', 'like', $searchTerm);
+            });
+        }
+
+        // Apply status filter
+        if ($request->has('status') && !empty($request->status)) {
+            if ($request->status === 'other') {
+                $query->whereNull('status')->orWhere('status', '');
+            } else {
+                $query->where('status', $request->status);
+            }
+        }
+
+        // Apply lead source filter
+        if ($request->has('lead_source') && $request->lead_source !== 'All') {
+            $query->where('lead_source', $request->lead_source);
+        }
+
+        // Get paginated results
+        $leads = $query->paginate($userRole == 1 ? 15 : 50);
+
+        // Set is_fresh for admin view
+        if ($userRole == 1) {
             foreach ($leads as $lead) {
                 $lead->is_fresh = $lead->agent_id == 1;
             }
-        } else {
-            return redirect()->back()->with('error', 'Unauthorized access.');
         }
 
         return view('personal.show_lead', compact('leads'));

@@ -115,28 +115,37 @@
         </div>
     </div>
 
-    <!-- Content Header (Page header) -->
-    <!-- <div class="container-fluid mb-2">
-        <div class="d-flex flex-md-row align-items-center justify-content-between gap-3">
-            <a href="{{ url('/i-admin/leads/add-lead') }}" 
-               class="btn btn-danger d-inline-flex align-items-center px-2  fs-6 fw-bold rounded-2 shadow-sm">
-              <span class="fs-5">&#43;</span> Add Lead
-            </a>
-        </div>
-    </div> -->
-
-
     <!-- Main content -->
     <div class="container-fluid" style="padding: 0px;">
         <div class="card shadow-sm mt-3">
             <div class="card-body" style="padding: 8px;">
                 <!-- Filters and Search -->
-                <form method="GET" action="{{ route('leads.index') }}" class="row g-3 mb-4" style="gap: 8px;">
+                <form method="GET" action="{{ url('/i-admin/show-leads') }}" class="row g-3 mb-4" style="gap: 8px;">
                     <!-- Search -->
                     <div class="col-md-3 col-12 d-flex">
                         <input type="text" name="search" class="form-control me-2" placeholder="Search Leads" value="{{ request()->search }}">
                         <button type="submit" class="btn btn-outline-secondary"><i class="fa fa-search"></i></button>
                     </div>
+
+                    <!-- Search by Status -->
+                    <div class="col-md-3 col-12">
+                        <select name="status" class="form-select lead-form-select" onchange="this.form.submit()">
+                            <option value="">All Statuses</option>
+                            <option value="other" {{ request()->status === 'other' ? 'selected' : '' }}>Other (No Status)</option>
+                            @foreach(\App\Helpers\SiteHelper::getLeadStatus() as $type => $categories)
+                                <optgroup label="{{ $type }}">
+                                    @foreach($categories as $category)
+                                        @foreach($category['subcategories'] as $subcategory)
+                                            <option value="{{ $subcategory['code'] }}" {{ request()->status == $subcategory['code'] ? 'selected' : '' }}>
+                                                {{ $category['category'] }} - {{ $subcategory['name'] }}
+                                            </option>
+                                        @endforeach
+                                    @endforeach
+                                </optgroup>
+                            @endforeach
+                        </select>
+                    </div>
+                    
 
                     <!-- Lead Source -->
                     @if(session()->get('emp_job_role') == 1)
@@ -217,91 +226,18 @@
                     <div class="alert alert-success">{{ session('success') }}</div>
                 @endif
 
-                <!-- Lead Cards -->
-                <!-- <div class="row g-3">
-                    @foreach($leads as $lead)
-                    @php
-                        $lastFollowUp = $lead->followUps->sortByDesc('created_at')->first();
-                        $daysSinceFollowUp = $lastFollowUp ? \Carbon\Carbon::parse($lastFollowUp->created_at)->diffInDays(now()) : null;
-                        $statusText = 'Contacted';
-                        $buttonClass = 'btn-secondary';
-
-                        if ($daysSinceFollowUp !== null) {
-                            if ($daysSinceFollowUp <= 1) {
-                                $statusText = 'Active';
-                                $buttonClass = 'btn-warning';
-                            } elseif ($daysSinceFollowUp <= 7) {
-                                $statusText = 'Engaged';
-                                $buttonClass = 'btn-success';
-                            } else {
-                                $statusText = 'Disengaged';
-                                $buttonClass = 'btn-danger';
-                            }
-                        }
-                    @endphp
-
-                    <div class="col-12 col-sm-6 col-md-4 col-lg-3" style="margin-bottom: 20px;">
-                        <div class="lead-card" style="background-color: antiquewhite;">
-                            <h5 class="mb-2 d-flex justify-content-between">
-                                <a href="{{ url('/i-admin/leads/view/'.$lead->id) }}">
-                                    {{ $lead->first_name }} {{ $lead->last_name }}
-                                </a>
-                                <span class="bg-dark text-white rounded px-2 py-1 fw-semibold">{{ $loop->iteration }}</span>
-                            </h5>
-                            @if($lead->is_fresh)
-                                <span class="badge bg-success ms-1">Fresh</span>
-                            @endif
-                            <div class="lead-meta display_none"><strong>Email:</strong> {{ $lead->email }}</div>
-                            <div class="lead-meta display_none">
-                                <strong>Phone:</strong> 
-                                <span>{{ $lead->phone }}</span>
-                            </div>
-                            <div class="lead-meta display_none"><strong>Source:</strong> {{ $lead->lead_source }}</div>
-                            <div class="mt-2 w-100">
-                                <button class="btn btn-sm {{ $buttonClass }}">{{ $statusText }}</button>
-                                <button class="btn btn-info btn-sm update-status-btn" data-lead-id="{{ $lead->id }}" data-current-status="{{ $lead->status }}">
-                                    Update Status
-                                </button>
-                                <a href="tel:{{ $lead->phone }}" class="btn btn-primary btn-sm" style="float: right;"><i class="fa fa-phone"></i></a>
-                                <a href="{{ url('/i-admin/leads/edit/'.$lead->id) }}" class="btn btn-warning btn-sm display_none">Edit</a>
-                            </div>
-                        </div> 
-                    </div>
-                    @endforeach
-                </div>  -->
-
-                <table style="display: inline-table;" class="table table-bordered table-striped table-hover w-100">
+                <table style="display: inline-table;" class="table table-bordered table-striped table-hover table-sm w-100">
                     <thead class="table-info w-100">
                         <tr class="w-100">
                             <th>#</th>
                             <th>Name & Status</th>
                             <th class="display_none">Email</th>
                             <th class="display_none">Phone</th>
-                            <!-- <th class="display_none">Source</th> -->
                             <th>Actions</th>
                         </tr>
                     </thead>
                     <tbody class="w-100">
                         @foreach($leads as $lead)
-                        {{-- @php
-                            $lastFollowUp = $lead->followUps->sortByDesc('created_at')->first();
-                            $daysSinceFollowUp = $lastFollowUp ? \Carbon\Carbon::parse($lastFollowUp->created_at)->diffInDays(now()) : null;
-                            $statusText = 'Contacted';
-                            $buttonClass = 'btn-secondary';
-
-                            if ($daysSinceFollowUp !== null) {
-                                if ($daysSinceFollowUp <= 1) {
-                                    $statusText = 'Active';
-                                    $buttonClass = 'btn-warning';
-                                } elseif ($daysSinceFollowUp <= 7) {
-                                    $statusText = 'Engaged';
-                                    $buttonClass = 'btn-success';
-                                } else {
-                                    $statusText = 'Disengaged';
-                                    $buttonClass = 'btn-danger';
-                                }
-                            }
-                        @endphp --}}
                         <tr class="w-100">
                             <td style="padding: 5px; text-align: center; font-size: 12px;">{{ $loop->iteration }}</td>
                             <td class="d-flex flex-column align-items-start" style="padding: 5px; font-size: 14px;">
@@ -309,39 +245,30 @@
                                     {{ $lead->first_name }} {{ $lead->last_name }}
                                 </a>
                                 @php
-                                    $statusColor = [
-                                        'new' => 'bg-secondary',
-                                        'contacted' => 'bg-warning',
-                                        'not_connected' => 'bg-info',
-                                        'qualified' => 'bg-success',
-                                        'not_qualified' => 'bg-danger',
-                                        'future' => 'bg-primary',
-                                        'lost' => 'bg-dark',
-                                        'closed' => 'bg-light text-dark',
-                                        'registration_done' => 'bg-success',
-                                        'admission_done' => 'bg-success',
-                                        'interested' => 'bg-primary',
-                                        'not_interested' => 'bg-danger',
-                                        'wrong_number' => 'bg-dark',
-                                        'follow_up_callback' => 'bg-warning',
-                                        'follow_up_ringing' => 'bg-warning',
-                                        'follow_up_hang_up' => 'bg-info',
-                                        'follow_up_rpnc' => 'bg-info',
-                                    ];
-
-                                    $statusKey = strtolower(str_replace(' ', '_', $lead->status)); // sanitize
-                                    $badgeClass = $statusColor[$statusKey] ?? 'bg-secondary';
+                                    $statusColors = \App\Helpers\SiteHelper::getStatusColors();
+                                    $statusKey = $lead->status; // Use the status code directly from the database
+                                    $badgeClass = $statusColors[$statusKey] ?? $statusColors['default'];
+                                    
+                                    // Get the display name for the status
+                                    $statusName = $lead->status;
+                                    foreach (\App\Helpers\SiteHelper::getLeadStatus() as $type => $categories) {
+                                        foreach ($categories as $category) {
+                                            foreach ($category['subcategories'] as $subcategory) {
+                                                if ($subcategory['code'] === $statusKey) {
+                                                    $statusName = $subcategory['name'];
+                                                    break 3;
+                                                }
+                                            }
+                                        }
+                                    }
                                 @endphp
-                                <span class="badge {{ $badgeClass }}">{{ $lead->status }}</span>
+                                <span class="badge {{ $badgeClass }}" title="{{ $lead->status }}">{{ $statusName }}</span>
                                 @if($lead->is_fresh)
                                     <span class="badge bg-success ms-1" style="font-size: 12px;">Fresh</span>
                                 @endif
                             </td>
                             <td class="display_none" style="padding: 5px;">{{ $lead->email }}</td>
                             <td class="display_none" style="padding: 5px;">{{ $lead->phone }}</td>
-                            <!-- <td class="display_none" style="padding: 5px;">{{ $lead->lead_source }}</td> -->
-                            <!-- <button class="btn btn-sm lead-status-btn {{ $buttonClass }}">{{ $statusText }}</button> -->
-
                             <td style="padding: 5px;">
                                 <a href="tel:{{ $lead->phone }}" class="btn btn-primary btn-sm" title="Call">
                                     <i class="fa fa-phone" style="font-size: 12px;"></i>
@@ -349,7 +276,6 @@
                                 <button style="font-size: 12px;" class="btn btn-info btn-sm update-status-btn" data-lead-id="{{ $lead->id }}" data-current-status="{{ $lead->status }}">
                                     Update
                                 </button>
-                                <!-- <a href="{{ url('/i-admin/leads/edit/'.$lead->id) }}" class="btn btn-warning btn-sm display_none">Edit</a> -->
                             </td>
                         </tr>
                         @endforeach

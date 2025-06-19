@@ -68,4 +68,31 @@ class SiteHelper
             ],
         ];
     }
+
+    public static function getStatusColors()
+    {
+        return [
+            // Hot Lead statuses
+            'H_follow_up_callback' => 'bg-warning',
+            'H_follow_up_ringing' => 'bg-warning',
+            'H_follow_up_hang_up' => 'bg-info',
+            'H_follow_up_rpnc' => 'bg-info',
+            'H_registration_done' => 'bg-success',
+            'H_admission_done' => 'bg-success',
+            
+            // Cold Lead statuses
+            'C_new' => 'bg-secondary',
+            'C_not_connected' => 'bg-info',
+            'C_interested' => 'bg-primary',
+            'C_not_interested' => 'bg-danger',
+            'C_wrong_number' => 'bg-dark',
+            'C_follow_up_callback' => 'bg-warning',
+            'C_follow_up_ringing' => 'bg-warning',
+            'C_follow_up_hang_up' => 'bg-info',
+            'C_follow_up_rpnc' => 'bg-info',
+            
+            // Default fallback
+            'default' => 'bg-secondary'
+        ];
+    }
 }
