@@ -528,28 +528,34 @@
             <div id="conversations" class="tab-content mt-4">
                 <h4 class="mb-3 text-primary">Recent Conversations</h4>
 
+                @php
+                    $currentEmployeeName = auth()->user()->emp_name ?? session('emp_name');
+                    $userRole = auth()->user()->emp_job_role ?? session('emp_job_role');
+                    $isAdmin = $userRole == 1; // Check if user is admin (role 1)
+                @endphp
                 @foreach($lead->followUps->sortByDesc('created_at') as $followUp)
-                    <div class="card mb-3 shadow-sm">
-                        <div class="card-body">
-                            {{-- <p class="mb-2"><strong>Agent:</strong> {{ $followUp->agent->name }}</p> --}}
+                    @if($isAdmin || ($followUp->agent && $followUp->agent->emp_name === $currentEmployeeName))
+                        <div class="card mb-3 shadow-sm">
+                            <div class="card-body">
+                                <p class="mb-2"><strong>Agent:</strong> {{ $followUp->agent->emp_name }}</p>
 
-                            <p class="mb-1">
-                                <span class="fw-bold text-secondary">Date:</span>
-                                <span class="text-dark">{{ $followUp->created_at->format('d M Y, H:i A') }}</span>
-                            </p>
+                                <p class="mb-1">
+                                    <span class="fw-bold text-secondary">Date:</span>
+                                    <span class="text-dark">{{ $followUp->created_at->format('d M Y, H:i A') }}</span>
+                                </p>
 
-                            <p class="mb-1">
-                                <span class="fw-bold text-secondary">Comments:</span>
-                                <span class="text-dark">{{ $followUp->comments }}</span>
-                            </p>
+                                <p class="mb-1">
+                                    <span class="fw-bold text-secondary">Comments:</span>
+                                    <span class="text-dark">{{ $followUp->comments }}</span>
+                                </p>
 
-                            <p class="mb-0">
-                                <span class="fw-bold text-secondary">Follow-up Time:</span>
-                                <span
-                                    class="text-dark">{{ \Carbon\Carbon::parse($followUp->follow_up_time)->format('d M Y, H:i A') }}</span>
-                            </p>
+                                <p class="mb-0">
+                                    <span class="fw-bold text-secondary">Follow-up Time:</span>
+                                    <span class="text-dark">{{ \Carbon\Carbon::parse($followUp->follow_up_time)->format('d M Y, H:i A') }}</span>
+                                </p>
+                            </div>
                         </div>
-                    </div>
+                    @endif
                 @endforeach
             </div>
 

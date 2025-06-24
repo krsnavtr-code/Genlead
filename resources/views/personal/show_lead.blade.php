@@ -241,31 +241,21 @@
                         <tr class="w-100">
                             <td style="padding: 5px; text-align: center; font-size: 12px;">{{ $loop->iteration }}</td>
                             <td class="d-flex flex-column align-items-start" style="padding: 5px; font-size: 14px;">
-                                <a href="{{ url('/i-admin/leads/view/'.$lead->id) }}">
+                                <a href="{{ url('/i-admin/leads/view/'.$lead->id) }}" class="d-block mb-1">
                                     {{ $lead->first_name }} {{ $lead->last_name }}
                                 </a>
-                                @php
-                                    $statusColors = \App\Helpers\SiteHelper::getStatusColors();
-                                    $statusKey = $lead->status; // Use the status code directly from the database
-                                    $badgeClass = $statusColors[$statusKey] ?? $statusColors['default'];
-                                    
-                                    // Get the display name for the status
-                                    $statusName = $lead->status;
-                                    foreach (\App\Helpers\SiteHelper::getLeadStatus() as $type => $categories) {
-                                        foreach ($categories as $category) {
-                                            foreach ($category['subcategories'] as $subcategory) {
-                                                if ($subcategory['code'] === $statusKey) {
-                                                    $statusName = $subcategory['name'];
-                                                    break 3;
-                                                }
-                                            }
-                                        }
-                                    }
-                                @endphp
-                                <span class="badge {{ $badgeClass }}" title="{{ $lead->status }}">{{ $statusName }}</span>
-                                @if($lead->is_fresh)
-                                    <span class="badge bg-success ms-1" style="font-size: 12px;">Fresh</span>
-                                @endif
+                                <div class="">
+                                    @php
+                                        $currentEmployeeName = auth()->user()->emp_name ?? session('emp_name');
+                                        $userRole = auth()->user()->emp_job_role ?? session('emp_job_role');
+                                        $isAdmin = $userRole == 1; // Check if user is admin (role 1)
+                                    @endphp
+                                    @foreach($lead->followUps->sortByDesc('created_at')->take(1) as $followUp)
+                                        @if($isAdmin || ($followUp->agent && $followUp->agent->emp_name === $currentEmployeeName))
+                                           <span class="text-dark">{{ \Illuminate\Support\Str::after($followUp->comments, 'to ') }}</span>
+                                        @endif
+                                    @endforeach
+                                </div>
                             </td>
                             <td class="display_none" style="padding: 5px;">{{ $lead->email }}</td>
                             <td class="display_none" style="padding: 5px;">{{ $lead->phone }}</td>

@@ -199,7 +199,9 @@ class LeadController extends Controller
         $userId = session()->get('user_id');
         $userRole = session()->get('emp_job_role');
 
-        $lead = Lead::with('followUps')->findOrFail($id);
+        $lead = Lead::with(['followUps' => function($query) {
+            $query->with('agent');
+        }])->findOrFail($id);
 
         // Check access permissions
         if ($userRole == 1) {  // Superadmin role
