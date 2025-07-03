@@ -132,6 +132,7 @@ Route::prefix('i-admin')->group(function () {
     Route::get('/leads/add-lead', [LeadController::class, 'addlead']);
     Route::post('/leads/add-lead', [LeadController::class, 'add_lead'])->name('store-lead');
     Route::get('/show-leads',[LeadController::class,'show_leads']);
+    Route::post('/leads/bulk-action', [LeadController::class, 'bulkAction'])->name('leads.bulk.action');
 
     Route::get('/leads/edit/{id}', [LeadController::class, 'edit']);
     Route::post('/leads/update/{id}', [LeadController::class, 'update']);

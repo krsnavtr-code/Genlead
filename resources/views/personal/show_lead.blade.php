@@ -226,22 +226,43 @@
                     <div class="alert alert-success">{{ session('success') }}</div>
                 @endif
 
-                <table style="display: inline-table;" class="table table-bordered table-striped table-hover table-sm w-100">
-                    <thead class="table-info w-100">
-                        <tr class="w-100">
-                            <th>#</th>
-                            <th>Name & Status</th>
-                            <th class="display_none">Email</th>
-                            <th class="display_none">Phone</th>
-                            <th>Actions</th>
+                <form id="leadsForm" method="POST" action="{{ route('leads.bulk.action') }}">
+                    @csrf
+                    <input type="hidden" name="select_all" id="selectAllPages" value="0">
+                    <input type="hidden" name="current_filters" id="currentFilters" value="{{ json_encode(request()->all()) }}">
+                    @if(in_array($emp_job_role, [1]))
+                    <div class="mb-3 d-flex align-items-center" style="gap: 10px;">
+                        <button type="button" class="btn btn-primary btn-sm" id="selectAllBtn">Select All</button>
+                        <button type="button" class="btn btn-secondary btn-sm" id="deselectAllBtn">Deselect All</button>
+                        <button type="submit" class="btn btn-success btn-sm" name="action" value="export" id="exportBtn" disabled>
+                            Export Selected (<span id="selectedCount">0</span>)
+                        </button>
+                        <button type="submit" class="btn btn-warning btn-sm" name="action" value="transfer" id="transferBtn" disabled>
+                            <i class="fas fa-exchange-alt"></i> Transfer to Agent 76
+                        </button>
+                        <span class="text-muted ms-2" id="selectionInfo">No leads selected</span>
+                    </div>
+                    @endif
+                    <table style="display: inline-table;" class="table table-bordered table-striped table-hover table-sm w-100">
+                        <thead class="table-info w-100">
+                            <tr class="w-100">
+                                <th><input type="checkbox" id="selectAll"></th>
+                                <th>#</th>
+                                <th>Name & Status</th>
+                                <th class="display_none">Email</th>
+                                <th class="display_none">Phone</th>
+                                <th>Actions</th>
                         </tr>
                     </thead>
                     <tbody class="w-100">
                         @foreach($leads as $lead)
                         <tr class="w-100">
-                            <td style="padding: 5px; text-align: center; font-size: 12px;">{{ $loop->iteration }}</td>
+                            <td style="padding: 5px; text-align: center;">
+                                <input type="checkbox" name="selected_leads[]" value="{{ $lead->id }}" class="lead-checkbox">
+                            </td>
+                            <td style="padding: 5px; text-align: center; font-size: 12px;">{{ ($leads->currentPage() - 1) * $leads->perPage() + $loop->iteration }}</td>
                             <td class="d-flex flex-column align-items-start" style="padding: 5px; font-size: 14px;">
-                                <a href="{{ url('/i-admin/leads/view/'.$lead->id) }}" class="d-block mb-1">
+                                <a href="{{ url('/i-admin/leads/view/'.$lead->id) }}" class="d-block mb-1 text-primary">
                                     {{ $lead->first_name }} {{ $lead->last_name }}
                                 </a>
                                 <div class="">
@@ -270,13 +291,131 @@
                         </tr>
                         @endforeach
                     </tbody>
-                </table>
+                    </table>
+                    
+                    <!-- Pagination -->
+                    <div class="d-flex justify-content-between align-items-center mt-3">
+                        <div class="text-muted">
+                            Showing {{ $leads->firstItem() ?? 0 }} to {{ $leads->lastItem() ?? 0 }} of {{ $leads->total() }} entries
+                        </div>
+                        <div>
+                            {{ $leads->links() }}
+                        </div>
+                    </div>
+                </form>
+
+                <style>
+                    .pagination {
+                        margin: 0;
+                        flex-wrap: wrap;
+                    }
+                    .page-link {
+                        padding: 0.25rem 0.5rem;
+                        font-size: 0.875rem;
+                    }
+                    .page-item.active .page-link {
+                        background-color: #0d6efd;
+                        border-color: #0d6efd;
+                    }
+                </style>
+
+                <script>
+                    document.addEventListener('DOMContentLoaded', function() {
+                        const selectAllCheckbox = document.getElementById('selectAll');
+                        const leadCheckboxes = document.querySelectorAll('.lead-checkbox');
+                        const selectAllBtn = document.getElementById('selectAllBtn');
+                        const deselectAllBtn = document.getElementById('deselectAllBtn');
+                        const exportBtn = document.getElementById('exportBtn');
+                        const transferBtn = document.getElementById('transferBtn');
+                        const selectedCountSpan = document.getElementById('selectedCount');
+                        const selectionInfo = document.getElementById('selectionInfo');
+                        
+                        // Function to update the selection count and UI
+                        function updateSelectionCount() {
+                            const selectedCount = document.querySelectorAll('.lead-checkbox:checked').length;
+                            selectedCountSpan.textContent = selectedCount;
+                            
+                            // Update the buttons state
+                            const anySelected = selectedCount > 0 || document.getElementById('selectAllPages').value === '1';
+                            exportBtn.disabled = !anySelected;
+                            transferBtn.disabled = !anySelected;
+                            
+                            // Update the selection info text
+                            if (selectedCount === 0) {
+                                selectionInfo.textContent = 'No leads selected';
+                                selectionInfo.className = 'text-muted ms-2';
+                            } else {
+                                selectionInfo.textContent = `${selectedCount} lead${selectedCount !== 1 ? 's' : ''} selected`;
+                                selectionInfo.className = 'text-primary fw-bold ms-2';
+                            }
+                        }
+
+                        // Toggle all checkboxes when select all checkbox is clicked
+                        selectAllCheckbox.addEventListener('change', function() {
+                            const selectAllPages = document.getElementById('selectAllPages');
+                            
+                            if (selectAllCheckbox.checked) {
+                                // Show confirmation for selecting all across pages
+                                if (confirm('Do you want to select all leads that match the current filters? This will select leads on all pages, not just this page.')) {
+                                    selectAllPages.value = '1';
+                                    // Uncheck all individual checkboxes as they're not needed
+                                    leadCheckboxes.forEach(checkbox => {
+                                        checkbox.checked = false;
+                                    });
+                                } else {
+                                    // If user cancels, just select current page
+                                    selectAllPages.value = '0';
+                                    leadCheckboxes.forEach(checkbox => {
+                                        checkbox.checked = true;
+                                    });
+                                }
+                            } else {
+                                // Deselect all
+                                selectAllPages.value = '0';
+                                leadCheckboxes.forEach(checkbox => {
+                                    checkbox.checked = false;
+                                });
+                            }
+                            updateSelectionCount();
+                        });
+
+                        // Select all button
+                        selectAllBtn.addEventListener('click', function() {
+                            leadCheckboxes.forEach(checkbox => {
+                                checkbox.checked = true;
+                            });
+                            selectAllCheckbox.checked = true;
+                            updateSelectionCount();
+                        });
+
+                        // Deselect all button
+                        deselectAllBtn.addEventListener('click', function() {
+                            leadCheckboxes.forEach(checkbox => {
+                                checkbox.checked = false;
+                            });
+                            selectAllCheckbox.checked = false;
+                            updateSelectionCount();
+                        });
+
+                        // Update select all checkbox and selection count when individual checkboxes are clicked
+                        leadCheckboxes.forEach(checkbox => {
+                            checkbox.addEventListener('change', function() {
+                                // If any checkbox is manually checked, turn off select all pages
+                                if (this.checked) {
+                                    document.getElementById('selectAllPages').value = '0';
+                                }
+                                const allChecked = Array.from(leadCheckboxes).every(cb => cb.checked);
+                                selectAllCheckbox.checked = allChecked;
+                                updateSelectionCount();
+                            });
+                        });
+                        
+                        // Initialize the selection count
+                        updateSelectionCount();
+                    });
+                </script>
 
 
-                <!-- Pagination -->
-                <div class="d-flex justify-content-center mt-4 flex-wrap">
-                    {{ $leads->links() }}
-                </div>
             </div>
         </div>
     </div>

@@ -36,7 +36,7 @@
                                     $teamLeaderName = $teamLeader ? $teamLeader->emp_name : 'No Team Leader';
                                 @endphp
                                 <option value="{{ $agent->id }}" data-team-leader="{{ $teamLeaderName }}" {{ request('agent_id') == $agent->id ? 'selected' : '' }}>
-                                    {{ $agent->emp_name }} ({{ $agent->emp_job_role ?? 'No Role' }}) - Team Lead: {{ $teamLeaderName }}
+                                  {{ $agent->id }} {{ $agent->emp_name }} ({{ $agent->emp_job_role ?? 'No Role' }}) - Team Lead: {{ $teamLeaderName }}
                                 </option>
                             @endforeach
                         </select>
@@ -84,7 +84,21 @@
                     </div>
 
                     <div class="table-responsive">
-                        <h2 class="h5 mb-3">All of these leads are assigned to {{ $agentData->emp_name }}</h2>
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h2 class="h5 mb-0">All of these leads are assigned to {{ $agentData->emp_name }}</h2>
+                            <div class="d-flex align-items-center">
+                                <span class="me-2 small text-muted">Select:</span>
+                                <div class="btn-group" role="group">
+                                    <button type="button" class="btn btn-sm btn-outline-secondary select-leads" data-count="20">20</button>
+                                    <button type="button" class="btn btn-sm btn-outline-secondary select-leads" data-count="50">50</button>
+                                    <button type="button" class="btn btn-sm btn-outline-secondary select-leads" data-count="80">80</button>
+                                    <button type="button" class="btn btn-sm btn-outline-secondary select-leads" data-count="100">100</button>
+                                    <button type="button" class="btn btn-sm btn-outline-secondary select-leads" data-count="150">150</button>
+                                    <button type="button" class="btn btn-sm btn-outline-secondary select-leads" data-count="200">200</button>
+                                    <button type="button" class="btn btn-sm btn-outline-primary select-leads" data-count="all">All</button>
+                                </div>
+                            </div>
+                        </div>
                         <table class="table table-striped table-hover">
                             <thead class="table-dark">
                                 <tr>
@@ -255,9 +269,53 @@
         updateTransferButton();
         
         // Force update checkboxes after a short delay to ensure DOM is ready
+        // Handle select buttons
+        document.querySelectorAll('.select-leads').forEach(button => {
+            button.addEventListener('click', function() {
+                const count = this.getAttribute('data-count');
+                const checkboxes = document.querySelectorAll('.lead-checkbox');
+                
+                if (count === 'all') {
+                    // Select all checkboxes
+                    checkboxes.forEach(checkbox => {
+                        checkbox.checked = true;
+                    });
+                } else {
+                    // Select specific number of checkboxes
+                    const max = parseInt(count);
+                    checkboxes.forEach((checkbox, index) => {
+                        checkbox.checked = index < max;
+                    });
+                }
+                
+                // Update the select all checkbox state
+                updateSelectAllCheckbox();
+                // Update transfer button state
+                updateTransferButton();
+            });
+        });
+
+        // Function to update select all checkbox state
+        function updateSelectAllCheckbox() {
+            const checkboxes = document.querySelectorAll('.lead-checkbox');
+            const checkedCount = document.querySelectorAll('.lead-checkbox:checked').length;
+            document.getElementById('selectAll').checked = checkedCount === checkboxes.length && checkboxes.length > 0;
+            document.getElementById('selectAll').indeterminate = checkedCount > 0 && checkedCount < checkboxes.length;
+        }
+
+        // Function to update transfer button state
+        function updateTransferButton() {
+            const checkedCount = document.querySelectorAll('.lead-checkbox:checked').length;
+            document.getElementById('transferBtn').disabled = checkedCount === 0;
+        }
+
         setTimeout(() => {
             allCheckboxes = document.querySelectorAll('.lead-checkbox');
             console.log('Updated checkboxes after delay:', allCheckboxes.length);
+            
+            // Update select all state after checkboxes are loaded
+            updateSelectAllCheckbox();
+            updateTransferButton();
         }, 500);
         
         // Update transfer button when target agent changes

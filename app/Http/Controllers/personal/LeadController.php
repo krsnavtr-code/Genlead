@@ -249,6 +249,210 @@ class LeadController extends Controller
 
     // }
 
+    /**
+     * Handle bulk actions for leads
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function bulkAction(Request $request)
+    {
+        $action = $request->input('action');
+        $selectAll = $request->input('select_all') === '1';
+        $selectedLeads = $request->input('selected_leads', []);
+
+        if (!$selectAll && empty($selectedLeads)) {
+            return redirect()->back()->with('error', 'No leads selected.');
+        }
+
+        switch ($action) {
+            case 'export':
+                if ($selectAll) {
+                    // Get all leads matching current filters
+                    $query = $this->buildFilteredQuery($request->except(['_token', 'action', 'select_all', 'current_filters', 'page']));
+                    $selectedLeads = $query->pluck('id')->toArray();
+                }
+                return $this->exportSelectedLeads($selectedLeads);
+            
+            case 'transfer':
+                $agentId = 76; // The target agent ID
+                $transferCount = 0;
+                
+                try {
+                    if ($selectAll) {
+                        // Get all leads matching current filters
+                        $filters = json_decode($request->input('current_filters'), true);
+                        $query = $this->buildFilteredQuery($filters);
+                        $transferCount = $query->update(['agent_id' => $agentId]);
+                    } else {
+                        // Update only the selected leads
+                        $transferCount = Lead::whereIn('id', $selectedLeads)
+                            ->update(['agent_id' => $agentId]);
+                    }
+                        
+                    if ($transferCount > 0) {
+                        return redirect()->back()->with('success', "Successfully transferred $transferCount lead(s) to agent ID $agentId");
+                    } else {
+                        return redirect()->back()->with('error', 'No leads were transferred. They may already be assigned to this agent.');
+                    }
+                } catch (\Exception $e) {
+                    return redirect()->back()->with('error', 'An error occurred while transferring leads: ' . $e->getMessage());
+                }
+                
+            default:
+                return redirect()->back()->with('error', 'Invalid action.');
+        }
+    }
+
+    /**
+     * Export selected leads to CSV
+     *
+     * @param  array  $leadIds
+     * @return \Symfony\Component\HttpFoundation\StreamedResponse
+     */
+    /**
+     * Build a query with the given filters
+     */
+    private function buildFilteredQuery($filters)
+    {
+        $userId = session()->get('user_id');
+        $userRole = session()->get('emp_job_role');
+
+        // Start building the query
+        $query = Lead::query();
+
+        // Apply agent filter for non-admin users
+        if (in_array($userRole, [2, 7])) {  // Agent or Chain Team Agent role
+            $query->where('agent_id', $userId);
+        } elseif ($userRole != 1) {  // Not admin
+            abort(403, 'Unauthorized');
+        }
+
+        // Apply search filter
+        if (!empty($filters['search'])) {
+            $searchTerm = '%' . $filters['search'] . '%';
+            $query->where(function($q) use ($searchTerm) {
+                $q->where('first_name', 'like', $searchTerm)
+                  ->orWhere('last_name', 'like', $searchTerm)
+                  ->orWhereRaw("CONCAT(first_name, ' ', last_name) LIKE ?", [$searchTerm])
+                  ->orWhere('email', 'like', $searchTerm)
+                  ->orWhere('phone', 'like', $searchTerm);
+            });
+        }
+
+        // Apply status filter
+        if (!empty($filters['status'])) {
+            if ($filters['status'] === 'other') {
+                $query->where(function($q) {
+                    $q->whereNull('status')->orWhere('status', '');
+                });
+            } else {
+                $query->where('status', $filters['status']);
+            }
+        }
+
+        // Apply lead source filter
+        if (!empty($filters['lead_source']) && $filters['lead_source'] !== 'All') {
+            $query->where('lead_source', $filters['lead_source']);
+        }
+
+        // Apply date range filter
+        if (!empty($filters['time_frame']) && $filters['time_frame'] !== 'All Time') {
+            $now = now();
+            $dateColumn = 'created_at'; // Default column
+            
+            // If date_range is specified, use it to determine the column
+            if (!empty($filters['date_range']) && $filters['date_range'] !== 'All') {
+                $dateColumn = match($filters['date_range']) {
+                    'Last Activity' => 'updated_at',
+                    'Created On' => 'created_at',
+                    'Modified On' => 'updated_at',
+                    default => 'created_at'
+                };
+            }
+
+            switch ($filters['time_frame']) {
+                case 'Yesterday':
+                    $query->whereDate($dateColumn, now()->subDay()->toDateString());
+                    break;
+                case 'Today':
+                    $query->whereDate($dateColumn, now()->toDateString());
+                    break;
+                case 'This Week':
+                    $query->whereBetween($dateColumn, [
+                        $now->startOfWeek()->toDateTimeString(),
+                        $now->endOfWeek()->toDateTimeString()
+                    ]);
+                    break;
+                case 'Last Week':
+                    $query->whereBetween($dateColumn, [
+                        $now->subWeek()->startOfWeek()->toDateTimeString(),
+                        $now->endOfWeek()->toDateTimeString()
+                    ]);
+                    break;
+                case 'This Month':
+                    $query->whereBetween($dateColumn, [
+                        $now->startOfMonth()->toDateTimeString(),
+                        $now->endOfMonth()->toDateTimeString()
+                    ]);
+                    break;
+                case 'Last Month':
+                    $query->whereBetween($dateColumn, [
+                        $now->subMonth()->startOfMonth()->toDateTimeString(),
+                        $now->endOfMonth()->toDateTimeString()
+                    ]);
+                    break;
+                case 'Last Year':
+                    $query->whereBetween($dateColumn, [
+                        $now->subYear()->startOfYear()->toDateTimeString(),
+                        $now->endOfYear()->toDateTimeString()
+                    ]);
+                    break;
+            }
+        }
+
+        return $query;
+    }
+
+    private function exportSelectedLeads($leadIds)
+    {
+        $fileName = 'leads-export-' . now()->format('Y-m-d') . '.csv';
+        $headers = [
+            'Content-Type' => 'text/csv',
+            'Content-Disposition' => 'attachment; filename="' . $fileName . '"',
+        ];
+
+        $leads = Lead::whereIn('id', $leadIds)->get();
+
+        $callback = function() use ($leads) {
+            $file = fopen('php://output', 'w');
+            
+            // Add CSV headers
+            fputcsv($file, [
+                'ID', 'First Name', 'Last Name', 'Email', 'Phone', 'Status', 'Lead Source', 'Created At', 'Updated At'
+            ]);
+
+            // Add data rows
+            foreach ($leads as $lead) {
+                fputcsv($file, [
+                    $lead->id,
+                    $lead->first_name,
+                    $lead->last_name,
+                    $lead->email,
+                    $lead->phone,
+                    $lead->status,
+                    $lead->lead_source,
+                    $lead->created_at,
+                    $lead->updated_at
+                ]);
+            }
+
+            fclose($file);
+        };
+
+        return response()->stream($callback, 200, $headers);
+    }
+
     public function show_leads(Request $request)
     {
         $userId = session()->get('user_id');
@@ -348,8 +552,8 @@ class LeadController extends Controller
             }
         }
 
-        // Get paginated results
-        $leads = $query->paginate($userRole == 1 ? 15 : 50);
+        // Get paginated results with 500 items per page
+        $leads = $query->paginate(500)->withQueryString();
 
         // Set is_fresh for admin view
         if ($userRole == 1) {
