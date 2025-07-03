@@ -284,7 +284,7 @@
                                 <a href="tel:{{ $lead->phone }}" class="btn btn-primary btn-sm" title="Call">
                                     <i class="fa fa-phone" style="font-size: 12px;"></i>
                                 </a>
-                                <button style="font-size: 12px;" class="btn btn-info btn-sm update-status-btn" data-lead-id="{{ $lead->id }}" data-current-status="{{ $lead->status }}">
+                                <button type="button" style="font-size: 12px;" class="btn btn-info btn-sm update-status-btn" data-lead-id="{{ $lead->id }}" data-current-status="{{ $lead->status }}">
                                     Update
                                 </button>
                             </td>
