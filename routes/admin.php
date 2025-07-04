@@ -167,6 +167,11 @@ Route::prefix('admin')->middleware(['checkrole'])->group(function () {
     Route::post('/employees/{id}/toggle-login-access', [ManageController::class, 'toggleLoginAccess'])
         ->withoutMiddleware(['auth', 'checkrole'])
         ->name('admin.employees.toggle_login_access');
+        
+    // Update employee username
+    Route::post('/employees/{id}/update-username', [ManageController::class, 'updateUsername'])
+        ->withoutMiddleware(['auth', 'checkrole'])
+        ->name('admin.employees.update_username');
 
     // View Leads Routes
 

@@ -379,6 +379,47 @@ public function resetPassword(Request $request)
     }
 
 /**
+ * Update username for an employee
+ * 
+ * @param Request $request
+ * @param int $id
+ * @return \Illuminate\Http\JsonResponse
+ */
+public function updateUsername(Request $request, $id)
+{
+    $request->validate([
+        'username' => 'required|string|max:255|unique:employees,emp_username,' . $id
+    ]);
+
+    $employee = Employee::findOrFail($id);
+    
+    try {
+        $employee->update([
+            'emp_username' => $request->username,
+            'updated_at' => now()
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Username updated successfully',
+            'username' => $employee->emp_username
+        ]);
+
+    } catch (\Exception $e) {
+        Log::error('Error updating username: ' . $e->getMessage(), [
+            'employee_id' => $id,
+            'username' => $request->username,
+            'exception' => $e
+        ]);
+
+        return response()->json([
+            'success' => false,
+            'message' => 'Failed to update username. Please try again.'
+        ], 500);
+    }
+}
+
+/**
  * Toggle login access for an employee
  * 
  * @param Request $request

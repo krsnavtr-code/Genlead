@@ -53,7 +53,31 @@
                 <div class="card-body">
                     <h5 class="mb-2 text-primary fw-bold">{{ $employee->emp_name }}</h5>
                     <p class="mb-1"><strong>Email:</strong> {{ $employee->emp_email }}</p>
-                    <p class="mb-1"><strong>Username:</strong> {{ $employee->emp_username }}</p>
+                    <div class="mb-1">
+                        <strong>Username:</strong>
+                        <span class="username-display" data-employee-id="{{ $employee->id }}">
+                            <span class="username-text">{{ $employee->emp_username }}</span>
+                            @if(session('emp_job_role') == 1) {{-- Only show edit for superadmin --}}
+                                <button class="btn btn-xs btn-link p-0 ml-1 edit-username" 
+                                        data-employee-id="{{ $employee->id }}"
+                                        data-current-username="{{ $employee->emp_username }}">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <div class="input-group input-group-sm d-none username-edit" style="max-width: 200px;" data-employee-id="{{ $employee->id }}">
+                                    <input type="text" class="form-control form-control-sm username-input" 
+                                           value="{{ $employee->emp_username }}">
+                                    <div class="input-group-append">
+                                        <button class="btn btn-success btn-sm save-username" type="button">
+                                            <i class="fas fa-check"></i>
+                                        </button>
+                                        <button class="btn btn-danger btn-sm cancel-username" type="button">
+                                            <i class="fas fa-times"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            @endif
+                        </span>
+                    </div>
                     <p class="mb-1"><strong>Password:</strong> {{ $employee->emp_password }}</p>
                     <p class="mb-2">
                         <strong>Role:</strong>
@@ -274,15 +298,88 @@ $(document).ready(function() {
                     toast.addEventListener('mouseleave', Swal.resumeTimer);
                 }
             });
-            
-            Toast.fire({
-                icon: type,
-                title: message
-            });
         } else {
             alert(type.toUpperCase() + ': ' + message);
         }
     }
+    
+    // Username editing functionality
+    $(document).on('click', '.edit-username', function() {
+        const employeeId = $(this).data('employee-id');
+        const $display = $(`.username-display[data-employee-id="${employeeId}"]`);
+        const $edit = $(`.username-edit[data-employee-id="${employeeId}"]`);
+        
+        $display.find('.username-text, .edit-username').addClass('d-none');
+        $edit.removeClass('d-none').find('input').focus();
+    });
+    
+    $(document).on('click', '.cancel-username', function() {
+        const $edit = $(this).closest('.username-edit');
+        const employeeId = $edit.data('employee-id');
+        const originalUsername = $(`.edit-username[data-employee-id="${employeeId}"]`).data('current-username');
+        
+        $edit.addClass('d-none');
+        $(`.username-display[data-employee-id="${employeeId}"] .username-text, 
+           .username-display[data-employee-id="${employeeId}"] .edit-username`)
+           .removeClass('d-none');
+        $edit.find('input').val(originalUsername);
+    });
+    
+    $(document).on('click', '.save-username', function() {
+        const $edit = $(this).closest('.username-edit');
+        const employeeId = $edit.data('employee-id');
+        const newUsername = $edit.find('input').val().trim();
+        const $display = $(`.username-display[data-employee-id="${employeeId}"]`);
+        
+        if (!newUsername) {
+            showToast('error', 'Username cannot be empty');
+            return;
+        }
+        
+        // Show loading state
+        const $saveBtn = $(this);
+        const originalText = $saveBtn.html();
+        $saveBtn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i>');
+        
+        // Send AJAX request to update username
+        $.ajax({
+            url: `/admin/employees/${employeeId}/update-username`,
+            type: 'POST',
+            data: {
+                _token: '{{ csrf_token() }}',
+                username: newUsername
+            },
+            success: function(response) {
+                if (response.success) {
+                    // Update UI
+                    $display.find('.username-text').text(newUsername);
+                    $display.find('.edit-username').data('current-username', newUsername);
+                    
+                    // Hide edit form
+                    $edit.addClass('d-none');
+                    $display.find('.username-text, .edit-username').removeClass('d-none');
+                    
+                    showToast('success', 'Username updated successfully');
+                } else {
+                    showToast('error', response.message || 'Failed to update username');
+                }
+            },
+            error: function(xhr) {
+                const errorMessage = xhr.responseJSON?.message || 'An error occurred while updating username';
+                showToast('error', errorMessage);
+            },
+            complete: function() {
+                $saveBtn.prop('disabled', false).html(originalText);
+            }
+        });
+    });
+    
+    // Allow pressing Enter to save
+    $(document).on('keypress', '.username-input', function(e) {
+        if (e.which === 13) { // Enter key
+            $(this).closest('.username-edit').find('.save-username').click();
+        }
+    });
     
     // Handle edit role button click
     $(document).on('click', '.edit-role', function(e) {
