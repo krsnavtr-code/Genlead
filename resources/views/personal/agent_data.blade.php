@@ -26,22 +26,55 @@
             @if($agents->count() > 0)
                 <form action="{{ route('admin.agent.data') }}" method="GET" class="mb-4">
                     @csrf
-                    <div class="form-group">
-                        <label for="agent_id">Select Agent:</label>
-                        <select name="agent_id" id="agent_id" class="form-control" required>
-                            <option value="" disabled {{ !request()->has('agent_id') ? 'selected' : '' }}>Select an agent</option>
-                            @foreach($agents->sortBy('emp_name') as $agent)
-                                @php
-                                    $teamLeader = $agent->reports_to ? Employee::find($agent->reports_to) : null;
-                                    $teamLeaderName = $teamLeader ? $teamLeader->emp_name : 'No Team Leader';
-                                @endphp
-                                <option value="{{ $agent->id }}" data-team-leader="{{ $teamLeaderName }}" {{ request('agent_id') == $agent->id ? 'selected' : '' }}>
-                                  {{ $agent->id }} {{ $agent->emp_name }} ({{ $agent->emp_job_role ?? 'No Role' }}) - Team Lead: {{ $teamLeaderName }}
-                                </option>
-                            @endforeach
-                        </select>
+                    <div class="row">
+                        <div class="col-md-8">
+                            <div class="form-group">
+                                <label for="agent_id">Select Agent:</label>
+                                <select name="agent_id" id="agent_id" class="form-control" required>
+                                    <option value="" disabled {{ !request()->has('agent_id') ? 'selected' : '' }}>Select an agent</option>
+                                    @foreach($agents->sortBy('emp_name') as $agent)
+                                        @php
+                                            $teamLeader = $agent->reports_to ? Employee::find($agent->reports_to) : null;
+                                            $teamLeaderName = $teamLeader ? $teamLeader->emp_name : 'No Team Leader';
+                                        @endphp
+                                        <option value="{{ $agent->id }}" data-team-leader="{{ $teamLeaderName }}" {{ request('agent_id') == $agent->id ? 'selected' : '' }}>
+                                          {{ $agent->id }} {{ $agent->emp_name }} ({{ $agent->emp_job_role ?? 'No Role' }}) - Team Lead: {{ $teamLeaderName }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label for="status">Filter by Status:</label>
+                                <select name="status" id="status" class="form-control" onchange="this.form.submit()">
+                                    <option value="">All Statuses</option>
+                                    <option value="other" {{ request('status') === 'other' ? 'selected' : '' }}>
+                                        Other (No Status)
+                                    </option>
+                                    @foreach(\App\Helpers\SiteHelper::getLeadStatus() as $type => $categories)
+                                    <optgroup label="{{ $type }}">
+                                        @foreach($categories as $category)
+                                            @foreach($category['subcategories'] as $subcategory)
+                                                <option value="{{ $subcategory['code'] }}" {{ request('status') == $subcategory['code'] ? 'selected' : '' }}>
+                                                    {{ $category['category'] }} - {{ $subcategory['name'] }}
+                                                </option>
+                                            @endforeach
+                                        @endforeach
+                                    </optgroup>
+                                    @endforeach
+                                </select>
+                            </div>
+                        </div>
                     </div>
-                    <button type="submit" class="btn btn-primary">View Leads</button>
+                    <div class="mt-2">
+                        <button type="submit" class="btn btn-primary">View Leads</button>
+                        @if(request()->has('status'))
+                            <a href="{{ route('admin.agent.data', ['agent_id' => request('agent_id')]) }}" class="btn btn-outline-secondary ml-2">
+                                Clear Filters
+                            </a>
+                        @endif
+                    </div>
                 </form>
             @else
                 <div class="alert alert-warning">
@@ -86,6 +119,9 @@
                     <div class="table-responsive">
                         <div class="d-flex justify-content-between align-items-center mb-3">
                             <h2 class="h5 mb-0">All of these leads are assigned to {{ $agentData->emp_name }}</h2>
+                            <!-- Status filter will be shown in the main form now -->
+                            
+                            <!-- Filter for count -->
                             <div class="d-flex align-items-center">
                                 <span class="me-2 small text-muted">Select:</span>
                                 <div class="btn-group" role="group">

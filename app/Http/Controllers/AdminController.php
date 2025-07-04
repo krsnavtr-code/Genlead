@@ -910,6 +910,7 @@ class AdminController extends Controller
 
         $agentData = null;
         $agentLeads = collect();
+        $selectedStatus = $request->input('status', '');
 
         // If an agent is selected, get their data and leads
         if ($request->has('agent_id')) {
@@ -917,12 +918,21 @@ class AdminController extends Controller
             $agentData = Employee::find($agentId);
 
             if ($agentData) {
-                $agentLeads = \App\Models\personal\Lead::where('agent_id', $agentId)
-                    ->orderBy('created_at', 'desc')
-                    ->get();
+                $query = \App\Models\personal\Lead::where('agent_id', $agentId);
+                
+                // Apply status filter if provided
+                if (!empty($selectedStatus)) {
+                    if ($selectedStatus === 'other') {
+                        $query->where('status', '')->orWhereNull('status');
+                    } else {
+                        $query->where('status', $selectedStatus);
+                    }
+                }
+                
+                $agentLeads = $query->orderBy('created_at', 'desc')->get();
             }
         }
 
-        return view('personal.agent_data', compact('agents', 'agentData', 'agentLeads'));
+        return view('personal.agent_data', compact('agents', 'agentData', 'agentLeads', 'selectedStatus'));
     }
 }
