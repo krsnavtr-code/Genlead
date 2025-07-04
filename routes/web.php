@@ -59,6 +59,9 @@ Route::middleware(['auth'])
     ->prefix('admin')
     ->name('admin.')
     ->group(function () {
+        // Lead conversation route
+        Route::get('/team/lead-conversation/{lead}', [\App\Http\Controllers\TeamManagementController::class, 'getLeadConversation'])
+            ->name('team.lead-conversation');
         // ID Card Download Route
         Route::get('employee/download-id-card/{id}', [NewJoinController::class, 'downloadIDCard'])
             ->name('employee.download_id_card');
@@ -93,6 +96,14 @@ Route::middleware(['auth'])
         // Team Member Followups
         Route::get('/team/member/{id}/followups', [\App\Http\Controllers\TeamManagementController::class, 'memberFollowups'])
             ->name('team.member.followups');
+            
+        // Overdue Followups
+        Route::get('/team/overdue-followups', [\App\Http\Controllers\TeamManagementController::class, 'overdueFollowups'])
+            ->name('team.overdue.followups');
+            
+        // Complete Followup
+        Route::put('/followups/{followup}/complete', [\App\Http\Controllers\TeamManagementController::class, 'completeFollowup'])
+            ->name('followup.complete'); // Note: The 'admin.' prefix is automatically applied
             
         // Agent Referral Leads Details
         Route::get('/agent-referral-leads-details', [\App\Http\Controllers\TeamManagementController::class, 'agentReferralLeadsDetails'])

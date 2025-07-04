@@ -20,6 +20,57 @@ class TeamManagementController extends Controller
     }
     
     /**
+     * Get conversation history for a lead
+     *
+     * @param Lead $lead
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function getLeadConversation(Lead $lead)
+    {
+        Log::info('getLeadConversation called for lead ID: ' . $lead->id);
+        try {
+            $followUps = $lead->followUps()
+                ->with(['status', 'createdBy'])
+                ->orderBy('follow_up_time', 'desc')
+                ->get()
+                ->map(function($followUp) {
+                    return [
+                        'id' => $followUp->id,
+                        'comments' => $followUp->comments,
+                        'follow_up_time' => $followUp->follow_up_time,
+                        'status' => $followUp->status ? [
+                            'id' => $followUp->status->id,
+                            'name' => $followUp->status->name,
+                            'color' => $followUp->status->color
+                        ] : null,
+                        'created_by' => $followUp->createdBy ? [
+                            'id' => $followUp->createdBy->id,
+                            'emp_name' => $followUp->createdBy->emp_name
+                        ] : null
+                    ];
+                });
+                
+            return response()->json([
+                'success' => true,
+                'followUps' => $followUps,
+                'debug' => [
+                    'lead_id' => $lead->id,
+                    'followups_count' => $followUps->count()
+                ]
+            ]);
+            
+        } catch (\Exception $e) {
+            Log::error('Error fetching lead conversation: ' . $e->getMessage() . '\n' . $e->getTraceAsString());
+            return response()->json([
+                'success' => false,
+                'message' => 'Error fetching conversation history.',
+                'error' => $e->getMessage(),
+                'trace' => config('app.debug') ? $e->getTrace() : []
+            ], 500);
+        }
+    }
+       
+    /**
      * Display lead details for a specific team member
      *
      * @param int $id The ID of the team member
@@ -905,6 +956,77 @@ class TeamManagementController extends Controller
             'upcomingFollowups' => $upcomingFollowups,
             'pastFollowups' => $pastFollowups,
             'title' => 'Followups - ' . $teamMember->emp_name
+        ]);
+    }
+
+    /**
+     * Display overdue followups for team members
+     * 
+     * @param int|null $agentId Optional agent ID to filter by specific agent
+     * @param \Illuminate\Http\Request $request
+     * @return \Illuminate\View\View
+     */
+    public function overdueFollowups(Request $request)
+    {
+        // Only team leaders can access this
+        if (session('emp_job_role') !== 6) {
+            abort(403, 'Unauthorized access.');
+        }
+
+        $teamLeaderId = Auth::id();
+        
+        // Get all team members that report to this team leader
+        $teamMembers = Employee::where('reports_to', $teamLeaderId)
+            ->where('emp_job_role', 2) // Only agents
+            ->orderBy('emp_name')
+            ->get();
+
+        // Get filter values
+        $agentId = $request->query('agent');
+        $status = $request->query('status');
+
+        // Build query for overdue followups
+        $query = FollowUp::with(['lead', 'agent'])
+            ->whereIn('agent_id', $teamMembers->pluck('id'))
+            ->where('follow_up_time', '<', now()) // Past follow-up time
+            ->where(function($q) {
+                $q->whereNull('status')
+                  ->orWhere('status', '!=', 'completed');
+            });
+
+        // Filter by agent if specified
+        if ($agentId) {
+            $query->where('agent_id', $agentId);
+        }
+
+        // Filter by status if specified
+        if ($status) {
+            if ($status === 'other') {
+                // Handle 'other' status (no status)
+                $query->where(function($q) {
+                    $q->whereNull('leads.status')
+                      ->orWhere('leads.status', '');
+                });
+            } else {
+                // Filter by specific status code
+                $query->whereHas('lead', function($q) use ($status) {
+                    $q->where('status', $status);
+                });
+            }
+        }
+
+        // Order results
+        $query->orderBy('follow_up_time', 'asc');
+
+        $overdueFollowups = $query->paginate(100)->withQueryString();
+
+        return view('team_management.overdue_followups', [
+            'overdueFollowups' => $overdueFollowups,
+            'teamMembers' => $teamMembers,
+            'selectedAgentId' => $agentId,
+            'selectedStatus' => $status,
+            'title' => 'Overdue Follow-ups',
+            'routeName' => 'admin.team.overdue.followups'
         ]);
     }
 

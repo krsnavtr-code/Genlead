@@ -68,9 +68,16 @@
                 <!-- Team management for Team Leader (6) -->
                 @if(in_array($emp_job_role, [1, 6]))
                 <li class="nav-item">
-                    <a href="{{ url('/admin/team-management') }}" class="nav-link w-100 {{ request()->is('admin/team-management*') ? 'active' : '' }}">
+                    <a href="{{ url('/admin/team-management') }}" class="nav-link w-100 {{ request()->is('admin/team-management*') && !request()->is('admin/team/overdue-followups*') ? 'active' : '' }}">
                         <i class="nav-icon fas fa-user-friends" style="color: #0062CC;"></i>
                         <p>Team Leader (Office)</p>
+                    </a>
+                </li>
+                <!-- Overdue Follow-ups for Team Leaders -->
+                <li class="nav-item">
+                    <a href="{{ route('admin.team.overdue.followups') }}" class="nav-link w-100 {{ request()->is('admin/team/overdue-followups*') ? 'active' : '' }}">
+                        <i class="nav-icon fas fa-exclamation-triangle" style="color: #ffc107;"></i>
+                        <p>Overdue Follow-ups</p>
                     </a>
                 </li>
                 @endif
