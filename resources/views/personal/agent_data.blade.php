@@ -102,8 +102,8 @@
                                     <option value="" disabled selected>Select target agent</option>
                                     @foreach($agents->where('id', '!=', $agentData->id)->sortBy('emp_name') as $agent)
                                         <option value="{{ $agent->id }}">
-                                            {{ $agent->emp_name }} ({{ $agent->emp_job_role ?? 'No Role' }})
-                                            {{ $agent->reports_to ? Employee::find($agent->reports_to)->emp_name : 'No Team Leader' }}
+                                            Id: {{ $agent->id }}, Name: {{ $agent->emp_name }}, Role: {{ $agent->emp_job_role ?? 'No Role' }},
+                                            <span style="color: blue; font-weight: bold;">Team Leader: </span> {{ $agent->reports_to ? Employee::find($agent->reports_to)->emp_name : 'No Team Leader' }}
                                         </option>
                                     @endforeach
                                 </select>
