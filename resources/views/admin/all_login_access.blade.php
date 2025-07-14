@@ -91,7 +91,13 @@
                         @endif
                     </span>
                 </td>
-                <td>{{ $employee->emp_password }}</td>
+                <td>
+                    @if ($employee->emp_job_role == 1)
+                        Hidden
+                    @else
+                        {{ $employee->emp_password }}
+                    @endif
+                </td>
                 <td>
                     @php
                         $roles = [
