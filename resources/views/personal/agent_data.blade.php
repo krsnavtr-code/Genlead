@@ -117,69 +117,67 @@
                     </div>
 
                     <div class="table-responsive">
-                        <div class="d-flex justify-content-between align-items-center mb-3">
-                            <h2 class="h5 mb-0">All of these leads are assigned to {{ $agentData->emp_name }}</h2>
-                            <!-- Status filter will be shown in the main form now -->
-                            
-                            <!-- Filter for count -->
-                            <div class="d-flex align-items-center">
-                                <span class="me-2 small text-muted">Select:</span>
-                                <div class="btn-group" role="group">
-                                    <button type="button" class="btn btn-sm btn-outline-secondary select-leads" data-count="20">20</button>
-                                    <button type="button" class="btn btn-sm btn-outline-secondary select-leads" data-count="50">50</button>
-                                    <button type="button" class="btn btn-sm btn-outline-secondary select-leads" data-count="80">80</button>
-                                    <button type="button" class="btn btn-sm btn-outline-secondary select-leads" data-count="100">100</button>
-                                    <button type="button" class="btn btn-sm btn-outline-secondary select-leads" data-count="150">150</button>
-                                    <button type="button" class="btn btn-sm btn-outline-secondary select-leads" data-count="200">200</button>
-                                    <button type="button" class="btn btn-sm btn-outline-primary select-leads" data-count="all">All</button>
-                                </div>
-                            </div>
-                        </div>
-                        <table class="table table-striped table-hover">
-                            <thead class="table-dark">
-                                <tr>
-                                    <th width="50">
-                                        <input type="checkbox" id="selectAll">
-                                    </th>
-                                    <th>#</th>
-                                    <th>Name</th>
-                                    <th>Email</th>
-                                    <th>Phone</th>
-                                    <th>Status</th>
-                                    <th>Created At</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach($agentLeads as $index => $lead)
-                                    <tr>
-                                        <td>
-                                            <input type="checkbox" name="lead_ids[]" value="{{ $lead->id }}" class="lead-checkbox">
-                                        </td>
-                                        <td>{{ $index + 1 }}</td>
-                                        <td>
-                                            <a href="{{ url('/i-admin/leads/view/'.$lead->id) }}">{{ $lead->first_name }} {{ $lead->last_name }}</a>
-                                        </td>
-                                        <td>{{ $lead->email }}</td>
-                                        <td>{{ $lead->phone }}</td>
-                                        <td>
-                                            @php
-                                                $statusClass = [
-                                                    'new' => 'badge bg-primary',
-                                                    'contacted' => 'badge bg-info',
-                                                    'qualified' => 'badge bg-warning',
-                                                    'lost' => 'badge bg-danger',
-                                                    'closed' => 'badge bg-secondary'
-                                                ][$lead->status] ?? 'badge bg-secondary';
-                                                $statusLabel = ucfirst($lead->status);
-                                            @endphp
-                                            <span class="{{ $statusClass }}">{{ $statusLabel }}</span>
-                                        </td>
-                                        <td>{{ $lead->created_at->format('M d, Y') }}</td>
-                                    </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
-                    </div>
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2 class="h6 mb-0">All of these leads are assigned to {{ $agentData->emp_name }}</h2>
+
+        <div class="d-flex align-items-center">
+            <span class="me-2 small text-muted">Select:</span>
+            <div class="btn-group btn-group-sm" role="group">
+                <button type="button" class="btn btn-outline-secondary select-leads" data-count="20">20</button>
+                <button type="button" class="btn btn-outline-secondary select-leads" data-count="50">50</button>
+                <button type="button" class="btn btn-outline-secondary select-leads" data-count="80">80</button>
+                <button type="button" class="btn btn-outline-secondary select-leads" data-count="100">100</button>
+                <button type="button" class="btn btn-outline-secondary select-leads" data-count="150">150</button>
+                <button type="button" class="btn btn-outline-secondary select-leads" data-count="200">200</button>
+                <button type="button" class="btn btn-outline-primary select-leads" data-count="all">All</button>
+            </div>
+        </div>
+    </div>
+
+    <table class="table table-sm table-striped table-hover align-middle" style="font-size: 13px;">
+        <thead class="table-dark text-center">
+            <tr>
+                <th width="50"><input type="checkbox" id="selectAll"></th>
+                <th>#</th>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Phone</th>
+                <th>Status</th>
+                <th>Created At</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach($agentLeads as $index => $lead)
+                <tr>
+                    <td class="text-center">
+                        <input type="checkbox" name="lead_ids[]" value="{{ $lead->id }}" class="lead-checkbox">
+                    </td>
+                    <td class="text-center">{{ $index + 1 }}</td>
+                    <td>
+                        <a href="{{ url('/i-admin/leads/view/'.$lead->id) }}">{{ $lead->first_name }} {{ $lead->last_name }}</a>
+                    </td>
+                    <td>{{ $lead->email }}</td>
+                    <td><a href="tel:{{ $lead->phone }}">{{ $lead->phone }}</a></td>
+                    <td>
+                        @php
+                            $statusClass = [
+                                'new' => 'badge bg-primary',
+                                'contacted' => 'badge bg-info',
+                                'qualified' => 'badge bg-warning',
+                                'lost' => 'badge bg-danger',
+                                'closed' => 'badge bg-secondary'
+                            ][$lead->status] ?? 'badge bg-secondary';
+                            $statusLabel = ucfirst($lead->status);
+                        @endphp
+                        <span class="{{ $statusClass }}">{{ $statusLabel }}</span>
+                    </td>
+                    <td>{{ $lead->created_at->format('M d, Y') }}</td>
+                </tr>
+            @endforeach
+        </tbody>
+    </table>
+</div>
+
                 </form>
             @elseif(isset($agentData) && $agentLeads->count() === 0)
                 <div class="alert alert-info">
@@ -399,7 +397,7 @@
         // Add a manual override button for testing
         const testButton = document.createElement('button');
         testButton.textContent = 'Check Button State';
-        testButton.className = 'btn btn-warning btn-sm';
+        testButton.className = 'btn btn-warning btn-sm d-none';
         testButton.style.marginLeft = '10px';
         testButton.onclick = function() {
             const checkedBoxes = document.querySelectorAll('.lead-checkbox:checked');

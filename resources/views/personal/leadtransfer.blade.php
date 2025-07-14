@@ -46,40 +46,58 @@
                                 <button type="submit" class="btn btn-primary ml-4">Transfer Leads</button>
                             </div>
 
-                            @foreach($freshLeads as $index => $lead)    
-                                @php
-                                    $lastFollowUp = $lead->followUps->sortByDesc('created_at')->first();
-                                    $daysSinceFollowUp = $lastFollowUp ? \Carbon\Carbon::parse($lastFollowUp->created_at)->diffInDays(now()) : null;
-                                    $statusText = 'Contacted';
-                                    $buttonClass = 'btn-secondary';
+                            <div class="table-responsive">
+    <table class="table table-sm table-bordered align-middle table-striped" style="font-size: 13px;">
+        <thead class="table-primary text-center">
+            <tr>
+                <th>#</th>
+                <th>Select</th>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Phone</th>
+                <th>Lead Source</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach($freshLeads as $index => $lead)
+                @php
+                    $lastFollowUp = $lead->followUps->sortByDesc('created_at')->first();
+                    $daysSinceFollowUp = $lastFollowUp ? \Carbon\Carbon::parse($lastFollowUp->created_at)->diffInDays(now()) : null;
+                    $statusText = 'Contacted';
+                    $buttonClass = 'btn-secondary';
 
-                                    if ($daysSinceFollowUp !== null) {
-                                        if ($daysSinceFollowUp <= 1) {
-                                            $statusText = 'Active';
-                                            $buttonClass = 'btn-warning';
-                                        } elseif ($daysSinceFollowUp <= 7) {
-                                            $statusText = 'Engaged';
-                                            $buttonClass = 'btn-success';
-                                        } else {
-                                            $statusText = 'Disengaged';
-                                            $buttonClass = 'btn-danger';
-                                        }
-                                    }
-                                @endphp
-
-                                <div class="col-md-6 col-lg-4">
-                                    <div class="card border rounded mb-3 shadow-sm p-3 position-relative">
-                                        <h6 class="text-muted mb-2">#{{ $index + 1 }}</h6>
-                                        <input type="checkbox" name="lead_ids[]" value="{{ $lead->id }}" class="position-absolute" style="top: 10px; right: 10px; transform: scale(1.2);">
-                                        <h5 class="card-title mb-1">{{ $lead->first_name }} {{ $lead->last_name }}</h5>
-                                        <p class="mb-1"><strong>Email:</strong> {{ $lead->email }}</p>
-                                        <p class="mb-1"><strong>Phone:</strong> <a href="tel:{{ $lead->phone }}">{{ $lead->phone }}</a></p>
-                                        <p class="mb-2"><strong>Lead Source:</strong> {{ $lead->lead_source }}</p>
-                                        <span class="btn btn-sm {{ $buttonClass }}">{{ $statusText }}</span>
-                                    </div>
-                                </div>
-                            @endforeach
-                        </div>
+                    if ($daysSinceFollowUp !== null) {
+                        if ($daysSinceFollowUp <= 1) {
+                            $statusText = 'Active';
+                            $buttonClass = 'btn-warning';
+                        } elseif ($daysSinceFollowUp <= 7) {
+                            $statusText = 'Engaged';
+                            $buttonClass = 'btn-success';
+                        } else {
+                            $statusText = 'Disengaged';
+                            $buttonClass = 'btn-danger';
+                        }
+                    }
+                @endphp
+                <tr>
+                    <td class="text-muted text-center">#{{ $index + 1 }}</td>
+                    <td class="text-center">
+                        <input type="checkbox" name="lead_ids[]" value="{{ $lead->id }}" style="transform: scale(1.2);">
+                    </td>
+                    <td>{{ $lead->first_name }} {{ $lead->last_name }}</td>
+                    <td>{{ $lead->email }}</td>
+                    <td><a href="tel:{{ $lead->phone }}">{{ $lead->phone }}</a></td>
+                    <td>{{ $lead->lead_source }}</td>
+                    <td>
+                        <span class="btn btn-sm {{ $buttonClass }}">{{ $statusText }}</span>
+                    </td>
+                </tr>
+            @endforeach
+        </tbody>
+    </table>
+</div>
+   </div>
                     </div>
                 </form>
             </div>
