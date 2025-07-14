@@ -11,56 +11,69 @@
     <div class="content">
         <div class="card shadow-sm">
             <div class="card-body">
-                <h4 class="text-center mb-4">Candidate Details</h4>
+                <!-- <h4 class="text-center mb-4">Candidate Details</h4> -->
 
-                <div class="row g-4">
-                    @foreach($new_employees as $candidate)
-                    <div class="col-md-6 col-lg-4 mb-4">
-                        <div class="card h-100 border-start border-4 border-info shadow-sm" style="background-color: #f8f9fa;">
-                            <div class="card-body">
-                                <h5 class="fw-bold text-info">{{ $candidate->name }}</h5>
-                                <div class="mb-1 d-flex align-items-center">
-                                    <strong class="me-2">Email:</strong>
-                                    <span id="email-display-{{ $candidate->id }}">{{ $candidate->email }}</span>
-                                    <button class="btn btn-sm btn-link p-0 ms-2 edit-email-btn" 
-                                            data-candidate-id="{{ $candidate->id }}"
-                                            data-email="{{ $candidate->email }}">
-                                        <i class="fas fa-edit text-primary"></i>
-                                    </button>
-                                </div>
-                                <p class="mb-1"><strong>Branch:</strong> {{ $candidate->branch }}</p>
-                                <p class="mb-1"><strong>Location:</strong> {{ $candidate->location }}</p>
-                                <p class="mb-1"><strong>Phone:</strong> {{ $candidate->phone }}</p>
-                                <p class="mb-1"><strong>Salary Discussed:</strong> {{ $candidate->salary_discussed ? 'Yes' : 'No' }}</p>
-                                <p class="mb-2"><strong>Salary Amount:</strong> ₹{{ $candidate->salary_amount }}</p>
+                <div class="table-responsive">
+    <table class="table table-sm table-bordered align-middle">
+        <thead class="table-info">
+            <tr class="text-center">
+                <th>Name</th>
+                <th>Email</th>
+                <th>Branch</th>
+                <th>Loc</th>
+                <th>Phone</th>
+                <th>Salary</th>
+                <th>Amount</th>
+                <th>Result</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach($new_employees as $candidate)
+            <tr>
+                <td class="fw-semibold text-info">{{ $candidate->name }}</td>
+                <td style="font-size: 0.875rem;">
+                    <span id="email-display-{{ $candidate->id }}">{{ $candidate->email }}</span>
+                    <button class="btn btn-link btn-sm p-0 ms-1 edit-email-btn"
+                        data-candidate-id="{{ $candidate->id }}"
+                        data-email="{{ $candidate->email }}">
+                        <i class="fas fa-edit text-primary"></i>
+                    </button>
+                </td>
+                <td>{{ $candidate->branch }}</td>
+                <td>{{ $candidate->location }}</td>
+                <td>{{ $candidate->phone }}</td>
+                <td>{{ $candidate->salary_discussed ? 'Yes' : 'No' }}</td>
+                <td>₹{{ $candidate->salary_amount }}</td>
+                <td class="text-center">
+                    @if(!$candidate->interview_result)
+                        <input type="checkbox" class="form-check-input interview-result-checkbox"
+                            data-candidate-id="{{ $candidate->id }}"
+                            id="interviewCheck{{ $candidate->id }}">
+                    @else
+                        <span class="badge bg-{{ $candidate->interview_result === 'Selected' ? 'success' : 'danger' }}">
+                            {{ Str::limit($candidate->interview_result, 8) }}
+                        </span>
+                    @endif
+                </td>
+                <td class="text-center">
+                    @if($candidate->interview_result === 'Selected')
+                        <button class="btn btn-outline-primary btn-sm resend-email-btn" 
+                            data-candidate-id="{{ $candidate->id }}">
+                            <i class="fas fa-paper-plane"></i>
+                        </button>
+                        <small class="text-muted d-block mt-1" style="font-size: 0.7rem;" id="resend-status-{{ $candidate->id }}"></small>
+                    @else
+                        <span class="text-muted" style="font-size: 0.75rem;">N/A</span>
+                    @endif
+                </td>
+            </tr>
+            @endforeach
+        </tbody>
+    </table>
+</div>
 
-                                <div class="d-flex justify-content-between align-items-center mt-3">
-                                    @if(!$candidate->interview_result)
-                                        <div>
-                                            <input type="checkbox" class="form-check-input interview-result-checkbox"
-                                                data-candidate-id="{{ $candidate->id }}" id="interviewCheck{{ $candidate->id }}">
-                                            <label for="interviewCheck{{ $candidate->id }}">Mark Result</label>
-                                        </div>
-                                    @else
-                                        <span class="badge bg-{{ $candidate->interview_result === 'Selected' ? 'success' : 'danger' }}">
-                                            {{ $candidate->interview_result }}
-                                        </span>
-                                    @endif
-                                </div>
-                                @if($candidate->interview_result === 'Selected')
-                                <div class="d-flex justify-content-between align-items-center mt-3">
-                                    <button class="btn btn-sm btn-outline-primary resend-email-btn" 
-                                            data-candidate-id="{{ $candidate->id }}">
-                                        <i class="fas fa-paper-plane me-1"></i> Resend Document Upload Email
-                                    </button>
-                                    <small class="text-muted" id="resend-status-{{ $candidate->id }}"></small>
-                                </div>
-                                @endif
-                            </div>
-                        </div>
-                    </div>
-                    @endforeach
-                </div>
+
 
             </div>
         </div>
