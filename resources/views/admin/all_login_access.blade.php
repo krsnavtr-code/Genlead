@@ -47,128 +47,139 @@
         <div class="alert alert-success text-center">{{ session('success') }}</div>
     @endif
 
-    <div class="row g-4">
-        @foreach ($employees as $index => $employee)
-        <div class="col-md-6 col-lg-4 mb-4">
-            <div class="card shadow-sm h-100 border-start border-4 border-primary">
-                <div class="card-body">
-                    <h5 class="mb-2 text-primary fw-bold"> Id: {{ $employee->id }}, Name: {{ $employee->emp_name }}</h5>
-                    <p class="mb-1"><strong>Email:</strong> {{ $employee->emp_email }}</p>
-                    <div class="mb-1">
-                        <strong>Username:</strong>
-                        <span class="username-display" data-employee-id="{{ $employee->id }}">
-                            <span class="username-text">{{ $employee->emp_username }}</span>
-                            @if(in_array(session('emp_job_role'), [1, 8])) {{-- Show edit for superadmin and childadmin --}}
-                                <button class="btn btn-xs btn-link p-0 ml-1 edit-username" 
-                                        data-employee-id="{{ $employee->id }}"
-                                        data-current-username="{{ $employee->emp_username }}">
-                                    <i class="fas fa-edit"></i>
-                                </button>
-                                <div class="input-group input-group-sm d-none username-edit" style="max-width: 200px;" data-employee-id="{{ $employee->id }}">
-                                    <input type="text" class="form-control form-control-sm username-input" 
-                                           value="{{ $employee->emp_username }}">
-                                    <div class="input-group-append">
-                                        <button class="btn btn-success btn-sm save-username" type="button">
-                                            <i class="fas fa-check"></i>
-                                        </button>
-                                        <button class="btn btn-danger btn-sm cancel-username" type="button">
-                                            <i class="fas fa-times"></i>
-                                        </button>
-                                    </div>
-                                </div>
-                            @endif
-                        </span>
-                    </div>
-                    <p class="mb-1"><strong>Password:</strong> {{ $employee->emp_password }}</p>
-                    <p class="mb-2">
-                        <strong>Role:</strong>
-                        <span class="role-display" data-employee-id="{{ $employee->id }}">
-                            @php
-                                $roles = [
-                                    1 => 'SuperAdmin',
-                                    2 => 'Agent',
-                                    4 => 'HR',
-                                    5 => 'Accountant',
-                                    6 => 'Team Leader',
-                                    7 => 'Chain Team Agent',
-                                    8 => 'ChildAdmin',
-                                ];
-                                $currentRole = $roles[$employee->emp_job_role] ?? 'Unknown Role';
-                            @endphp
-                            <span class="role-text">{{ $currentRole }}</span>
-                            @if(in_array(session('emp_job_role'), [1, 8])) {{-- Show edit for superadmin and childadmin --}}
-                                <button class="btn btn-xs btn-link p-0 ml-1 edit-role" 
-                                        data-employee-id="{{ $employee->id }}"
-                                        data-current-role="{{ $employee->emp_job_role }}">
-                                    <i class="fas fa-edit"></i>
-                                </button>
-                                <select class="form-control form-control-sm d-none role-select" 
-                                        data-employee-id="{{ $employee->id }}">
-                                    @foreach($roles as $id => $name)
-                                        <option value="{{ $id }}" {{ $employee->emp_job_role == $id ? 'selected' : '' }}>
-                                            {{ $name }}
-                                        </option>
-                                    @endforeach
-                                </select>
-                            @endif
-                        </span>
-                    </p>
-
-                    <div class="d-flex justify-content-between align-items-center mt-3">
-                        <div class="d-flex align-items-center">
-                            <div class="form-check form-switch me-2">
-                                <input type="checkbox" class="form-check-input toggle-login-access" 
-                                       data-employee-id="{{ $employee->id }}" 
-                                       id="toggle-{{ $employee->id }}"
-                                       {{ $employee->is_active ? 'checked' : '' }}>
-                                <label class="form-check-label" for="toggle-{{ $employee->id }}">
-                                    {{ $employee->is_active ? 'Active' : 'Inactive' }}
-                                </label>
-                            </div>
-                            <div class="spinner-border spinner-border-sm text-primary d-none" id="spinner-{{ $employee->id }}" role="status">
-                                <span class="visually-hidden">Loading...</span>
-                            </div>
-                        </div>
-                        <!-- Trigger Modal -->
-                        <button class="btn btn-sm btn-outline-primary" data-toggle="modal" data-target="#changePasswordModal{{ $employee->id }}">
-                            Change Password
+ <div class="table-responsive">
+    <table class="table table-bordered table-sm text-sm align-middle" style="font-size: 0.85rem;">
+        <thead class="table-primary">
+            <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Username</th>
+                <th>Password</th>
+                <th>Role</th>
+                <th>Status</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach ($employees as $employee)
+            <tr>
+                <td>{{ $employee->id }}</td>
+                <td>{{ $employee->emp_name }}</td>
+                <td>{{ $employee->emp_email }}</td>
+                <td>
+                    <span class="username-display" data-employee-id="{{ $employee->id }}">
+                        <span class="username-text">{{ $employee->emp_username }}</span>
+                        @if(in_array(session('emp_job_role'), [1, 8]))
+                        <button class="btn btn-xs btn-link p-0 ml-1 edit-username"
+                            data-employee-id="{{ $employee->id }}"
+                            data-current-username="{{ $employee->emp_username }}">
+                            <i class="fas fa-edit"></i>
                         </button>
+                        <div class="input-group input-group-sm d-none username-edit mt-1" style="max-width: 180px;" data-employee-id="{{ $employee->id }}">
+                            <input type="text" class="form-control form-control-sm username-input"
+                                value="{{ $employee->emp_username }}">
+                            <div class="input-group-append">
+                                <button class="btn btn-success btn-sm save-username" type="button">
+                                    <i class="fas fa-check"></i>
+                                </button>
+                                <button class="btn btn-danger btn-sm cancel-username" type="button">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </div>
+                        </div>
+                        @endif
+                    </span>
+                </td>
+                <td>{{ $employee->emp_password }}</td>
+                <td>
+                    @php
+                        $roles = [
+                            1 => 'SuperAdmin',
+                            2 => 'Agent',
+                            4 => 'HR',
+                            5 => 'Accountant',
+                            6 => 'Team Leader',
+                            7 => 'Chain Team Agent',
+                            8 => 'ChildAdmin',
+                        ];
+                        $currentRole = $roles[$employee->emp_job_role] ?? 'Unknown Role';
+                    @endphp
+                    <span class="role-display" data-employee-id="{{ $employee->id }}">
+                        <span class="role-text">{{ $currentRole }}</span>
+                        @if(in_array(session('emp_job_role'), [1, 8]))
+                        <button class="btn btn-xs btn-link p-0 ml-1 edit-role"
+                            data-employee-id="{{ $employee->id }}"
+                            data-current-role="{{ $employee->emp_job_role }}">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <select class="form-control form-control-sm d-none role-select mt-1"
+                            data-employee-id="{{ $employee->id }}">
+                            @foreach($roles as $id => $name)
+                            <option value="{{ $id }}" {{ $employee->emp_job_role == $id ? 'selected' : '' }}>
+                                {{ $name }}
+                            </option>
+                            @endforeach
+                        </select>
+                        @endif
+                    </span>
+                </td>
+                <td>
+                    <div class="form-check form-switch d-inline-block">
+                        <input type="checkbox" class="form-check-input toggle-login-access"
+                            data-employee-id="{{ $employee->id }}"
+                            id="toggle-{{ $employee->id }}"
+                            {{ $employee->is_active ? 'checked' : '' }}>
+                        <label class="form-check-label" for="toggle-{{ $employee->id }}">
+                            {{ $employee->is_active ? 'Active' : 'Inactive' }}
+                        </label>
+                    </div>
+                    <div class="spinner-border spinner-border-sm text-primary d-none" id="spinner-{{ $employee->id }}" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                </td>
+                <td>
+                    <button class="btn btn-outline-primary btn-sm py-0 px-2" data-toggle="modal" data-target="#changePasswordModal{{ $employee->id }}">
+                        Change Password
+                    </button>
+                </td>
+            </tr>
+
+            <!-- Modal -->
+            <div class="modal fade" id="changePasswordModal{{ $employee->id }}" tabindex="-1" aria-labelledby="changePasswordModalLabel{{ $employee->id }}" aria-hidden="true">
+                <div class="modal-dialog modal-sm">
+                    <div class="modal-content">
+                        <form action="{{ url('/admin/change-employee-password') }}" method="POST">
+                            @csrf
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="changePasswordModalLabel{{ $employee->id }}">Change Password</h5>
+                                <button type="button" class="btn-close" data-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <input type="hidden" name="employee_id" value="{{ $employee->id }}">
+                                <div class="mb-2">
+                                    <label class="form-label">New Password</label>
+                                    <input type="text" name="new_password" class="form-control form-control-sm" required>
+                                </div>
+                                <div class="mb-2">
+                                    <label class="form-label">Confirm Password</label>
+                                    <input type="password" name="new_password_confirmation" class="form-control form-control-sm" required>
+                                </div>
+                            </div>
+                            <div class="modal-footer py-2">
+                                <button type="button" class="btn btn-secondary btn-sm" data-dismiss="modal">Close</button>
+                                <button type="submit" class="btn btn-primary btn-sm">Save</button>
+                            </div>
+                        </form>
                     </div>
                 </div>
             </div>
-        </div>
+            @endforeach
+        </tbody>
+    </table>
+</div>
 
-        <!-- Modal -->
-        <div class="modal fade" id="changePasswordModal{{ $employee->id }}" tabindex="-1" aria-labelledby="changePasswordModalLabel{{ $employee->id }}" aria-hidden="true">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <form action="{{ url('/admin/change-employee-password') }}" method="POST">
-                        @csrf
-                        <div class="modal-header">
-                            <h5 class="modal-title" id="changePasswordModalLabel{{ $employee->id }}">Change Password</h5>
-                            <button type="button" class="btn-close" data-dismiss="modal" aria-label="Close"></button>
-                        </div>
-                        <div class="modal-body">
-                            <input type="hidden" name="employee_id" value="{{ $employee->id }}">
-                            <div class="mb-3">
-                                <label for="newPassword" class="form-label">New Password</label>
-                                <input type="text" name="new_password" class="form-control" required>
-                            </div>
-                            <div class="mb-3">
-                                <label for="confirmPassword" class="form-label">Confirm Password</label>
-                                <input type="password" name="new_password_confirmation" class="form-control" required>
-                            </div>
-                        </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                            <button type="submit" class="btn btn-primary">Save changes</button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
-        @endforeach
-    </div>
+
 </div>
 @push('scripts')
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>

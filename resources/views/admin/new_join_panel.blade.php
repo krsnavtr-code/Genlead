@@ -9,7 +9,7 @@
     </div>
 
     @if(session('success'))
-        <div class="alert alert-success text-center">{{ session('success') }}</div>
+    <div class="alert alert-success text-center">{{ session('success') }}</div>
     @endif
 
     <div class="content">
@@ -17,54 +17,76 @@
             <div class="card-body">
                 <h4 class="mb-4">New Joinee Candidates:</h4>
                 @if($verifiedCandidates->isEmpty())
-                    <div class="alert alert-info text-center">No candidates have been fully verified by HR yet.</div>
+                <div class="alert alert-info text-center">No candidates have been fully verified by HR yet.</div>
                 @else
-                <div class="row g-4">
-                    @foreach($verifiedCandidates as $candidate)
-                    <div class="col-md-6 col-lg-4" style="margin-bottom: 15px;">
-                        <div class="card h-100 shadow-sm border-start border-primary border-4" style="background-color: #e9ecef;">
-                            <div class="card-body">
-                                <h5 class="text-primary fw-bold">{{ $candidate->name }}</h5>
-                                <p class="mb-1"><strong>Email:</strong> {{ $candidate->email }}</p>
-                                <p class="mb-2"><strong>Phone:</strong> {{ $candidate->phone }}</p>
+                <div class="table-responsive">
+                    <table class="table table-bordered table-sm align-middle" style="font-size: 0.9rem;">
+                        <thead class="table-primary">
+                            <tr>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Phone</th>
+                                <th>Documents</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach($verifiedCandidates as $candidate)
+                            <tr style="background-color: #e9ecef;">
+                                <td>
+                                    <div class="fw-bold text-primary">{{ $candidate->name }}</div>
 
-                                <div class="mb-3">
-                                    <strong>Documents:</strong>
-                                    <ul class="mb-0 ps-3">
-                                        @if($candidate->company_pan_file)
-                                            <li><a href="{{ asset($candidate->company_pan_file) }}" target="_blank">Marksheet</a></li>
-                                        @endif
-                                        @if($candidate->personal_aadhar_file)
-                                            <li><a href="{{ asset($candidate->personal_aadhar_file) }}" target="_blank">Personal Aadhar</a></li>
-                                        @endif
-                                        @if($candidate->personal_pan_file)
-                                            <li><a href="{{ asset($candidate->personal_pan_file) }}" target="_blank">Personal PAN</a></li>
-                                        @endif
-                                    </ul>
-                                </div>
-
-                                <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
-                                    @if(!$candidate->is_superadmin_verified)
-                                        <form action="{{ route('superadmin.verify', $candidate->id) }}" method="POST">
+                                    {{-- Verify button or badge below name --}}
+                                    <div class="mt-1">
+                                        @if(!$candidate->is_superadmin_verified)
+                                        <form action="{{ route('superadmin.verify', $candidate->id) }}" method="POST" class="d-inline">
                                             @csrf
                                             <button type="submit" class="btn btn-success btn-sm">Verify</button>
                                         </form>
-                                    @else
+                                        @else
                                         <span class="badge bg-success">Verified</span>
-                                    @endif
+                                        @endif
+                                    </div>
+                                </td>
 
-                                    <a href="{{ route('candidates.edit', $candidate->id) }}" class="btn btn-warning btn-sm">Edit</a>
+                                <td>{{ $candidate->email }}</td>
+                                <td>{{ $candidate->phone }}</td>
 
-                                    <form action="{{ route('candidates.destroy', $candidate->id) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this candidate?');">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="btn btn-danger btn-sm">Delete</button>
-                                    </form>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    @endforeach
+                                <td>
+                                    <ul class="mb-0 ps-3">
+                                        @if($candidate->company_pan_file)
+                                        <li><a href="{{ asset($candidate->company_pan_file) }}" target="_blank">Marksheet</a></li>
+                                        @endif
+                                        @if($candidate->personal_aadhar_file)
+                                        <li><a href="{{ asset($candidate->personal_aadhar_file) }}" target="_blank">Personal Aadhar</a></li>
+                                        @endif
+                                        @if($candidate->personal_pan_file)
+                                        <li><a href="{{ asset($candidate->personal_pan_file) }}" target="_blank">Personal PAN</a></li>
+                                        @endif
+                                    </ul>
+                                </td>
+
+                                <td>
+                                    <div class="d-flex align-items-center gap-3">
+                                        {{-- Edit Icon (Blue) --}}
+                                        <a href="{{ route('candidates.edit', $candidate->id) }}" class="text-primary fs-5" title="Edit">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+
+                                        {{-- Delete Icon (Red) --}}
+                                        <form action="{{ route('candidates.destroy', $candidate->id) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this candidate?');">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="btn btn-link p-0 text-danger fs-5" title="Delete">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
                 </div>
                 @endif
             </div>

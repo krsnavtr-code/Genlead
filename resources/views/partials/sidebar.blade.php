@@ -108,7 +108,7 @@
                 @endif
 
                 <!-- Show New Join Panel for Admin (1) -->
-                @if(in_array($emp_job_role, [1]))
+                @if(in_array($emp_job_role, [1, 8]))
                 <li class="nav-item">
                     <a href="{{ url('/admin/new-join-panel') }}" class="nav-link w-100 {{ request()->is('admin/new-join-panel') ? 'active' : '' }}">
                         <i class="nav-icon fas fa-user-plus" style="color: #117A8B;"></i>
