@@ -55,8 +55,8 @@ class Employee extends Model
      */
     public function isAdmin()
     {
-        // Assuming admin has emp_job_role = 1 (adjust according to your role structure)
-        return $this->emp_job_role === 1;
+        // Admin has emp_job_role = 1, ChildAdmin has emp_job_role = 8
+        return in_array($this->emp_job_role, [1, 8]);
     }
     
     public function jobRole()

@@ -531,7 +531,7 @@
                 @php
                     $currentEmployeeName = auth()->user()->emp_name ?? session('emp_name');
                     $userRole = auth()->user()->emp_job_role ?? session('emp_job_role');
-                    $isAdmin = $userRole == 1; // Check if user is admin (role 1)
+                    $isAdmin = in_array($userRole, [1, 8]); // Check if user is admin (role 1) or childadmin (role 8)
                 @endphp
                 @foreach($lead->followUps->sortByDesc('created_at') as $followUp)
                     @if($isAdmin || ($followUp->agent && $followUp->agent->emp_name === $currentEmployeeName))

@@ -148,7 +148,7 @@
                     
 
                     <!-- Lead Source -->
-                    @if(session()->get('emp_job_role') == 1)
+                    @if(in_array(session()->get('emp_job_role'), [1, 8]))
                     <div class="col-md-3 col-12">
                         <select name="lead_source" class="form-select lead-form-select" onchange="this.form.submit()">
                             <option value="All">Lead Source</option>
@@ -160,7 +160,7 @@
                     @endif
 
                     <!-- Date Range -->
-                    @if(session()->get('emp_job_role') == 1)
+                    @if(in_array(session()->get('emp_job_role'), [1, 8]))
                     <div class="col-md-3 col-12">
                         <select name="date_range" class="form-select lead-form-select" onchange="this.form.submit()">
                             <option value="All">Date Range</option>
@@ -183,7 +183,7 @@
 
                 <!-- Action Buttons -->
                 <div class="d-flex flex-wrap mb-4" style="gap: 8px;">
-                    @if(session()->get('emp_job_role') == 1)
+                    @if(in_array(session()->get('emp_job_role'), [1, 8]))
                     <div class="dropdown">
                         <button class="btn btn-info dropdown-toggle px-3" type="button"
                             id="leadDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -230,7 +230,7 @@
                     @csrf
                     <input type="hidden" name="select_all" id="selectAllPages" value="0">
                     <input type="hidden" name="current_filters" id="currentFilters" value="{{ json_encode(request()->all()) }}">
-                    @if(in_array($emp_job_role, [1]))
+                    @if(in_array($emp_job_role, [1, 8]))
                     <div class="mb-3 d-flex align-items-center" style="gap: 10px;">
                         <button type="button" class="btn btn-primary btn-sm" id="selectAllBtn">Select All</button>
                         <button type="button" class="btn btn-secondary btn-sm" id="deselectAllBtn">Deselect All</button>

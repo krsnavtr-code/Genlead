@@ -461,10 +461,10 @@ class LeadController extends Controller
         // Start building the query
         $query = Lead::query();
 
-        // Apply agent filter for non-admin users
-        if (in_array($userRole, [2, 7])) {  // Agent or Chain Team Agent role
+        // Apply agent filter - only show their own leads unless they're admin or childadmin
+        if (in_array($userRole, [2, 7])) {  // Regular Agent or Chain Team Agent
             $query->where('agent_id', $userId);
-        } elseif ($userRole != 1) {  // Not admin
+        } elseif (!in_array($userRole, [1, 8])) {  // Not admin or childadmin
             return redirect()->back()->with('error', 'Unauthorized access.');
         }
 

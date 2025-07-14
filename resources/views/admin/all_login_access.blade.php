@@ -17,6 +17,7 @@
                     <option value="5" {{ request('role') == '5' ? 'selected' : '' }}>Accountant</option>
                     <option value="6" {{ request('role') == '6' ? 'selected' : '' }}>Team Leader</option>
                     <option value="7" {{ request('role') == '7' ? 'selected' : '' }}>Chain Team Agent</option>
+                    <option value="8" {{ request('role') == '8' ? 'selected' : '' }}>ChildAdmin</option>
                 </select>
                 
                 <select name="status" class="form-select p-2 me-2" style="border-radius: 10px; border-color: blue; margin:0px 10px ;" onchange="this.form.submit()">
@@ -57,7 +58,7 @@
                         <strong>Username:</strong>
                         <span class="username-display" data-employee-id="{{ $employee->id }}">
                             <span class="username-text">{{ $employee->emp_username }}</span>
-                            @if(session('emp_job_role') == 1) {{-- Only show edit for superadmin --}}
+                            @if(in_array(session('emp_job_role'), [1, 8])) {{-- Show edit for superadmin and childadmin --}}
                                 <button class="btn btn-xs btn-link p-0 ml-1 edit-username" 
                                         data-employee-id="{{ $employee->id }}"
                                         data-current-username="{{ $employee->emp_username }}">
@@ -90,11 +91,12 @@
                                     5 => 'Accountant',
                                     6 => 'Team Leader',
                                     7 => 'Chain Team Agent',
+                                    8 => 'ChildAdmin',
                                 ];
                                 $currentRole = $roles[$employee->emp_job_role] ?? 'Unknown Role';
                             @endphp
                             <span class="role-text">{{ $currentRole }}</span>
-                            @if(session('emp_job_role') == 1) {{-- Only show edit for superadmin --}}
+                            @if(in_array(session('emp_job_role'), [1, 8])) {{-- Show edit for superadmin and childadmin --}}
                                 <button class="btn btn-xs btn-link p-0 ml-1 edit-role" 
                                         data-employee-id="{{ $employee->id }}"
                                         data-current-role="{{ $employee->emp_job_role }}">

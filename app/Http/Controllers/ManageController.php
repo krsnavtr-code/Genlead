@@ -320,8 +320,8 @@ public function resetPassword(Request $request)
      */
     public function showAllEmployees(Request $request)
     {
-        // Ensure only superadmin can access this page
-        if (session('emp_job_role') != 1) {
+        // Ensure only superadmin or childadmin can access this page
+        if (!in_array(session('emp_job_role'), [1, 8])) {
             return redirect()->back()->with('error', 'Unauthorized access.');
         }
 
@@ -602,15 +602,15 @@ public function changeEmployeePassword(Request $request)
   */
  public function updateEmployeeRole(Request $request)
  {
-     // Ensure only superadmin can perform this action
-     if (session('emp_job_role') !== 1) {
-         return response()->json(['success' => false, 'message' => 'Unauthorized access.'], 403);
-     }
+     // Ensure only superadmin or childadmin can perform this action
+    if (!in_array(session('emp_job_role'), [1, 8])) {
+        return response()->json(['success' => false, 'message' => 'Unauthorized access.'], 403);
+    }
 
      $request->validate([
-         'employee_id' => 'required|exists:employees,id',
-         'new_role' => 'required|in:1,2,4,5,6,7', // Validate against existing role IDs
-     ]);
+        'employee_id' => 'required|exists:employees,id',
+        'new_role' => 'required|in:1,2,4,5,6,7,8', // Validate against existing role IDs (8 is ChildAdmin)
+    ]);
 
      try {
          $employee = Employee::findOrFail($request->employee_id);

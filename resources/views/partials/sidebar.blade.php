@@ -46,7 +46,7 @@
                 </li>
 
                 <!-- Show My Account for All Roles -->
-                @if(in_array($emp_job_role, [1, 2, 3, 4, 5, 6, 7]))
+                @if(in_array($emp_job_role, [1, 2, 3, 4, 5, 6, 7, 8]))
                 <li class="nav-item">
                     <a href="{{ url('/admin/my-account') }}" class="nav-link w-100 {{ request()->is('admin/my-account') ? 'active' : '' }}">
                         <i class="nav-icon fas fa-user"></i>
@@ -56,7 +56,7 @@
                 @endif
 
                 <!-- Show Leads for Agent (2), Admin (1) -->
-                @if(in_array($emp_job_role, [1, 2, 7]))
+                @if(in_array($emp_job_role, [1, 2, 7, 8]))
                 <li class="nav-item">
                     <a href="{{ url('/i-admin/show-leads') }}" class="nav-link w-100 {{ request()->is('i-admin/show-leads*') || request()->is('admin/activities*') || request()->is('admin/tasks*') || request()->is('i-admin/followups*') ? 'active' : '' }}">
                         <i class="nav-icon fas fa-plus-circle" style="color: #1E7E34;"></i>
@@ -118,7 +118,7 @@
                 @endif
 
                 <!-- Show All Login Access for Admin (1) -->
-                @if(in_array($emp_job_role, [1]))
+                @if(in_array($emp_job_role, [1, 8]))
                 <li class="nav-item">
                     <a href="{{ url('/admin/all-login-access') }}" class="nav-link w-100 {{ request()->is('admin/all-login-access') ? 'active' : '' }}">
                         <i class="nav-icon fas fa-briefcase"></i>

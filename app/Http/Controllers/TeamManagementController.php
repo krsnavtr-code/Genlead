@@ -442,16 +442,16 @@ class TeamManagementController extends Controller
             'all_session' => session()->all()
         ]);
 
-        // Allow both admin (role 1) and team leaders (role 6) to access
-        if (!in_array(session('emp_job_role'), [1, 6])) {
+        // Allow admin (role 1), childadmin (role 8), and team leaders (role 6) to access
+        if (!in_array(session('emp_job_role'), [1, 6, 8])) {
             abort(403, 'You do not have permission to access this page. Only Team Leaders and Admins can access this section.');
         }
 
         // Get all active lead statuses for the dropdown
         $leadStatuses = LeadStatus::active()->ordered()->get();
         
-        // Check if user is admin (role 1) or team leader (role 6)
-        $isAdmin = session('emp_job_role') == 1;
+        // Check if user is admin (role 1), childadmin (role 8), or team leader (role 6)
+        $isAdmin = in_array(session('emp_job_role'), [1, 8]);
         $teamLeaderId = Auth::id();
 
         // Get team member IDs for the current team leader
@@ -968,8 +968,8 @@ class TeamManagementController extends Controller
      */
     public function overdueFollowups(Request $request)
     {
-        // Only team leaders can access this
-        if (session('emp_job_role') !== 6) {
+        // Only team leaders and child admins can access this
+        if (!in_array(session('emp_job_role'), [6, 8])) {
             abort(403, 'Unauthorized access.');
         }
 

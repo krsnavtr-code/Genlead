@@ -179,6 +179,8 @@
                                 Team Leader
                             @elseif ($employee->emp_job_role == 7)
                                 Referral Team Leader
+                            @elseif ($employee->emp_job_role == 8)
+                                ChildAdmin
                             @else
                                 Other
                             @endif

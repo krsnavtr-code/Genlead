@@ -5,7 +5,7 @@
     <a href="{{ url('/admin/activities') }}" class="btn m-1">Manage Activities</a>
     <!-- <a href="{{ url('/admin/tasks/create') }}" class="btn m-1">Create/Add Tasks</a> -->
     <a href="{{ url('/admin/tasks') }}" class="btn m-1">Manage Tasks</a>
-    @if ($emp_job_role === 1)
+    @if (in_array($emp_job_role, [1, 8]))
     <a href="{{ url('/i-admin/pending') }}" class="btn m-1">Pending Payment</a>
     @endif
 </div>
