@@ -12,6 +12,8 @@ use Illuminate\Notifications\DatabaseNotification;
 class User extends Authenticatable
 {
     use HasFactory, Notifiable, HasDatabaseNotifications;
+   
+
     
     /**
      * The attributes that are mass assignable.
@@ -77,4 +79,6 @@ class User extends Authenticatable
     {
         return $this->notifications()->whereNull('read_at');
     }
+
+
 }
