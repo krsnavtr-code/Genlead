@@ -20,6 +20,41 @@ use App\Models\Employee;
 use Carbon\Carbon;
 use App\Http\Controllers\TeamManagementController;
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\SuperAdminController;
+use App\Http\Controllers\OrganizationController;
+use App\Http\Controllers\OrganizationDashboardController;
+
+
+
+Route::middleware(['auth'])->group(function () {
+    Route::get('/superadmin/dashboard', [SuperAdminController::class, 'dashboard'])->name('superadmin.dashboard');
+});
+
+// Organization dashboard using slug
+Route::prefix('{organization:slug}')->middleware('web')->group(function () {
+    Route::get('/dashboard', [OrganizationDashboardController::class, 'index'])->name('organization.dashboard');
+});
+
+// Super admin fro or
+Route::middleware(['auth'])->group(function () {
+    Route::get('/superadmin/dashboard', [SuperAdminController::class, 'dashboard'])->name('superadmin.dashboard');
+});
+
+Route::post('/superadmin/super-login', [SuperAdminController::class, 'login'])->name('superadmin.login');
+// Show the login page (GET)
+Route::get('/superadmin/super-login', function () {
+    return view('superadmin.superadminlogin');
+})->name('superadmin.login.form');
+
+
+//for organization route
+
+// Show registration form
+Route::get('/organization/register', [OrganizationController::class, 'showRegisterForm'])->name('organization.register.form');
+
+// Handle registration form submission
+Route::post('/organization/register', [OrganizationController::class, 'register'])->name('organization.register');
+
 
 // Include test routes
 require __DIR__.'/test.php';
@@ -206,4 +241,5 @@ Route::prefix('i-admin')->group(function () {
     // Update lead course
     Route::post('/leads/{lead}/update-course', [LeadController::class, 'updateCourse'])->name('leads.update-course');
 
+    //superadmin routes
 });
