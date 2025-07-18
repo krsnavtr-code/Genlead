@@ -9,11 +9,12 @@ class SuperAdmin
 {
     public function handle($request, Closure $next)
     {
-        if (Auth::check() && Auth::user()->is_superadmin) {
-            return $next($request);
+        if (!Auth::check() || !Auth::user()->is_superadmin) {
+            return redirect()->route('superadmin.login.form');
         }
-
-        return redirect()->route('superadmin.login.form');
+    
+        return $next($request);
     }
+    
 }
 

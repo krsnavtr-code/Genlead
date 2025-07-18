@@ -10,21 +10,23 @@ class RedirectIfAuthenticated
 {
     public function handle($request, Closure $next, ...$guards)
     {
-        $guards = empty($guards) ? [null] : $guards;
+        if (Auth::check()) {
+            $user = Auth::user();
     
-        foreach ($guards as $guard) {
-            if (Auth::guard($guard)->check()) {
-                if ($guard === 'superadmin') {
-                    return redirect()->route('superadmin.dashboard');
-                }
-                
+            if ($user->is_superadmin) {
+                return redirect()->route('superadmin.dashboard');
+            }
     
-                return redirect('/home'); // default user redirect
+            if ($user->organization) {
+                return redirect()->route('organization.dashboard', [
+                    'organization' => $user->organization->slug
+                ]);
             }
         }
     
         return $next($request);
     }
+    
     
     
 }

@@ -8,39 +8,43 @@ use Illuminate\Support\Facades\Auth;
 
 class SuperAdminController extends Controller
 {
-    public function showLoginForm()
+    public function showsuperLoginForm()
     {
         return view('superadmin.superadminlogin');
     }
 
-    public function login(Request $request)
+    public function superadminlogin(Request $request)
     {
         $credentials = $request->validate([
-            'email' => ['required', 'email'],
-            'password' => ['required'],
+            'email' => 'required|email',
+            'password' => 'required',
         ]);
 
-        if (Auth::attempt($credentials)) {
+        // Manually retrieve the superadmin user (role_id = 1)
+        $user = \App\Models\User::where('email', $credentials['email'])
+            ->where('role_id', 1)
+            ->first();
+
+        // Verify credentials using Bcrypt
+        if ($user && \Illuminate\Support\Facades\Hash::check($credentials['password'], $user->password)) {
+            // Log the user in
+            Auth::login($user);
             $request->session()->regenerate();
-
-            if (Auth::user()->is_superadmin) {
-                return redirect()->route('superadmin.dashboard');
-            }
-
-            Auth::logout();
-            return back()->withErrors([
-                'email' => 'You do not have super admin access.',
-            ]);
+            
+            return redirect()->route('superadmin.dashboard');
         }
 
         return back()->withErrors([
-            'email' => 'The provided credentials do not match our records.',
+            'email' => 'The provided credentials do not match our records or you do not have super admin access.',
         ]);
     }
 
     public function dashboard()
     {
-        // Auth middleware already handles superadmin check, so no need to double-check here
+        if (!Auth::check() || !Auth::user()->is_superadmin) {
+            return redirect()->route('superadmin.login.form');
+        }
+
         $organizations = Organization::all();
         return view('superadmin.dashboard', compact('organizations'));
     }
@@ -48,7 +52,6 @@ class SuperAdminController extends Controller
     public function logout(Request $request)
     {
         Auth::logout();
-
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 

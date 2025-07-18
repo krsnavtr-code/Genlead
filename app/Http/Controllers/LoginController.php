@@ -13,7 +13,7 @@ class LoginController extends Controller
     {
         return view('organization.login');
     }
-public function login(Request $request)
+public function orglogin(Request $request)
 {
     $credentials = $request->only('email', 'password');
 

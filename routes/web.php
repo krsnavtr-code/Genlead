@@ -34,8 +34,8 @@ Route::prefix('superadmin')->name('superadmin.')->group(function () {
 
     // Guest Routes (Only for non-authenticated users)
     Route::middleware('guest')->group(function () {
-        Route::get('/super-login', [SuperAdminController::class, 'showLoginForm'])->name('login.form');
-        Route::post('/super-login', [SuperAdminController::class, 'login'])->name('login');
+        Route::get('/super-login', [SuperAdminController::class, 'showsuperLoginForm'])->name('login.form');
+        Route::post('/super-login', [SuperAdminController::class, 'superadminlogin'])->name('login');
     });
 
     // Authenticated Routes (Only for authenticated superadmin users)
@@ -59,8 +59,8 @@ Route::middleware('guest')->group(function () {
 // Organization Login Routes
 // ====================================
 Route::middleware('guest')->group(function () {
-    Route::get('/organization-login', [LoginController::class, 'showLoginForm'])->name('login.form');
-    Route::post('/organization-login', [LoginController::class, 'login'])->name('login.submit');
+    Route::get('/organization-login', [LoginController::class, 'showLoginForm'])->name('login.formm');
+    Route::post('/organization-login', [LoginController::class, 'orglogin'])->name('login.submit');
 });
 
 // ====================================
@@ -71,7 +71,7 @@ Route::get('/', function () {
 })->name('organization.login');
 
 
-Route::prefix('{organization:slug}')->middleware('web')->group(function () {
+Route::prefix('{organization}')->middleware('web')->group(function () {
     // Login route
     Route::get('/login', function () {
         return view('login');
@@ -99,10 +99,8 @@ Route::prefix('{organization:slug}')->middleware('web')->group(function () {
 
     Route::get('/send-reminder',  [CronJobController::class, 'SendLeadReminders']);
 
-    // Dashboard route
-    Route::middleware(['auth'])->group(function () {
-        Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('dashboard');
-    });
+    // Dashboard route for organization users
+    Route::middleware(['auth'])->get('/admin/dashboard', [AdminController::class, 'dashboard'])->name('admin.dashboard');
 
     // Test route for debugging
     Route::get('/test-js', function() {
