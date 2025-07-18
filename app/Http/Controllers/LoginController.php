@@ -9,8 +9,11 @@ use App\Models\Organization;
 class LoginController extends Controller
 {
  
-
-public function login(Request $request)
+    public function showLoginForm()
+    {
+        return view('organization.login');
+    }
+public function orglogin(Request $request)
 {
     $credentials = $request->only('email', 'password');
 

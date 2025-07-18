@@ -3,8 +3,10 @@
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="csrf-token" content="{{ csrf_token() }}">
 
-        <title>Laravel</title>
+        <title>Select Organization</title>
+        <script src="https://cdn.tailwindcss.com"></script>
 
         <!-- Fonts -->
         <link rel="preconnect" href="https://fonts.bunny.net">
@@ -162,8 +164,8 @@
                         </div>
                     </main>
 
-                    <footer class="py-16 text-center text-sm text-black dark:text-white/70">
-                        Laravel v{{ Illuminate\Foundation\Application::VERSION }} (PHP v{{ PHP_VERSION }})
+                    <footer class="mt-8 text-center text-sm text-gray-500">
+                        &copy; {{ date('Y') }} Your Application. All rights reserved.
                     </footer>
                 </div>
             </div>

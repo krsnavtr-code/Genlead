@@ -20,10 +20,6 @@ use App\Models\Document;
 Route::post('/hrms/update-candidate-email', [NewJoinController::class, 'updateCandidateEmail'])
     ->name('hrms.update_candidate_email');
 
-Route::get('/', function () {
-    return view('login');
-})->name('login');
-
 Route::prefix('admin')->group(function () {
 
     Route::post('/login', [AdminController::class, 'store']);

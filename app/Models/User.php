@@ -24,7 +24,29 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'is_superadmin',
     ];
+    
+    /**
+     * The attributes that should be cast.
+     *
+     * @var array<string, string>
+     */
+    protected $casts = [
+        'email_verified_at' => 'datetime',
+        'password' => 'hashed',
+        'is_superadmin' => 'boolean',
+    ];
+    
+    /**
+     * Check if the user is a super admin.
+     *
+     * @return bool
+     */
+    public function getIsSuperAdminAttribute()
+    {
+        return $this->attributes['is_superadmin'] ?? false;
+    }
 
     /**
      * The attributes that should be hidden for serialization.
